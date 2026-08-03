@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NEXORA Design System — Premium E-Commerce komponent kitabxanası">
+  <title>NEXORA Design System | Mərhələ 1</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Əsas məzmuna keç</a>
+
+  <div class="page-wrapper">
+    <!-- Header -->
+    <header class="ds-header">
+      <div class="container ds-header-inner">
+        <div class="flex items-center gap-4">
+          <span class="text-brand text-brand-md">NEXORA</span>
+          <span class="badge badge-primary">Mərhələ 1</span>
+        </div>
+        <nav class="ds-nav" aria-label="Design System naviqasiyası">
+          <a href="#colors" class="is-active">Rənglər</a>
+          <a href="#typography">Tipografiya</a>
+          <a href="#buttons">Düymələr</a>
+          <a href="#cards">Kartlar</a>
+          <a href="#forms">Formalar</a>
+          <a href="#inputs">Inputlar</a>
+          <a href="#modals">Modallar</a>
+          <a href="#toasts">Toast</a>
+          <a href="#icons">İkonlar</a>
+        </nav>
+        <button type="button" class="icon-btn icon-btn-circle" data-theme-toggle aria-label="Tema dəyiş">
+          <span class="icon icon-md" data-icon="moon"></span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main-content" class="page-content">
+      <!-- Hero -->
+      <section class="section bg-black">
+        <div class="container text-center">
+          <p class="text-overline text-primary mb-4">Design System v1.0</p>
+          <h1 class="heading-1 text-light mb-4">NEXORA Komponent Kitabxanası</h1>
+          <p class="text-body-lg text-muted" style="max-width: 600px; margin: 0 auto;">
+            Premium E-Commerce və Excel ERP sistemi üçün tam dizayn sistemi.
+            Rəng palitrası, tipografiya, düymələr, kartlar, formalar, modallar, toast bildirişləri və ikon sistemi.
+          </p>
+        </div>
+      </section>
+
+      <!-- Colors -->
+      <section id="colors" class="ds-section">
+        <div class="container">
+          <h2 class="ds-section-title">Rəng Palitrası</h2>
+          <p class="ds-section-desc">NEXORA brend rəngləri və semantik rənglər</p>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Brend Rəngləri</h3>
+            <div class="ds-color-grid">
+              <div class="ds-color-swatch">
+                <div class="ds-color-preview" style="background: #FF0000;"></div>
+                <div class="ds-color-info">
+                  <div class="ds-color-name">Primary Red</div>
+                  <div class="ds-color-hex">#FF0000</div>
+                </div>
+              </div>
+              <div class="ds-color-swatch">
+                <div class="ds-color-preview" style="background: #111111;"></div>
+                <div class="ds-color-info">
+                  <div class="ds-color-name">Black</div>
+                  <div class="ds-color-hex">#111111</div>
+                </div>
+              </div>
+              <div class="ds-color-swatch">
+                <div class="ds-color-preview" style="background: #1E1E1E;"></div>
+                <div class="ds-color-info">
+                  <div class="ds-color-name">Dark Grey</div>
+                  <div class="ds-color-hex">#1E1E1E</div>
+                </div>
+              </div>
+              <div class="ds-color-swatch">
+                <div class="ds-color-preview" style="background: #FFFFFF; border-bottom: 1px solid #E0E0E0;"></div>
+                <div class="ds-color-info">
+                  <div class="ds-color-name">White</div>
+                  <div class="ds-color-hex">#FFFFFF</div>
+                </div>
+              </div>
+              <div class="ds-color-swatch">
+                <div class="ds-color-preview" style="background: #E0E0E0;"></div>
+                <div class="ds-color-info">
+                  <div class="ds-color-name">Light Grey</div>
+                  <div class="ds-color-hex">#E0E0E0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Semantik Rənglər</h3>
+            <div class="ds-color-grid">
+              <div class="ds-color-swatch">
+                <div class="ds-color-preview" style="background: #2E7D32;"></div>
+                <div class="ds-color-info">
+                  <div class="ds-color-name">Success</div>
+                  <div class="ds-color-hex">#2E7D32</div>
+                </div>
+              </div>
+              <div class="ds-color-swatch">
+                <div class="ds-color-preview" style="background: #F57C00;"></div>
+                <div class="ds-color-info">
+                  <div class="ds-color-name">Warning</div>
+                  <div class="ds-color-hex">#F57C00</div>
+                </div>
+              </div>
+              <div class="ds-color-swatch">
+                <div class="ds-color-preview" style="background: #D32F2F;"></div>
+                <div class="ds-color-info">
+                  <div class="ds-color-name">Error</div>
+                  <div class="ds-color-hex">#D32F2F</div>
+                </div>
+              </div>
+              <div class="ds-color-swatch">
+                <div class="ds-color-preview" style="background: #1565C0;"></div>
+                <div class="ds-color-info">
+                  <div class="ds-color-name">Info</div>
+                  <div class="ds-color-hex">#1565C0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Typography -->
+      <section id="typography" class="ds-section bg-alt">
+        <div class="container">
+          <h2 class="ds-section-title">Tipografiya</h2>
+          <p class="ds-section-desc">Inter font ailəsi — başlıqlar, mətn və brend tipografiyası</p>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Başlıqlar</h3>
+            <div class="flex flex-col gap-4">
+              <h1 class="heading-1">Heading 1 — Premium E-Commerce</h1>
+              <h2 class="heading-2">Heading 2 — Məhsul Kateqoriyaları</h2>
+              <h3 class="heading-3">Heading 3 — Yeni Gələnlər</h3>
+              <h4 class="heading-4">Heading 4 — Kampaniyalar</h4>
+              <h5 class="heading-5">Heading 5 — Brendlər</h5>
+              <h6 class="heading-6">Heading 6 — Əlaqə</h6>
+            </div>
+          </div>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Mətn Stiləri</h3>
+            <p class="text-body-lg mb-4">Body Large — Premium keyfiyyətli məhsullar və sürətli çatdırılma xidməti.</p>
+            <p class="text-body mb-4">Body — Standart mətn ölçüsü bütün səhifələr üçün istifadə olunur.</p>
+            <p class="text-body-sm mb-4">Body Small — Kiçik mətn, əlavə məlumatlar və footnote-lar üçün.</p>
+            <p class="text-caption">Caption — Kiçik izah mətni, tarix və metadata.</p>
+          </div>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Brend & Qiymət</h3>
+            <p class="text-brand text-brand-lg mb-4">NEXORA</p>
+            <div class="flex items-center gap-4">
+              <span class="text-price">249.99 ₼</span>
+              <span class="text-price-old">349.99 ₼</span>
+              <span class="text-price text-price-sale">-29%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Buttons -->
+      <section id="buttons" class="ds-section">
+        <div class="container">
+          <h2 class="ds-section-title">Düymələr</h2>
+          <p class="ds-section-desc">Müxtəlif variant, ölçü və vəziyyətli düymələr</p>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Variantlar</h3>
+            <div class="ds-demo-row">
+              <button type="button" class="btn btn-primary">Primary</button>
+              <button type="button" class="btn btn-secondary">Secondary</button>
+              <button type="button" class="btn btn-outline">Outline</button>
+              <button type="button" class="btn btn-outline-primary">Outline Primary</button>
+              <button type="button" class="btn btn-ghost">Ghost</button>
+              <button type="button" class="btn btn-danger">Danger</button>
+              <button type="button" class="btn btn-success">Success</button>
+            </div>
+          </div>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Ölçülər</h3>
+            <div class="ds-demo-row">
+              <button type="button" class="btn btn-primary btn-xs">Extra Small</button>
+              <button type="button" class="btn btn-primary btn-sm">Small</button>
+              <button type="button" class="btn btn-primary">Default</button>
+              <button type="button" class="btn btn-primary btn-lg">Large</button>
+              <button type="button" class="btn btn-primary btn-xl">Extra Large</button>
+            </div>
+          </div>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">İkonlu Düymələr</h3>
+            <div class="ds-demo-row">
+              <button type="button" class="btn btn-primary">
+                <span class="icon icon-sm" data-icon="cart"></span>
+                Səbətə əlavə et
+              </button>
+              <button type="button" class="btn btn-outline">
+                <span class="icon icon-sm" data-icon="heart"></span>
+                Seçilmişlər
+              </button>
+              <button type="button" class="btn btn-icon btn-outline" aria-label="Axtar">
+                <span class="icon icon-md" data-icon="search"></span>
+              </button>
+              <button type="button" class="btn btn-icon btn-primary btn-lg" aria-label="Səbət">
+                <span class="icon icon-md" data-icon="cart"></span>
+              </button>
+              <button type="button" class="btn btn-primary is-loading">Yüklənir</button>
+              <button type="button" class="btn btn-primary" disabled>Deaktiv</button>
+            </div>
+          </div>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Badge-lər</h3>
+            <div class="ds-demo-row">
+              <span class="badge badge-primary">Yeni</span>
+              <span class="badge badge-dark">-30%</span>
+              <span class="badge badge-outline">Stokda</span>
+              <span class="badge badge-success">Çatdırıldı</span>
+              <span class="badge badge-warning">Az qalıb</span>
+              <span class="badge badge-error">Bitib</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cards -->
+      <section id="cards" class="ds-section bg-alt">
+        <div class="container">
+          <h2 class="ds-section-title">Kartlar</h2>
+          <p class="ds-section-desc">Məhsul, kateqoriya, statistika və ümumi kart komponentləri</p>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Ümumi Kartlar</h3>
+            <div class="ds-demo-grid">
+              <div class="card card-elevated">
+                <div class="card-body">
+                  <h4 class="card-title">Elevated Card</h4>
+                  <p class="card-text">Kölgə effekti ilə premium görünüş.</p>
+                </div>
+              </div>
+              <div class="card card-bordered">
+                <div class="card-body">
+                  <h4 class="card-title">Bordered Card</h4>
+                  <p class="card-text">Qalın border ilə vurğulanmış kart.</p>
+                </div>
+              </div>
+              <div class="card card-dark">
+                <div class="card-body">
+                  <h4 class="card-title">Dark Card</h4>
+                  <p class="card-text">Qaranlıq tema üçün kart dizaynı.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Məhsul Kartı</h3>
+            <div class="card-grid-sm">
+              <article class="card card-product">
+                <div class="card-product-image">
+                  <div style="width:100%;height:100%;background:linear-gradient(135deg,#1E1E1E,#333);display:flex;align-items:center;justify-content:center;">
+                    <span class="icon icon-2xl icon-muted" data-icon="image"></span>
+                  </div>
+                  <span class="card-product-badge badge badge-primary">Yeni</span>
+                  <div class="card-product-actions">
+                    <button type="button" class="icon-btn icon-btn-circle bg-white shadow-md" aria-label="Seçilmişlərə əlavə et">
+                      <span class="icon icon-sm" data-icon="heart"></span>
+                    </button>
+                    <button type="button" class="icon-btn icon-btn-circle bg-white shadow-md" aria-label="Sürətli baxış">
+                      <span class="icon icon-sm" data-icon="eye"></span>
+                    </button>
+                  </div>
+                </div>
+                <div class="card-product-content">
+                  <p class="card-product-brand">Samsung</p>
+                  <h4 class="card-product-name">Galaxy S24 Ultra 256GB Titanium Black</h4>
+                  <div class="card-product-price">
+                    <span class="text-price text-price-sale">1,899 ₼</span>
+                    <span class="text-price-old">2,199 ₼</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="card card-product">
+                <div class="card-product-image">
+                  <div style="width:100%;height:100%;background:linear-gradient(135deg,#FF0000,#990000);display:flex;align-items:center;justify-content:center;">
+                    <span class="icon icon-2xl icon-white" data-icon="headphones"></span>
+                  </div>
+                  <span class="card-product-badge badge badge-dark">-25%</span>
+                </div>
+                <div class="card-product-content">
+                  <p class="card-product-brand">Sony</p>
+                  <h4 class="card-product-name">WH-1000XM5 Wireless Noise Cancelling</h4>
+                  <div class="card-product-price">
+                    <span class="text-price">449 ₼</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="ds-subsection">
+            <h3 class="ds-subsection-title">Stat Kartları</h3>
+            <div class="grid grid-cols-3 md-grid-cols-1 gap-6">
+              <div class="card card-stat">
+                <div class="card-stat-value">2,450</div>
+                <div class="card-stat-label">Məhsul</div>
+              </div>
+              <div class="card card-stat">
+                <div class="card-stat-value">18K+</div>
+                <div class="card-stat-label">Müştəri</div>
+              </div>
+              <div class="card card-stat">
+                <div class="card-stat-value">99.2%</div>
+                <div class="card-stat-label">Məmnuniyyət</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Forms -->
+      <section id="forms" class="ds-section">
+        <div class="container">
+          <h2 class="ds-section-title">Formalar</h2>
+          <p class="ds-section-desc">Form qrupu, checkbox, radio, switch və axtarış formaları</p>
+
+          <div class="grid grid-cols-2 md-grid-cols-1 gap-8">
+            <div>
+              <h3 class="ds-subsection-title">Əsas Form</h3>
+              <form class="form" onsubmit="return false;">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label form-label-required" for="firstName">Ad</label>
+                    <input type="text" class="input" id="firstName" placeholder="Adınızı daxil edin">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label form-label-required" for="lastName">Soyad</label>
+                    <input type="text" class="input" id="lastName" placeholder="Soyadınızı daxil edin">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label form-label-required" for="email">E-poçt</label>
+                  <input type="email" class="input" id="email" placeholder="email@example.com">
+                  <span class="form-hint">Sifariş təsdiqləmələri bu ünvana göndəriləcək.</span>
+                </div>
+                <div class="form-group has-error">
+                  <label class="form-label" for="phone">Telefon</label>
+                  <input type="tel" class="input" id="phone" value="123">
+                  <span class="form-error">Düzgün telefon nömrəsi daxil edin.</span>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="terms" checked>
+                  <label class="form-check-label" for="terms">
+                    İstifadə şərtlərini qəbul edirəm
+                    <small>Şərtləri oxuyub razılaşdım.</small>
+                  </label>
+                </div>
+                <div class="form-switch">
+                  <input type="checkbox" class="form-switch-input" id="newsletter" checked>
+                  <label class="form-switch-label" for="newsletter">Kampaniya bildirişləri al</label>
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="btn btn-outline">Ləğv et</button>
+                  <button type="submit" class="btn btn-primary">Göndər</button>
+                </div>
+              </form>
+            </div>
+
+            <div>
+              <h3 class="ds-subsection-title">Axtarış & Input Qrupları</h3>
+              <form class="form-search mb-6" onsubmit="return false;">
+                <span class="form-search-icon">
+                  <span class="icon icon-sm" data-icon="search"></span>
+                </span>
+                <input type="search" class="input" placeholder="Məhsul, brend və ya SKU axtar...">
+              </form>
+
+              <div class="form-group mb-6">
+                <label class="form-label">Miqdar</label>
+                <div class="input-quantity">
+                  <button type="button" class="input-quantity-btn" data-qty-minus aria-label="Azalt">
+                    <span class="icon icon-sm" data-icon="minus"></span>
+                  </button>
+                  <input type="number" class="input-quantity-value" value="1" min="1" max="99">
+                  <button type="button" class="input-quantity-btn" data-qty-plus aria-label="Artır">
+                    <span class="icon icon-sm" data-icon="plus"></span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Şifrə</label>
+                <div class="input-icon-wrapper">
+                  <input type="password" class="input has-icon-right" id="password" placeholder="Şifrənizi daxil edin">
+                  <button type="button" class="input-icon input-icon-right icon-btn icon-btn-sm" data-password-toggle="#password" aria-label="Şifrəni göstər">
+                    <span class="icon icon-sm" data-icon="eye"></span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group mt-6">
+                <label class="form-label">Qiymət Aralığı</label>
+                <input type="range" class="input-range" min="0" max="5000" value="1500">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Inputs -->
+      <section id="inputs" class="ds-section bg-alt">
+        <div class="container">
+          <h2 class="ds-section-title">Inputlar</h2>
+          <p class="ds-section-desc">Müxtəlif input növləri və vəziyyətləri</p>
+
+          <div class="grid grid-cols-2 md-grid-cols-1 gap-8">
+            <div>
+              <h3 class="ds-subsection-title">Input Ölçüləri</h3>
+              <div class="flex flex-col gap-4">
+                <input type="text" class="input input-sm" placeholder="Small input">
+                <input type="text" class="input" placeholder="Default input">
+                <input type="text" class="input input-lg" placeholder="Large input">
+              </div>
+            </div>
+
+            <div>
+              <h3 class="ds-subsection-title">Select & Textarea</h3>
+              <div class="flex flex-col gap-4">
+                <select class="select">
+                  <option value="">Kateqoriya seçin</option>
+                  <option value="electronics">Elektronika</option>
+                  <option value="fashion">Moda</option>
+                  <option value="home">Ev & Bağça</option>
+                </select>
+                <textarea class="textarea" placeholder="Mesajınızı yazın..."></textarea>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="ds-subsection-title">Floating Label</h3>
+              <div class="form-floating">
+                <input type="text" class="input" id="floatName" placeholder=" ">
+                <label class="form-label" for="floatName">Ad Soyad</label>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="ds-subsection-title">Input Group</h3>
+              <div class="input-group">
+                <span class="input-group-prepend">₼</span>
+                <input type="number" class="input" placeholder="0.00">
+              </div>
+            </div>
+
+            <div>
+              <h3 class="ds-subsection-title">Fayl Yükləmə</h3>
+              <div class="input-file">
+                <input type="file" id="fileUpload" accept="image/*">
+                <label class="input-file-label" for="fileUpload">
+                  <span class="icon icon-sm" data-icon="upload"></span>
+                  Şəkil yüklə
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="ds-subsection-title">OTP Input</h3>
+              <div class="input-otp-group">
+                <input type="text" class="input-otp" maxlength="1" inputmode="numeric">
+                <input type="text" class="input-otp" maxlength="1" inputmode="numeric">
+                <input type="text" class="input-otp" maxlength="1" inputmode="numeric">
+                <input type="text" class="input-otp" maxlength="1" inputmode="numeric">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Modals -->
+      <section id="modals" class="ds-section">
+        <div class="container">
+          <h2 class="ds-section-title">Modallar</h2>
+          <p class="ds-section-desc">Dialog, təsdiq və drawer modal komponentləri</p>
+
+          <div class="ds-demo-row">
+            <button type="button" class="btn btn-primary" data-demo-modal>Modal Aç</button>
+            <button type="button" class="btn btn-outline" data-demo-confirm>Təsdiq Modalı</button>
+            <button type="button" class="btn btn-outline" data-modal-open="#demoDrawer">Drawer Aç</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Toasts -->
+      <section id="toasts" class="ds-section bg-alt">
+        <div class="container">
+          <h2 class="ds-section-title">Toast Bildirişləri</h2>
+          <p class="ds-section-desc">Uğur, xəta, xəbərdarlıq və məlumat bildirişləri</p>
+
+          <div class="ds-demo-row">
+            <button type="button" class="btn btn-success btn-sm" data-demo-toast="success">Success</button>
+            <button type="button" class="btn btn-danger btn-sm" data-demo-toast="error">Error</button>
+            <button type="button" class="btn btn-outline btn-sm" data-demo-toast="warning">Warning</button>
+            <button type="button" class="btn btn-outline btn-sm" data-demo-toast="info">Info</button>
+            <button type="button" class="btn btn-primary btn-sm" data-demo-toast="primary">Primary</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Icons -->
+      <section id="icons" class="ds-section">
+        <div class="container">
+          <h2 class="ds-section-title">İkon Sistemi</h2>
+          <p class="ds-section-desc">60+ SVG ikon — <span class="ds-code">data-icon="name"</span> ilə istifadə</p>
+
+          <div class="icon-grid" id="iconGrid"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black py-8">
+      <div class="container text-center">
+        <p class="text-brand text-brand-sm mb-2">NEXORA</p>
+        <p class="text-caption" style="color: #666;">Design System — Mərhələ 1 tamamlandı</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Demo Modal -->
+  <div class="modal" id="demoModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title">NEXORA Modal</h2>
+        <button type="button" class="modal-close" aria-label="Bağla" data-modal-close>
+          <span class="icon icon-md" data-icon="close"></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="text-body mb-4">Bu NEXORA dizayn sisteminin modal komponentidir. ESC düyməsi və ya backdrop-a klikləyərək bağlaya bilərsiniz.</p>
+        <div class="form-group">
+          <label class="form-label" for="modalInput">Nümunə input</label>
+          <input type="text" class="input" id="modalInput" placeholder="Bir şey yazın..." data-modal-focus>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-modal-close>Ləğv et</button>
+        <button type="button" class="btn btn-primary" data-modal-close>Təsdiq et</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo Drawer -->
+  <div class="modal modal-drawer" id="demoDrawer" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title">Səbət</h2>
+        <button type="button" class="modal-close" aria-label="Bağla" data-modal-close>
+          <span class="icon icon-md" data-icon="close"></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="text-body-sm text-muted mb-4">Səbətinizdə 2 məhsul var</p>
+        <div class="flex flex-col gap-4">
+          <div class="flex gap-4 items-center">
+            <div style="width:64px;height:64px;background:var(--color-bg-alt);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+              <span class="icon icon-lg icon-muted" data-icon="package"></span>
+            </div>
+            <div class="flex-1">
+              <p class="text-body-sm text-semibold">Galaxy S24 Ultra</p>
+              <p class="text-caption">1,899 ₼</p>
+            </div>
+            <button type="button" class="icon-btn icon-btn-sm" aria-label="Sil">
+              <span class="icon icon-sm" data-icon="trash"></span>
+            </button>
+          </div>
+          <div class="flex gap-4 items-center">
+            <div style="width:64px;height:64px;background:var(--color-bg-alt);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+              <span class="icon icon-lg icon-muted" data-icon="package"></span>
+            </div>
+            <div class="flex-1">
+              <p class="text-body-sm text-semibold">WH-1000XM5</p>
+              <p class="text-caption">449 ₼</p>
+            </div>
+            <button type="button" class="icon-btn icon-btn-sm" aria-label="Sil">
+              <span class="icon icon-sm" data-icon="trash"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer modal-footer-between">
+        <div>
+          <p class="text-caption">Cəmi</p>
+          <p class="text-price">2,348 ₼</p>
+        </div>
+        <button type="button" class="btn btn-primary">Sifarişi tamamla</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var grid = document.getElementById('iconGrid');
+      if (grid && typeof NexoraIcons !== 'undefined') {
+        NexoraIcons.getAvailableIcons().forEach(function (name) {
+          var item = document.createElement('div');
+          item.className = 'icon-grid-item';
+          item.innerHTML = NexoraIcons.create(name, { size: 'lg' }) + '<span>' + name + '</span>';
+          grid.appendChild(item);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

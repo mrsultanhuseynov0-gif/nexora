@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hesab | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span><span data-i18n="account">Hesab</span>
+          </nav>
+          <h1>Hesabım</h1>
+          <p class="section-subtitle" id="accountHeroSub">Hesabınıza daxil olun və ya qeydiyyatdan keçin</p>
+        </div>
+      </div>
+
+      <div class="container" id="accountAuth">
+        <div class="auth-card">
+          <div class="flex gap-2 mb-6">
+            <button type="button" class="btn btn-primary flex-1 is-active" data-auth-tab="login">Giriş</button>
+            <button type="button" class="btn btn-outline flex-1" data-auth-tab="register">Qeydiyyat</button>
+          </div>
+          <form id="loginForm">
+            <div class="form-group"><label class="form-label">E-poçt</label>
+              <input type="email" class="input" id="loginEmail" required autocomplete="username"></div>
+            <div class="form-group"><label class="form-label">Şifrə</label>
+              <input type="password" class="input" id="loginPassword" required minlength="8" autocomplete="current-password"></div>
+            <button type="submit" class="btn btn-primary w-full">Daxil ol</button>
+          </form>
+          <form id="registerForm" hidden>
+            <div class="form-group"><label class="form-label">Ad Soyad</label>
+              <input class="input" id="regName" required></div>
+            <div class="form-group"><label class="form-label">E-poçt</label>
+              <input type="email" class="input" id="regEmail" required></div>
+            <div class="form-group"><label class="form-label">Telefon</label>
+              <input class="input" id="regPhone"></div>
+            <div class="form-group"><label class="form-label">Dost kodu (istəyə bağlı)</label>
+              <input class="input" id="regReferral" placeholder="DOST…"></div>
+            <div class="form-group"><label class="form-label">Şifrə (min. 8, hərf + rəqəm)</label>
+              <input type="password" class="input" id="regPassword" required minlength="8" autocomplete="new-password"></div>
+            <button type="submit" class="btn btn-primary w-full">Qeydiyyatdan keç</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="container account-layout" id="accountDash" hidden>
+        <aside class="account-nav">
+          <button type="button" class="is-active" data-account-nav="overview">İcmal</button>
+          <button type="button" data-account-nav="profile">Profil</button>
+          <button type="button" data-account-nav="password">Şifrə</button>
+          <button type="button" data-account-nav="orders">Sifarişlər</button>
+          <button type="button" data-account-nav="referral">Dost kodu</button>
+          <button type="button" data-account-nav="addresses">Ünvanlar</button>
+          <button type="button" data-account-nav="rewards">XP & Level</button>
+          <button type="button" data-account-nav="digital-twin">Digital Twin</button>
+          <button type="button" data-account-nav="warranty">Warranty Center</button>
+          <button type="button" data-account-nav="service">Servis Tarixçəsi</button>
+          <button type="button" id="logoutBtn">Çıxış</button>
+        </aside>
+        <div>
+          <div class="account-panel is-active" data-panel="overview">
+            <div id="overviewDash" class="overview-dash">
+              <p class="text-muted">Yüklənir…</p>
+            </div>
+          </div>
+          <div class="account-panel" data-panel="digital-twin">
+            <div class="dt-hero-banner mb-4">
+              <p class="dt-kicker">🔥 NEXORA DIGITAL TWIN</p>
+              <h2 class="section-title mb-2">Rəqəmsal əkizləriniz</h2>
+              <p class="section-subtitle mb-0">Aldığınız cihazların IMEI, faktura, zəmanət, servis və yeniləmə tövsiyələri — bir platformada.</p>
+            </div>
+            <div id="dtSummary" class="warranty-summary mb-4"></div>
+            <div id="digitalTwinRoot" class="dt-layout">
+              <div id="dtList" class="dt-list"></div>
+              <div id="dtDetail" class="dt-detail">
+                <p class="text-muted">Cihaz seçin — Digital Twin detalları burada açılacaq.</p>
+              </div>
+            </div>
+          </div>
+          <div class="account-panel" data-panel="profile">
+            <h2 class="section-title mb-4">Profil</h2>
+            <div id="xpBadgeCard" class="card mb-4"><div class="card-body" id="xpBadgeBody"></div></div>
+            <form id="profileForm" class="card"><div class="card-body">
+              <div class="form-group"><label class="form-label">Ad</label>
+                <input class="input" id="profileName"></div>
+              <div class="form-group"><label class="form-label">E-poçt</label>
+                <input class="input" id="profileEmail" disabled></div>
+              <div class="form-group"><label class="form-label">Telefon</label>
+                <input class="input" id="profilePhone"></div>
+              <button type="submit" class="btn btn-primary">Yadda saxla</button>
+            </div></form>
+          </div>
+          <div class="account-panel" data-panel="rewards">
+            <h2 class="section-title mb-4">XP və səviyyə</h2>
+            <div class="card"><div class="card-body" id="rewardsPanel"></div></div>
+          </div>
+          <div class="account-panel" data-panel="warranty">
+            <h2 class="section-title mb-4">🔧 Warranty Center</h2>
+            <p class="section-subtitle mb-4" id="warrantyIntro">Bütün zəmanətlər, qalan günlər və PDF sertifikat.</p>
+            <div id="warrantySummary" class="warranty-summary mb-4"></div>
+            <div id="warrantyPanel"></div>
+          </div>
+          <div class="account-panel" data-panel="service">
+            <h2 class="section-title mb-4">🔧 Servis Tarixçəsi</h2>
+            <p class="section-subtitle mb-4">Alış tarixi, zəmanət, servis müraciətləri və təmir tarixçəsi — bir yerdə.</p>
+            <div id="serviceSummary" class="warranty-summary mb-4"></div>
+            <div class="flex gap-2 flex-wrap mb-4" id="serviceTabs">
+              <button type="button" class="btn btn-primary btn-sm is-active" data-service-tab="purchases">Alışlar</button>
+              <button type="button" class="btn btn-outline btn-sm" data-service-tab="tickets">Müraciətlər</button>
+              <button type="button" class="btn btn-outline btn-sm" data-service-tab="repairs">Təmir</button>
+              <button type="button" class="btn btn-outline btn-sm" id="serviceNewTicket">+ Yeni müraciət</button>
+            </div>
+            <div id="servicePanel"></div>
+            <div id="serviceTicketForm" class="card mt-4" hidden>
+              <div class="card-body">
+                <h3 class="card-title">Servis müraciəti</h3>
+                <form id="svcTicketForm">
+                  <div class="form-group">
+                    <label class="form-label">Zəmanət / məhsul</label>
+                    <select class="input" id="svcWarranty" required></select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Növ</label>
+                    <select class="input" id="svcType">
+                      <option value="repair">Təmir</option>
+                      <option value="warranty_claim">Zəmanət müraciəti</option>
+                      <option value="diagnostic">Diaqnostika</option>
+                      <option value="other">Digər</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Mövzu</label>
+                    <input class="input" id="svcSubject" required maxlength="160" placeholder="Qısa problem təsviri">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Ətraflı</label>
+                    <textarea class="input" id="svcDesc" rows="3" maxlength="2000" placeholder="Nə vaxt başladı, simptomlar…"></textarea>
+                  </div>
+                  <div class="flex gap-2 flex-wrap">
+                    <button type="submit" class="btn btn-primary">Göndər</button>
+                    <button type="button" class="btn btn-outline" id="svcTicketCancel">Ləğv</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="account-panel" data-panel="password">
+            <h2 class="section-title mb-4">Şifrəni dəyiş</h2>
+            <form id="passwordForm" class="card"><div class="card-body">
+              <div class="form-group"><label class="form-label">Cari şifrə</label>
+                <input type="password" class="input" id="currentPassword" required autocomplete="current-password"></div>
+              <div class="form-group"><label class="form-label">Yeni şifrə</label>
+                <input type="password" class="input" id="newPassword" required minlength="8" autocomplete="new-password"></div>
+              <div class="form-group"><label class="form-label">Yeni şifrə (təkrar)</label>
+                <input type="password" class="input" id="confirmPassword" required minlength="8" autocomplete="new-password"></div>
+              <button type="submit" class="btn btn-primary">Şifrəni yenilə</button>
+            </div></form>
+          </div>
+          <div class="account-panel" data-panel="orders">
+            <h2 class="section-title mb-4">Sifariş tarixçəsi</h2>
+            <div id="ordersList"></div>
+          </div>
+          <div class="account-panel" data-panel="referral">
+            <h2 class="section-title mb-4">Dost kodu</h2>
+            <div class="card mb-4"><div class="card-body" id="referralPanel">
+              <p class="text-muted">Yüklənir…</p>
+            </div></div>
+          </div>
+          <div class="account-panel" data-panel="addresses">
+            <h2 class="section-title mb-4">Ünvanlar</h2>
+            <div id="addressesList"></div>
+            <form id="addressForm" class="card mt-4"><div class="card-body">
+              <h3 class="card-title">Yeni ünvan</h3>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Başlıq</label>
+                  <input class="input" id="addrTitle" required placeholder="Ev / İş"></div>
+                <div class="form-group"><label class="form-label">Ad</label>
+                  <input class="input" id="addrName" required></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Telefon</label>
+                  <input class="input" id="addrPhone" required></div>
+                <div class="form-group"><label class="form-label">Şəhər</label>
+                  <input class="input" id="addrCity" required></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Rayon</label>
+                  <input class="input" id="addrDistrict"></div>
+                <div class="form-group"><label class="form-label">Poçt</label>
+                  <input class="input" id="addrPostal"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Ünvan</label>
+                <textarea class="input" id="addrLine" required></textarea></div>
+              <label class="form-check mb-4">
+                <input type="checkbox" class="form-check-input" id="addrDefault">
+                <span class="form-check-label">Əsas ünvan</span>
+              </label>
+              <button type="submit" class="btn btn-primary">Əlavə et</button>
+            </div></form>
+          </div>
+        </div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/smart.js"></script>
+  <script src="../js/order-timeline.js"></script>
+  <script src="../js/digital-twin.js"></script>
+  <script src="../js/account.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/smart-ui.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>

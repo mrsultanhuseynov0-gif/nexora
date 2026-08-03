@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brendlər | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span><span data-i18n="brands">Brendlər</span>
+          </nav>
+          <h1 data-i18n="brands">Brendlər</h1>
+          <p class="section-subtitle">Loqolar üzrə filter və məhsullar</p>
+        </div>
+      </div>
+      <div class="container section">
+        <div class="brand-strip mb-8" id="brandsGrid" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr))"></div>
+        <div class="section-header">
+          <div>
+            <h2 class="section-title" id="brandProductsTitle">Bütün brend məhsulları</h2>
+            <p class="section-subtitle" id="brandProductsMeta"></p>
+          </div>
+        </div>
+        <div class="product-grid" id="brandProducts"></div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      const brands = await NexoraApp.loadBrands();
+      const products = await NexoraApp.loadProducts();
+      const selected = NexoraApp.getQueryParam('brand');
+      const grid = document.getElementById('brandsGrid');
+      const productsEl = document.getElementById('brandProducts');
+
+      grid.innerHTML = '<a class="brand-tile' + (!selected ? '" style="border-color:var(--color-primary);color:var(--color-primary)' : '') +
+        '" href="brands.html">Hamısı</a>' +
+        brands.map(function (b) {
+          const active = selected === b.id;
+          return '<a class="brand-tile brand-tile--media" href="brands.html?brand=' + b.id + '"' +
+            (active ? ' style="border-color:var(--color-primary)"' : '') + '>' +
+            (b.image ? '<img src="' + b.image + '" alt="' + b.name + '" loading="lazy">' : '') +
+            '<span style="color:' + (active ? 'var(--color-primary)' : b.color) + '">' + (b.logo || b.name) + '</span></a>';
+        }).join('');
+
+      let list = products;
+      const brand = brands.find(function (b) { return b.id === selected; });
+      if (brand) {
+        list = products.filter(function (p) { return p.brandId === brand.id; });
+        document.getElementById('brandProductsTitle').textContent = brand.name;
+      }
+      document.getElementById('brandProductsMeta').textContent = list.length + ' məhsul';
+      productsEl.innerHTML = list.length
+        ? list.map(function (p) { return NexoraApp.productCardHTML(p); }).join('')
+        : '<div class="empty-state" style="grid-column:1/-1"><p>Bu brend üzrə məhsul yoxdur</p></div>';
+      NexoraApp.bindProductActions(productsEl);
+      if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
+    });
+  </script>
+</body>
+</html>

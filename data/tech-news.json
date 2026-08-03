@@ -1,0 +1,192 @@
+{
+  "brands": [
+    { "id": "apple", "name": "Apple", "color": "#111111", "shopBrandId": "apple" },
+    { "id": "samsung", "name": "Samsung", "color": "#1428A0", "shopBrandId": "samsung" },
+    { "id": "nvidia", "name": "NVIDIA", "color": "#76B900", "shopQuery": "NVIDIA" },
+    { "id": "intel", "name": "Intel", "color": "#0071C5", "shopQuery": "Intel" },
+    { "id": "amd", "name": "AMD", "color": "#ED1C24", "shopQuery": "AMD" },
+    { "id": "sony", "name": "Sony", "color": "#1a1a1a", "shopBrandId": "sony" }
+  ],
+  "articles": [
+    {
+      "id": "nws-apple-m4-mac",
+      "brand": "apple",
+      "title": "Apple M4 Mac ailəsi: daha sürətli AI və enerji səmərəliliyi",
+      "summary": "Yeni M4 çip ailəsi MacBook və iMac modellərində on-device AI performansını artırır — redaktə, tərcümə və foto işləri daha sürətli olur.",
+      "body": "Apple M4 seriyası Neural Engine gücünü artıraraq yerli AI funksiyalarını gündəlik istifadəyə yaxınlaşdırır. Video export, foto təmizləmə və real-vaxt tərcümə kimi işlər əvvəlkindən daha az enerji ilə tamamlanır.\n\nNEXORA-da Apple kateqoriyasında yeni Mac və aksessuar seçimləri mövsüm üzrə yenilənir. Əgər peşəkar redaktə və ya tələbə noutbuku axtarırsınızsa, M-seriya modelləri müqayisə siyahınıza əlavə edin.",
+      "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Apple", "M4", "Mac", "AI"],
+      "publishedAt": "2026-07-28",
+      "featured": true,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-apple-ios-update",
+      "brand": "apple",
+      "title": "iOS yeniləməsi: şəxsiyyət qoruması və batareya optimizasiyası",
+      "summary": "Son iOS yeniləməsi bildiriş idarəsini sadələşdirir, App Privacy hesabatını genişləndirir və batareya ömrünü gecə rejimində daha stabil saxlayır.",
+      "body": "Yeniləmə ilə birlikdə Lock Screen widget-ləri daha çevik olur, Safari-də tracking əleyhinə qoruma gücləndirilir. İstifadəçilər üçün ən hiss olunan dəyişiklik isə fon tapşırıqlarının batareyanı daha az yükləməsidir.\n\niPhone modelləriniz üçün uyğun case, adapter və audio aksessuarları NEXORA kataloqunda tapa bilərsiniz.",
+      "image": "https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Apple", "iOS", "iPhone"],
+      "publishedAt": "2026-07-12",
+      "featured": false,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-samsung-galaxy-ai",
+      "brand": "samsung",
+      "title": "Samsung Galaxy AI: kamera və qeyd alətləri bir addım irəli",
+      "summary": "Galaxy AI yeniləməsi Circle to Search, canlı tərcümə və AI foto redaktəsini daha çox Galaxy modelinə gətirir.",
+      "body": "Samsung Galaxy AI paketini orta seqment modellərə də yayır. Bu o deməkdir ki, səyahət zamanı menyu tərcüməsi, görüş qeydlərinin xülasəsi və portret təmizləmə artıq yalnız flagship-lərdə qalmır.\n\nYeni Galaxy telefon və qulaqlıq dəstlərini NEXORA-da Samsung brendi altında izləyə bilərsiniz.",
+      "image": "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Samsung", "Galaxy AI", "Android"],
+      "publishedAt": "2026-07-22",
+      "featured": true,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-samsung-neo-qled",
+      "brand": "samsung",
+      "title": "Samsung Neo QLED: oyun və kinoteatr rejimi yeniləndi",
+      "summary": "Yeni firmware Game Hub latensiyasını azaldır, Dolby Atmos səs səhnəsini isə daha dəqiq kalibrasiya edir.",
+      "body": "Neo QLED seriyası üçün gələn yeniləmə 4K/120Hz oyunlarda input lag-i aşağı salır və avtomatik oyun rejiminə keçidi sürətləndirir. Film rejimi isə qaranlıq səhnələrdə detal itkisini azaldır.\n\nTV və soundbar seçimi üçün NEXORA Lookbook və kampaniya bölmələrinə baxın.",
+      "image": "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Samsung", "TV", "Neo QLED"],
+      "publishedAt": "2026-06-30",
+      "featured": false,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-nvidia-rtx50",
+      "brand": "nvidia",
+      "title": "NVIDIA RTX: DLSS və yaradıcı AI alətləri genişlənir",
+      "summary": "Yeni sürücü paketi DLSS keyfiyyətini artırır, Broadcast və Studio alətlərində isə real-vaxt fon silməni təkmilləşdirir.",
+      "body": "NVIDIA oyunçular və kontent yaradıcıları üçün eyni vaxtda addım atır: DLSS frame generation daha stabil FPS verir, AI denoiser isə video zənglərdə şəkil keyfiyyətini qoruyur.\n\nNoutbuk və workstation seçərkən NVIDIA etiketi olan modelləri məhsul axtarışında süzün — NEXORA kataloqunda müqayisə aləti də kömək edir.",
+      "image": "https://images.unsplash.com/photo-1591488322292-5d94fc698e58?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["NVIDIA", "RTX", "DLSS", "Gaming"],
+      "publishedAt": "2026-07-25",
+      "featured": true,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-nvidia-cuda",
+      "brand": "nvidia",
+      "title": "CUDA ekosistemi: lokal LLM və render axınları",
+      "summary": "Yeni CUDA/Toolkit yeniləməsi lokal dil modelləri və 3D render boru xətlərini eyni GPU-da daha səmərəli paylaşdırır.",
+      "body": "Developer-lər üçün VRAM idarəsi və multi-stream işləmə yaxşılaşır. Bu, kiçik studiyaların buluda çıxmadan AI prototipləri qurmasına imkan verir.\n\nGüclü qrafika tələb edən noutbuklar üçün NEXORA Server & Şəbəkə / kompüter kateqoriyalarına baxın.",
+      "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["NVIDIA", "CUDA", "AI"],
+      "publishedAt": "2026-06-18",
+      "featured": false,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-intel-core-ultra",
+      "brand": "intel",
+      "title": "Intel Core Ultra: NPU ilə noutbuklarda yerli AI",
+      "summary": "Core Ultra nəsli NPU sayəsində Windows-da Copilot və studio effektlərini batareyanı az yeyərək işlədir.",
+      "body": "Intel NPU-nu gündəlik laptop təcrübəsinin mərkəzinə qoyur: fon bulanıqlığı, canlı titrlər və axtarış funksiyaları CPU/GPU-ya yüklənmədən işləyə bilir.\n\nIntel etiketi olan biznes və tələbə noutbuklarını NEXORA-da «Intel» axtarışı ilə tapa bilərsiniz.",
+      "image": "https://images.unsplash.com/photo-1555617981-dac3880eac6e?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Intel", "Core Ultra", "NPU"],
+      "publishedAt": "2026-07-18",
+      "featured": true,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-intel-arc",
+      "brand": "intel",
+      "title": "Intel Arc qrafika: sürücü yetkinliyi və XeSS",
+      "summary": "Arc sürücüləri populyar oyunlarda stabilliyi artırır; XeSS isə FPS artımı üçün daha çox title-də aktivdir.",
+      "body": "Intel qrafika komandası driver yeniləmələri ilə stutter və crash şikayətlərini azaldır. Yaradıcı proqramlarda da encode sürəti yaxşılaşır.\n\nKompakt PC və noutbuk seçimində Arc/Intel qrafikalı modelləri müqayisə edin.",
+      "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Intel", "Arc", "XeSS"],
+      "publishedAt": "2026-06-05",
+      "featured": false,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-amd-ryzen-ai",
+      "brand": "amd",
+      "title": "AMD Ryzen AI: güclü çoxnüvə + NPU kombinasiyası",
+      "summary": "Yeni Ryzen AI prosessorları həm render, həm də lokal AI işləri üçün balanslı performans vəd edir.",
+      "body": "AMD çoxnüvə üstünlüyünü NPU ilə birləşdirərək yaradıcı noutbuk seqmentində rəqabəti artırır. Uzun batareya ömrü və yüksək turbo tezlik eyni platformada daha real görünür.\n\nAMD Ryzen olan noutbukları NEXORA axtarışında «AMD» yazaraq süzün.",
+      "image": "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["AMD", "Ryzen", "AI"],
+      "publishedAt": "2026-07-20",
+      "featured": true,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-amd-radeon",
+      "brand": "amd",
+      "title": "Radeon HYPR-RX: bir kliklə FPS və latensiya",
+      "summary": "HYPR-RX yeniləməsi Anti-Lag, Boost və Super Resolution funksiyalarını bir profilə yığır.",
+      "body": "Oyunçular üçün sürücü paneli sadələşir: bir profil həm kadr sürətini, həm də reaksiya müddətini hədəfləyir. Streaming zamanı encoder yükü də daha proqnozlaşdırılan olur.\n\nGaming noutbuk və monitör dəstlərini NEXORA kampaniyalarında izləyin.",
+      "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["AMD", "Radeon", "Gaming"],
+      "publishedAt": "2026-06-22",
+      "featured": false,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-sony-ps-update",
+      "brand": "sony",
+      "title": "Sony PlayStation: UI sürəti və DualSense yenilikləri",
+      "summary": "Sistem yeniləməsi kitabxana yüklənməsini sürətləndirir, DualSense haptics profili isə daha dəqiq olur.",
+      "body": "PlayStation ekosistemi gündəlik rahatlığa fokuslanır: oyun keçidləri daha az gözləmə tələb edir, ələt titrəyişləri isə sürücü və atış ssenarilərində daha təbii hiss olunur.\n\nSony audio, TV və oyun aksessuarlarını NEXORA Brendlər → Sony bölməsində kəşf edin.",
+      "image": "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Sony", "PlayStation", "DualSense"],
+      "publishedAt": "2026-07-15",
+      "featured": true,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-sony-alpha",
+      "brand": "sony",
+      "title": "Sony Alpha: avtofokus və 4K video sabitliyi",
+      "summary": "Yeni firmware real-vaxt göz/AF izləməni və 4K slow-motion stabilliyini gücləndirir.",
+      "body": "Kontent yaradıcıları üçün Alpha seriyası hələ də güclü seçimdir. Firmware yeniləməsi aşağı işıqda fokus itkisini azaldır və gimbal-sız çəkilişlərdə daha təmiz kadr verir.\n\nKamera və linza ekosistemi üçün NEXORA-da Sony məhsullarına baxın.",
+      "image": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Sony", "Alpha", "Camera"],
+      "publishedAt": "2026-06-10",
+      "featured": false,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-sony-bravia",
+      "brand": "sony",
+      "title": "BRAVIA XR: kinoteatr kalibrasiyası evdə",
+      "summary": "Cognitive Processor XR yeniləməsi dərin qara səviyyələrini və dialoq aydınlığını artırır.",
+      "body": "Sony BRAVIA seriyası film və serial izləyənlər üçün rəng elmini sadə menyulara çevirir. Səs tərəfində isə mərkəzi dialoq kanalı güclənir — serial izləmək daha rahat olur.\n\nTV seçimi üçün müqayisə səhifəsindən və kampaniyalardan yararlanın.",
+      "image": "https://images.unsplash.com/photo-1593784991095-a205069470b6?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Sony", "BRAVIA", "TV"],
+      "publishedAt": "2026-05-28",
+      "featured": false,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-apple-vision",
+      "brand": "apple",
+      "title": "Apple ekosistemi: Mac ↔ iPhone davamlılığı",
+      "summary": "Universal Clipboard, Handoff və iCloud sinxronu növbəti yeniləmədə daha az gecikmə ilə işləyir.",
+      "body": "Apple istifadəçiləri üçün cihazlar arası axın əsas dəyərdir. Son yeniliklər şəkil və sənəd ötürülməsini stabilləşdirir, AirDrop uğursuzluqlarını azaldır.\n\nEkosistemə uyğun aksessuar və cihazları NEXORA Apple vitrinində toplayın.",
+      "image": "https://images.unsplash.com/photo-1491933382434-500287f9b54b?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Apple", "Continuity", "iCloud"],
+      "publishedAt": "2026-05-20",
+      "featured": false,
+      "source": "NEXORA Tech Desk"
+    },
+    {
+      "id": "nws-samsung-galaxy-watch",
+      "brand": "samsung",
+      "title": "Galaxy Watch: yuxu və ürək analizi dərinləşir",
+      "summary": "Wear OS yeniləməsi yuxu mərhələlərini daha dəqiq göstərir və məşq rejiminə sürətli keçid əlavə edir.",
+      "body": "Sağlamlıq izləmə Samsung-un wearable strategiyasının mərkəzində qalır. Yeni alqoritmlər gecə oxunuşlarını sabitləşdirir, idmançılar üçün isə GPS izləri daha təmiz görünür.\n\nSmart saat və qulaqlıq dəstlərini Samsung brend səhifəsindən seçin.",
+      "image": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=1200&q=80",
+      "tags": ["Samsung", "Galaxy Watch", "Wearable"],
+      "publishedAt": "2026-05-14",
+      "featured": false,
+      "source": "NEXORA Tech Desk"
+    }
+  ]
+}

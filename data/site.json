@@ -1,0 +1,59 @@
+{
+  "brandName": "NEXORA",
+  "logoText": "NEXORA",
+  "logoImage": "",
+  "tagline": "Premium alış-veriş",
+  "accentColor": "#FF0000",
+  "whatsapp": "+994501234567",
+  "telegram": "nexora_az",
+  "promoBar": {
+    "enabled": true,
+    "text": "Yeni mövsüm — pulsuz çatdırılma 100 ₼-dən yuxarı",
+    "link": "pages/campaigns.html",
+    "linkText": "Kampaniyalara bax"
+  },
+  "nav": [
+    { "id": "home", "label": "Ana səhifə", "href": "index.html", "visible": true },
+    { "id": "products", "label": "Məhsullar", "href": "pages/products.html", "visible": true },
+    { "id": "categories", "label": "Kateqoriyalar", "href": "pages/categories.html", "visible": true },
+    { "id": "campaigns", "label": "Kampaniyalar", "href": "pages/campaigns.html", "visible": true },
+    { "id": "lookbook", "label": "Lookbook", "href": "pages/lookbook.html", "visible": true },
+    { "id": "consultant", "label": "AI Məsləhətçi", "href": "pages/consultant.html", "visible": true },
+    { "id": "office_builder", "label": "Office Builder", "href": "pages/office-builder.html", "visible": true },
+    { "id": "offer_generator", "label": "PDF Offer", "href": "pages/offer-generator.html", "visible": true },
+    { "id": "compare", "label": "Müqayisə", "href": "pages/compare.html", "visible": true },
+    { "id": "brands", "label": "Brendlər", "href": "pages/brands.html", "visible": true },
+    { "id": "news", "label": "Xəbərlər", "href": "pages/news.html", "visible": true },
+    { "id": "about", "label": "Haqqımızda", "href": "pages/about.html", "visible": true },
+    { "id": "contact", "label": "Əlaqə", "href": "pages/contact.html", "visible": true },
+    { "id": "faq", "label": "FAQ", "href": "pages/faq.html", "visible": true },
+    { "id": "track", "label": "Sifariş izlə", "href": "pages/track.html", "visible": true }
+  ],
+  "footer": {
+    "desc": "Premium e-commerce platforması. Keyfiyyətli məhsullar, sürətli çatdırılma və etibarlı xidmət.",
+    "facebook": "https://facebook.com",
+    "instagram": "https://instagram.com",
+    "youtube": "https://youtube.com"
+  },
+  "pages": {
+    "about": {
+      "title": "Haqqımızda",
+      "subtitle": "NEXORA — premium e-commerce təcrübəsi",
+      "body": "NEXORA premium onlayn alış-veriş platformasıdır. Məqsədimiz keyfiyyətli brendləri sürətli çatdırılma və şəffaf qiymətlərlə təqdim etməkdir.\n\nMissiyamız: müştəri təcrübəsini sadələşdirmək və etibarlı ödəniş infrastrukturu qurmaq."
+    },
+    "contact": {
+      "title": "Əlaqə",
+      "subtitle": "Bizimlə əlaqə saxlayın",
+      "body": "Email: hello@nexora.az\nTelefon: +994 50 123 45 67\nÜnvan: Bakı, Azərbaycan"
+    },
+    "faq": {
+      "title": "FAQ",
+      "subtitle": "Tez-tez verilən suallar",
+      "body": "Çatdırılma nə qədər çəkir?\nBakı daxilində 1–2 gün, regionlara 2–5 gün.\n\nQaytarma mümkündür?\nBəli, 14 gün ərzində."
+    }
+  },
+  "home": {
+    "heroHeadline": "",
+    "heroCta": ""
+  }
+}

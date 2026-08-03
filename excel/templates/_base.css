@@ -1,0 +1,65 @@
+/* NEXORA sənəd / email şablon bazası */
+:root {
+  --nx-red: #FF0000;
+  --nx-black: #111111;
+  --nx-dark: #1E1E1E;
+  --nx-white: #FFFFFF;
+  --nx-grey: #E0E0E0;
+  --nx-muted: #666666;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  color: var(--nx-black);
+  margin: 0;
+  padding: 24px;
+  background: var(--nx-white);
+  line-height: 1.45;
+}
+.sheet {
+  max-width: 800px;
+  margin: 0 auto;
+  border: 1px solid var(--nx-grey);
+  padding: 32px;
+}
+.brand {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--nx-red);
+  margin: 0;
+}
+.doc-title {
+  font-size: 20px;
+  margin: 8px 0 24px;
+  color: var(--nx-dark);
+}
+.meta { color: var(--nx-muted); font-size: 13px; margin-bottom: 20px; }
+.meta strong { color: var(--nx-black); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+th, td { border: 1px solid var(--nx-grey); padding: 8px 10px; text-align: left; font-size: 13px; }
+th { background: var(--nx-black); color: var(--nx-white); }
+.total { font-weight: 700; }
+.footer {
+  margin-top: 28px;
+  padding-top: 12px;
+  border-top: 1px solid var(--nx-grey);
+  font-size: 12px;
+  color: var(--nx-muted);
+}
+.placeholder { background: #fff3f3; padding: 0 4px; border-radius: 2px; }
+.btn {
+  display: inline-block;
+  background: var(--nx-red);
+  color: #fff !important;
+  text-decoration: none;
+  padding: 10px 18px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+.sig { margin-top: 40px; display: flex; gap: 48px; }
+.sig div { flex: 1; border-top: 1px solid var(--nx-grey); padding-top: 8px; font-size: 12px; }
+@media print {
+  body { padding: 0; }
+  .sheet { border: none; max-width: none; }
+}

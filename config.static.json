@@ -1,0 +1,5 @@
+{
+  "apiBase": "https://YOUR-RENDER-SERVICE.onrender.com",
+  "siteUrl": "https://YOUR-VERCEL-OR-PAGES-URL",
+  "env": "production"
+}

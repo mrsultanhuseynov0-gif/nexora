@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Məsləhətçi | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+  <style>
+    .consult-meta {
+      font-size: 12px;
+      color: var(--color-text-muted, #777);
+      margin-top: 8px;
+    }
+    .consult-why {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 6px 0 0;
+    }
+    .consult-why span {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: var(--color-bg-alt, #f4f4f5);
+      color: #444;
+    }
+    .consult-card-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .consult-status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      background: #bbb;
+      vertical-align: middle;
+    }
+    .consult-status-dot.is-live { background: #1b7a3d; }
+    .consult-status-dot.is-offline { background: #c62828; }
+    .consult-typing {
+      opacity: .75;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span><span data-i18n="consultant">AI Məsləhətçi</span>
+          </nav>
+          <h1 data-i18n="consult_title">AI Smart Consultant</h1>
+          <p class="section-subtitle" data-i18n="consult_sub">Büdcə və ehtiyacını yaz — canlı kataloqdan uyğun məhsulları seçək</p>
+          <p class="consult-meta" id="consultApiStatus"><span class="consult-status-dot" id="consultDot"></span>Bağlantı yoxlanır…</p>
+        </div>
+      </div>
+      <div class="container section consultant-layout">
+        <div class="card"><div class="card-body">
+          <div id="consultChat" class="consult-chat" aria-live="polite"></div>
+          <form id="consultForm" class="consult-form mt-4">
+            <input class="input" id="consultInput" data-i18n-placeholder="consult_ph" placeholder='Məs: "3000 AZN büdcəm var, oyun üçün noutbuk istəyirəm"' required maxlength="500" autocomplete="off">
+            <button type="submit" class="btn btn-primary" id="consultAskBtn" data-i18n="consult_ask">Soruş</button>
+          </form>
+          <div class="flex gap-2 flex-wrap mt-3" id="consultChips">
+            <button type="button" class="btn btn-ghost btn-sm" data-suggest="Mənə hansı kompüteri məsləhət görürsən?">Kompüter</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-suggest="24 port PoE switch">Switch</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-suggest="MikroTik router">Router</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-suggest="42U server kabinet">Rak</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-suggest="1500 AZN Samsung smartfon">Smartfon</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-suggest="2500 AZN oyun noutbuk">Oyun noutbuk</button>
+          </div>
+        </div></div>
+        <div>
+          <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+            <h2 class="heading-3 mb-0" data-i18n="consult_recs">Tövsiyələr</h2>
+            <button type="button" class="btn btn-primary btn-sm" id="addAllConsult" hidden data-i18n="add_all">Hamısını səbətə at</button>
+          </div>
+          <div class="product-grid product-grid--dense" id="consultResults">
+            <p class="text-muted">Sorğu yazın — nəticələr burada görünəcək.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/smart.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    (function () {
+      const chat = document.getElementById('consultChat');
+      const askBtn = document.getElementById('consultAskBtn');
+      let lastProducts = [];
+      let busy = false;
+      let apiLive = false;
+      let history = [];
+
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function bubble(role, text, opts) {
+        opts = opts || {};
+        const div = document.createElement('div');
+        div.className = 'consult-bubble consult-bubble--' + role + (opts.typing ? ' consult-typing' : '');
+        div.textContent = text;
+        if (opts.id) div.id = opts.id;
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+        return div;
+      }
+
+      function setBusy(on) {
+        busy = on;
+        if (askBtn) askBtn.disabled = on;
+        document.querySelectorAll('#consultChips [data-suggest]').forEach(function (b) { b.disabled = on; });
+      }
+
+      function bindChipClicks(root) {
+        (root || document).querySelectorAll('[data-suggest]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            run(btn.getAttribute('data-suggest'));
+          });
+        });
+      }
+
+      function setChips(list) {
+        var wrap = document.getElementById('consultChips');
+        if (!wrap || !list || !list.length) return;
+        wrap.innerHTML = list.map(function (t) {
+          return '<button type="button" class="btn btn-ghost btn-sm" data-suggest="' + esc(t) + '">' + esc(t) + '</button>';
+        }).join('');
+        bindChipClicks(wrap);
+      }
+
+      async function detectApi() {
+        const el = document.getElementById('consultApiStatus');
+        try {
+          const r = await fetch('/api/ai/health');
+          const j = await r.json();
+          apiLive = !!(r.ok && j && j.ok);
+        } catch (e) {
+          apiLive = false;
+        }
+        if (el) {
+          el.innerHTML = apiLive
+            ? '<span class="consult-status-dot is-live" id="consultDot"></span>Canlı kataloq API · yazı xətasını düzəldir, özü axtarır'
+            : '<span class="consult-status-dot is-offline" id="consultDot"></span>Offline rejim · lokal kataloq';
+        }
+      }
+
+      function renderResults(products) {
+        const grid = document.getElementById('consultResults');
+        if (!products.length) {
+          grid.innerHTML = '<p class="text-muted">Aşağıdakı qısa cavablardan birini seçin və ya daha dəqiq yazın.</p>';
+          document.getElementById('addAllConsult').hidden = true;
+          return;
+        }
+        grid.innerHTML = products.map(function (p) {
+          var card = NexoraApp.productCardHTML(p);
+          var why = (p.why || []).map(function (w) {
+            return '<span>' + esc(w) + '</span>';
+          }).join('');
+          if (!why) return '<div class="consult-card-wrap">' + card + '</div>';
+          return '<div class="consult-card-wrap">' + card + '<div class="consult-why">' + why + '</div></div>';
+        }).join('');
+        NexoraApp.bindProductActions(grid);
+        document.getElementById('addAllConsult').hidden = false;
+        if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
+      }
+
+      async function run(text) {
+        if (busy || !text) return;
+        setBusy(true);
+        bubble('user', text);
+        history.push(text);
+        if (history.length > 8) history = history.slice(-8);
+        const thinking = bubble('bot', 'Başa düşürəm, kataloqda axtarıram…', { typing: true, id: 'consultThinking' });
+
+        try {
+          const res = await NexoraSmart.consult(text, { history: history.slice(0, -1) });
+          thinking.classList.remove('consult-typing');
+          thinking.textContent = res.advice || 'Seçimləri hazırladım.';
+          lastProducts = res.products || [];
+          renderResults(lastProducts);
+          var nextChips = (res.chips && res.chips.length) ? res.chips : (res.questions || []);
+          if (nextChips.length) setChips(nextChips);
+        } catch (err) {
+          thinking.classList.remove('consult-typing');
+          thinking.textContent = err.message || 'Xəta baş verdi. Bir az sonra yenidən cəhd edin.';
+          if (typeof NexoraToast !== 'undefined') NexoraToast.error(thinking.textContent);
+        } finally {
+          setBusy(false);
+          chat.scrollTop = chat.scrollHeight;
+        }
+      }
+
+      document.getElementById('consultForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const input = document.getElementById('consultInput');
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        run(text);
+      });
+
+      bindChipClicks(document.getElementById('consultChips'));
+
+      document.getElementById('addAllConsult').addEventListener('click', async function () {
+        await NexoraSmart.addConsultCart(lastProducts.slice(0, 5));
+        NexoraToast.success('Uyğun məhsullar səbətə əlavə olundu');
+        NexoraApp.updateBadges();
+      });
+
+      detectApi().then(function () {
+        bubble('bot', apiLive
+          ? 'Salam! Nə istədiyini adi dildə yaz — məsələn «mənə hansı kompüteri məsləhət görürsən». Yazı xətasını düzəldib kataloqdan özüm seçəcəyəm.'
+          : 'Salam! API offline görünür. Serveri işə salıb səhifəni yeniləyin.');
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "coupons": [
+    {
+      "code": "NEXORA10",
+      "type": "percent",
+      "value": 10,
+      "minOrder": 50,
+      "description": "10% endirim"
+    },
+    {
+      "code": "PULSUZ",
+      "type": "shipping",
+      "value": 0,
+      "minOrder": 0,
+      "description": "Pulsuz çatdırılma"
+    },
+    {
+      "code": "SAVE50",
+      "type": "fixed",
+      "value": 50,
+      "minOrder": 200,
+      "description": "50 ₼ endirim (min. 200 ₼)"
+    },
+    {
+      "code": "REF10",
+      "type": "percent",
+      "value": 10,
+      "minOrder": 0,
+      "description": "Dostunu gətir — 10% endirim"
+    },
+    {
+      "code": "DOST10",
+      "type": "percent",
+      "value": 10,
+      "minOrder": 30,
+      "description": "Referral / dost kodu"
+    }
+  ]
+}

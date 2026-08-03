@@ -1,0 +1,188 @@
+{
+  "brands": [
+    {
+      "id": "samsung",
+      "name": "Samsung",
+      "logo": "S",
+      "color": "#1428A0",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "apple",
+      "name": "Apple",
+      "logo": "",
+      "color": "#000000",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "sony",
+      "name": "Sony",
+      "logo": "SONY",
+      "color": "#000000",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "lg",
+      "name": "LG",
+      "logo": "LG",
+      "color": "#A50034",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "nike",
+      "name": "Nike",
+      "logo": "✓",
+      "color": "#111111",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "adidas",
+      "name": "Adidas",
+      "logo": "Adi",
+      "color": "#000000",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "dyson",
+      "name": "Dyson",
+      "logo": "DYSON",
+      "color": "#C4398A",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1558317374-1979f140bff4?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "philips",
+      "name": "Philips",
+      "logo": "PHILIPS",
+      "color": "#0E5FD8",
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1558002038-1091a1162221?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "bosch",
+      "name": "Bosch",
+      "logo": "BOSCH",
+      "color": "#EA0016",
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1585659722983-3a675648b5e4?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "xiaomi",
+      "name": "Xiaomi",
+      "logo": "mi",
+      "color": "#FF6700",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1518640467707-6811f4a5ab6b?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "huawei",
+      "name": "Huawei",
+      "logo": "HUAWEI",
+      "color": "#CF0A2C",
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "canon",
+      "name": "Canon",
+      "logo": "Canon",
+      "color": "#BC0024",
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "rayban",
+      "name": "Ray-Ban",
+      "logo": "RB",
+      "color": "#111111",
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "lego",
+      "name": "LEGO",
+      "logo": "LEGO",
+      "color": "#E3000B",
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=400&h=400&q=80"
+    },
+    {
+      "id": "cisco",
+      "name": "Cisco",
+      "logo": "CISCO",
+      "color": "#049fd9",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "mikrotik",
+      "name": "MikroTik",
+      "logo": "MT",
+      "color": "#293239",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1606904825846-647eb07d8adb?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "ubiquiti",
+      "name": "Ubiquiti",
+      "logo": "UI",
+      "color": "#0559c9",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1544197150-b99a576b9b2d?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "tp-link",
+      "name": "TP-Link",
+      "logo": "TP",
+      "color": "#4acbd6",
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1606904825751-0d5ab6a5f8c0?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "hpe",
+      "name": "HPE",
+      "logo": "HPE",
+      "color": "#01a982",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "dell-emc",
+      "name": "Dell EMC",
+      "logo": "DELL",
+      "color": "#007db8",
+      "featured": true,
+      "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "netgear",
+      "name": "NETGEAR",
+      "logo": "NG",
+      "color": "#2b2b2b",
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "apc",
+      "name": "APC",
+      "logo": "APC",
+      "color": "#000000",
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1597852074816-d933c7d2d988?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "triton",
+      "name": "Tritón",
+      "logo": "TR",
+      "color": "#1a237e",
+      "featured": false,
+      "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&h=800&q=80"
+    }
+  ]
+}

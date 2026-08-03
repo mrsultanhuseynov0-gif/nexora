@@ -1,0 +1,118 @@
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const bcrypt = require('bcryptjs');
+const { db, productToRow } = require('./db');
+
+const ROOT = path.join(__dirname, '..', '..');
+const DATA = path.join(ROOT, 'data');
+
+function readJson(name) {
+  const full = path.join(DATA, name);
+  return JSON.parse(fs.readFileSync(full, 'utf8'));
+}
+
+function uid(prefix) {
+  return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function seed() {
+  const productsData = readJson('products.json');
+  const usersData = readJson('users.json');
+  const couponsData = readJson('coupons.json');
+  const categoriesData = readJson('categories.json');
+
+  const insertProduct = db.prepare(`
+    INSERT OR REPLACE INTO products (
+      id, sku, name, brand, brand_id, category, subcategory, price, old_price, currency,
+      rating, reviews, badge, badge_type, in_stock, stock, is_new, tags_json, description,
+      specs_json, images_json, gradient, image, review_list_json, raw_json
+    ) VALUES (
+      @id, @sku, @name, @brand, @brand_id, @category, @subcategory, @price, @old_price, @currency,
+      @rating, @reviews, @badge, @badge_type, @in_stock, @stock, @is_new, @tags_json, @description,
+      @specs_json, @images_json, @gradient, @image, @review_list_json, @raw_json
+    )
+  `);
+
+  const insertUser = db.prepare(`
+    INSERT OR REPLACE INTO users (id, email, password_hash, name, phone, role, addresses_json, created_at)
+    VALUES (@id, @email, @password_hash, @name, @phone, @role, @addresses_json, @created_at)
+  `);
+
+  const insertCoupon = db.prepare(`
+    INSERT OR REPLACE INTO coupons (code, type, value, min_order, description, active)
+    VALUES (@code, @type, @value, @min_order, @description, 1)
+  `);
+
+  const insertCategory = db.prepare(`
+    INSERT OR REPLACE INTO categories (id, data_json) VALUES (@id, @data_json)
+  `);
+
+  const tx = db.transaction(() => {
+    db.exec('DELETE FROM products; DELETE FROM users; DELETE FROM coupons; DELETE FROM categories;');
+
+    for (const p of productsData.products || []) {
+      insertProduct.run(productToRow(p));
+    }
+
+    for (const u of usersData.users || []) {
+      insertUser.run({
+        id: u.id,
+        email: String(u.email).toLowerCase(),
+        password_hash: bcrypt.hashSync(String(u.password), 10),
+        name: u.name || 'User',
+        phone: u.phone || '',
+        role: u.role === 'admin' ? 'admin' : 'customer',
+        addresses_json: JSON.stringify(u.addresses || []),
+        created_at: u.createdAt || new Date().toISOString()
+      });
+    }
+
+    for (const c of couponsData.coupons || []) {
+      insertCoupon.run({
+        code: String(c.code).toUpperCase(),
+        type: c.type,
+        value: Number(c.value) || 0,
+        min_order: Number(c.minOrder) || 0,
+        description: c.description || ''
+      });
+    }
+
+    const cats = categoriesData.categories || categoriesData;
+    if (Array.isArray(cats)) {
+      for (const cat of cats) {
+        insertCategory.run({ id: cat.id || cat.slug || uid('c'), data_json: JSON.stringify(cat) });
+      }
+    } else if (cats && typeof cats === 'object') {
+      insertCategory.run({ id: 'all', data_json: JSON.stringify(categoriesData) });
+    }
+
+    db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run(
+      'catalog_version',
+      String(productsData.version || 1)
+    );
+    db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run(
+      'seeded_at',
+      new Date().toISOString()
+    );
+  });
+
+  tx();
+
+  const counts = {
+    products: db.prepare('SELECT COUNT(*) AS n FROM products').get().n,
+    users: db.prepare('SELECT COUNT(*) AS n FROM users').get().n,
+    coupons: db.prepare('SELECT COUNT(*) AS n FROM coupons').get().n,
+    categories: db.prepare('SELECT COUNT(*) AS n FROM categories').get().n
+  };
+
+  console.log('Seed complete:', counts);
+  return counts;
+}
+
+if (require.main === module) {
+  seed();
+}
+
+module.exports = { seed };

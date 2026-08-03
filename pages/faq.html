@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span><span data-i18n="faq">FAQ</span>
+          </nav>
+          <h1>Tez-tez verilən suallar</h1>
+          <p class="section-subtitle">Sifariş, çatdırılma, ödəniş və daha çoxu</p>
+        </div>
+      </div>
+      <div class="container section" style="max-width:800px">
+        <div class="flex flex-wrap gap-2 mb-6" id="faqCats"></div>
+        <div id="faqList"></div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/pages-content.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    let faqs = [];
+    let activeCat = 'Hamısı';
+
+    function render() {
+      const cats = ['Hamısı'].concat(Array.from(new Set(faqs.map(function (f) { return f.category; }))));
+      document.getElementById('faqCats').innerHTML = cats.map(function (c) {
+        return '<button type="button" class="btn btn-sm ' + (c === activeCat ? 'btn-primary' : 'btn-outline') +
+          '" data-faq-cat="' + c + '">' + c + '</button>';
+      }).join('');
+
+      const list = activeCat === 'Hamısı' ? faqs : faqs.filter(function (f) { return f.category === activeCat; });
+      document.getElementById('faqList').innerHTML = list.map(function (f) {
+        return '<div class="faq-item" data-faq>' +
+          '<button type="button" class="faq-question">' + f.question +
+          '<span class="icon icon-sm" data-icon="chevronDown"></span></button>' +
+          '<div class="faq-answer">' + f.answer + '</div></div>';
+      }).join('');
+
+      document.querySelectorAll('[data-faq-cat]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          activeCat = btn.getAttribute('data-faq-cat');
+          render();
+        });
+      });
+      document.querySelectorAll('[data-faq]').forEach(function (item) {
+        item.querySelector('.faq-question').addEventListener('click', function () {
+          item.classList.toggle('is-open');
+        });
+      });
+      if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      const data = await NexoraApp.fetchJSON('data/faq.json');
+      faqs = data.faqs || [];
+      render();
+    });
+  </script>
+</body>
+</html>

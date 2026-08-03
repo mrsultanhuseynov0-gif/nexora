@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Business Panel | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html">Ana səhifə</a><span class="breadcrumb-sep">/</span><span>Business Panel</span>
+          </nav>
+          <h1>📊 Business Panel</h1>
+          <p class="section-subtitle">Şirkətlər üçün toplu sifariş, PDF təklif və müqavilə · <a href="offer-generator.html" style="color:inherit;text-decoration:underline">Bir klik Offer Generator</a></p>
+        </div>
+      </div>
+
+      <div class="container" id="bizGate">
+        <div class="auth-card biz-auth-card">
+          <div class="flex gap-2 mb-6">
+            <button type="button" class="btn btn-primary flex-1 is-active" data-biz-tab="login">Giriş</button>
+            <button type="button" class="btn btn-outline flex-1" data-biz-tab="register">Şirkət qeydiyyatı</button>
+          </div>
+          <form id="bizLoginForm">
+            <div class="form-group"><label class="form-label">E-poçt</label>
+              <input type="email" class="input" id="bizLoginEmail" required autocomplete="username" value="business@nexora.az"></div>
+            <div class="form-group"><label class="form-label">Şifrə</label>
+              <input type="password" class="input" id="bizLoginPassword" required minlength="8" autocomplete="current-password" placeholder="Business1234"></div>
+            <button type="submit" class="btn btn-primary w-full">Biznes panelə daxil ol</button>
+            <p class="text-xs text-muted mt-3 mb-0" id="bizApiStatus"></p>
+            <p class="text-xs mt-2 mb-0" id="bizDevHint" style="opacity:.85">
+              Demo: <code>business@nexora.az</code> / <code>Business1234</code>
+            </p>
+          </form>
+          <form id="bizRegisterForm" hidden>
+            <div class="form-group"><label class="form-label">Şirkət adı</label>
+              <input class="input" id="bizRegCompany" required placeholder="MMC / ASC"></div>
+            <div class="form-group"><label class="form-label">VÖEN</label>
+              <input class="input" id="bizRegVoen" placeholder="10 rəqəm"></div>
+            <div class="form-group"><label class="form-label">Əlaqədar şəxs</label>
+              <input class="input" id="bizRegPerson" required></div>
+            <div class="form-group"><label class="form-label">E-poçt</label>
+              <input type="email" class="input" id="bizRegEmail" required></div>
+            <div class="form-group"><label class="form-label">Telefon</label>
+              <input class="input" id="bizRegPhone"></div>
+            <div class="form-group"><label class="form-label">Hüquqi ünvan</label>
+              <input class="input" id="bizRegAddress"></div>
+            <div class="form-group"><label class="form-label">Şifrə</label>
+              <input type="password" class="input" id="bizRegPassword" required minlength="8"></div>
+            <button type="submit" class="btn btn-primary w-full">Biznes hesabı yarat</button>
+          </form>
+          <p class="text-xs text-muted mt-4 mb-0">Artıq şəxsi hesabınız varsa, daxil olub profilinizi şirkətə çevirə bilərsiniz.</p>
+        </div>
+      </div>
+
+      <div class="container biz-layout" id="bizDash" hidden>
+        <aside class="biz-nav">
+          <button type="button" class="is-active" data-biz-nav="bulk">Toplu sifariş</button>
+          <button type="button" data-biz-nav="quotes">PDF təklif</button>
+          <button type="button" data-biz-nav="contracts">Müqavilə</button>
+          <button type="button" data-biz-nav="company">Şirkət profili</button>
+          <button type="button" id="bizLogout">Çıxış</button>
+        </aside>
+        <div class="biz-main">
+          <div class="biz-banner card mb-4" id="bizBanner"></div>
+
+          <section class="biz-panel is-active" data-biz-panel="bulk">
+            <h2 class="section-title mb-2">Toplu sifariş</h2>
+            <p class="text-sm text-muted mb-4">Məhsul əlavə edin — B2B endirim avtomatik hesablanır (≥200 ₼ → 8%).</p>
+            <div class="card mb-4"><div class="card-body">
+              <div class="form-row">
+                <div class="form-group flex-1"><label class="form-label">Məhsul axtar</label>
+                  <input class="input" id="bizProductSearch" placeholder="SKU, ad, brend…"></div>
+              </div>
+              <div id="bizProductHits" class="biz-product-hits"></div>
+            </div></div>
+            <div class="card mb-4"><div class="card-body">
+              <h3 class="card-title">Səbət (toplu)</h3>
+              <div id="bizBulkLines"></div>
+              <div id="bizBulkTotals" class="biz-totals mt-4"></div>
+              <div class="flex gap-2 flex-wrap mt-4">
+                <button type="button" class="btn btn-primary" id="bizPlaceOrder">Toplu sifarişi göndər</button>
+                <button type="button" class="btn btn-outline" id="bizMakeQuote">PDF təklif yarat</button>
+              </div>
+            </div></div>
+          </section>
+
+          <section class="biz-panel" data-biz-panel="quotes">
+            <h2 class="section-title mb-4">PDF təkliflər</h2>
+            <div id="bizQuotesList"></div>
+          </section>
+
+          <section class="biz-panel" data-biz-panel="contracts">
+            <h2 class="section-title mb-4">Müqavilələr</h2>
+            <p class="text-sm text-muted mb-4">Mövcud təklifdən müqavilə yaradın və PDF yükləyin.</p>
+            <div id="bizContractsList"></div>
+          </section>
+
+          <section class="biz-panel" data-biz-panel="company">
+            <h2 class="section-title mb-4">Şirkət profili</h2>
+            <form id="bizProfileForm" class="card"><div class="card-body">
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Şirkət adı</label>
+                  <input class="input" id="pfCompany" required></div>
+                <div class="form-group"><label class="form-label">VÖEN</label>
+                  <input class="input" id="pfVoen"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Əlaqədar şəxs</label>
+                  <input class="input" id="pfPerson"></div>
+                <div class="form-group"><label class="form-label">Telefon</label>
+                  <input class="input" id="pfPhone"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">E-poçt</label>
+                  <input type="email" class="input" id="pfEmail"></div>
+                <div class="form-group"><label class="form-label">Bank</label>
+                  <input class="input" id="pfBank"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Hüquqi ünvan</label>
+                <textarea class="input" id="pfAddress" rows="2"></textarea></div>
+              <div class="form-group"><label class="form-label">Hesab nömrəsi</label>
+                <input class="input" id="pfAccount"></div>
+              <button type="submit" class="btn btn-primary">Yadda saxla</button>
+            </div></form>
+          </section>
+        </div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/account.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/business.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>

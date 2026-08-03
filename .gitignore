@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+server/node_modules/
+
+# Environment & secrets
+.env
+.env.local
+.env.production
+server/.env
+
+# Databases
+*.db
+*.db-*
+server/data/*.db
+server/data/*.db-*
+*.sqlite
+
+# Logs & OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Deploy / IDE
+.vercel
+.netlify
+.wrangler
+dist/
+tmp/
+server/tmp-*
+.idea/
+.vscode/

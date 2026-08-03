@@ -1,0 +1,36 @@
+{
+  "users": [
+    {
+      "id": "u001",
+      "email": "demo@nexora.az",
+      "password": "Demo1234",
+      "name": "Sultan",
+      "phone": "+994 50 123 45 67",
+      "role": "customer",
+      "addresses": [
+        {
+          "id": "a001",
+          "title": "Ev",
+          "fullName": "Sultan",
+          "phone": "+994 50 123 45 67",
+          "city": "Bakı",
+          "district": "Nəsimi",
+          "address": "Nizami küç. 45, mənzil 12",
+          "postalCode": "AZ1000",
+          "isDefault": true
+        }
+      ],
+      "createdAt": "2026-01-15T10:00:00"
+    },
+    {
+      "id": "u002",
+      "email": "admin@nexora.az",
+      "password": "Admin1234",
+      "name": "Admin NEXORA",
+      "phone": "+994 12 555 00 00",
+      "role": "admin",
+      "addresses": [],
+      "createdAt": "2025-12-01T09:00:00"
+    }
+  ]
+}

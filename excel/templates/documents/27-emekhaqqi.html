@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NEXORA - Əməkhaqqı cədvəli</title>
+  <link rel="stylesheet" href="../_base.css" />
+</head>
+<body>
+  <div class="sheet">
+    <p class="brand">NEXORA</p>
+    <h1 class="doc-title">Əməkhaqqı cədvəli</h1>
+    <div class="meta">
+      <div>Sened No: <strong class="placeholder">{{docNo}}</strong> (prefiks: PAY)</div>
+      <div>Tarix: <strong class="placeholder">{{date}}</strong></div>
+      <div>Kod: <strong>payroll</strong> / Sablon: <strong>27-emekhaqqi.html</strong></div>
+      <div>Teref: <strong class="placeholder">{{party}}</strong></div>
+      <div>Elaqeli: <strong class="placeholder">{{relatedTo}}</strong></div>
+    </div>
+    <table><thead><tr><th>Isci</th><th>Vezife</th><th>Mebleg</th><th>Bonus</th><th>Yekun</th></tr></thead><tbody><tr><td class="placeholder">{{employee}}</td><td class="placeholder">{{role}}</td><td class="placeholder">{{base}}</td><td class="placeholder">{{bonus}}</td><td class="placeholder">{{total}}</td></tr></tbody></table>
+    <div class="sig">
+      <div>Hazirladi<br/><span class="placeholder">{{preparedBy}}</span></div>
+      <div>Tesdiq etdi<br/><span class="placeholder">{{approvedBy}}</span></div>
+    </div>
+    <div class="footer">NEXORA sened dovriyyesi. Avtomatik nomreleme Excel Documents vereqinden. Cap / PDF ucun brauzerden Print.</div>
+  </div>
+</body>
+</html>

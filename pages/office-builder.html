@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Office Builder | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero ob-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span><span data-i18n="office_builder">Office Builder</span>
+          </nav>
+          <p class="ob-kicker">📦 6. Office Builder</p>
+          <h1>Ofis paketini bir cümlədən hesablayın</h1>
+          <p class="section-subtitle">Şirkət ehtiyacını yazın — sistem Laptop, Printer, Router, UPS və Monitor sayını avtomatik seçir.</p>
+        </div>
+      </div>
+
+      <div class="container section ob-layout">
+        <div class="ob-panel">
+          <form id="officeBuilderForm" class="ob-form">
+            <div class="form-group">
+              <label class="form-label" for="obPrompt">Şirkət sorğusu</label>
+              <textarea class="input" id="obPrompt" rows="3" maxlength="400"
+                placeholder='Məs: "20 nəfərlik ofis qurmaq istəyirəm."' required></textarea>
+            </div>
+            <div class="ob-form-row">
+              <div class="form-group mb-0">
+                <label class="form-label" for="obHeadcount">Nəfər sayı</label>
+                <input type="number" class="input" id="obHeadcount" min="1" max="500" value="20">
+              </div>
+              <div class="form-group mb-0">
+                <label class="form-label" for="obTier">Paket səviyyəsi</label>
+                <select class="input" id="obTier">
+                  <option value="economy">Ekonom</option>
+                  <option value="standard" selected>Standart</option>
+                  <option value="premium">Premium</option>
+                </select>
+              </div>
+              <div class="ob-form-submit">
+                <button type="submit" class="btn btn-primary w-full">Hesabla</button>
+              </div>
+            </div>
+          </form>
+          <div class="ob-chips flex gap-2 flex-wrap mt-4">
+            <button type="button" class="btn btn-ghost btn-sm" data-ob-suggest="20 nəfərlik ofis qurmaq istəyirəm.">20 nəfər</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-ob-suggest="10 nəfərlik kiçik ofis, ekonom paket.">10 · Ekonom</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-ob-suggest="50 nəfərlik ofis, premium avadanlıq.">50 · Premium</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-ob-suggest="8 nəfərlik startup ofisi qurmaq istəyirəm.">8 · Startup</button>
+          </div>
+          <div class="ob-roles-hint mt-5">
+            <h3 class="heading-4 mb-3">Paketə daxil</h3>
+            <ul class="ob-roles-list">
+              <li>💻 Laptop</li>
+              <li>🖨 Printer</li>
+              <li>📡 Router</li>
+              <li>🔋 UPS</li>
+              <li>🖥 Monitor</li>
+            </ul>
+          </div>
+        </div>
+
+        <div id="officeBuilder" class="ob-results" aria-live="polite">
+          <p class="text-muted">Sorğunu yazın və Hesabla düyməsinə basın.</p>
+        </div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/office-builder.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>

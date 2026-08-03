@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lookbook | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <section class="lookbook-hero" id="lookbookHero">
+        <div class="lookbook-hero-inner">
+          <p class="lookbook-kicker">NEXORA Lookbook</p>
+          <h1 class="lookbook-title">Mövsümün ritmi</h1>
+          <p class="lookbook-sub">Premium seçimlər — atmosfera və stil bir yerdə</p>
+          <a href="products.html" class="btn btn-primary">Kolleksiyaya keç</a>
+        </div>
+      </section>
+      <div class="lookbook-strip" id="lookbookStrip"></div>
+      <div class="container section">
+        <h2 class="section-title mb-6">Seçilmişlər</h2>
+        <div class="product-grid" id="lookbookProducts"></div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    (async function () {
+      const products = await NexoraApp.loadProducts();
+      const campaigns = await NexoraApp.loadCampaigns();
+      const strip = document.getElementById('lookbookStrip');
+      const stories = (campaigns.campaigns || []).slice(0, 6);
+      strip.innerHTML = stories.map(function (c, i) {
+        return '<a class="lookbook-story" href="campaigns.html" style="--d:' + (i * 0.08) + 's">' +
+          '<span class="lookbook-story-media" style="background:' + (c.gradient || 'linear-gradient(135deg,#111,#FF0000)') + '"></span>' +
+          '<span class="lookbook-story-label">' + c.title + '</span></a>';
+      }).join('') || '<p class="text-muted container">Kampaniya yoxdur.</p>';
+
+      const picks = products.filter(function (p) { return p.badge || p.isNew; }).slice(0, 8);
+      const grid = document.getElementById('lookbookProducts');
+      grid.innerHTML = (picks.length ? picks : products.slice(0, 8))
+        .map(function (p) { return NexoraApp.productCardHTML(p); }).join('');
+      NexoraApp.bindProductActions(grid);
+      if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
+    })();
+  </script>
+</body>
+</html>

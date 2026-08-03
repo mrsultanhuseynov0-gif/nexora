@@ -1,0 +1,193 @@
+{
+  "categories": [
+    {
+      "id": "electronics",
+      "name": "Elektronika",
+      "slug": "elektronika",
+      "count": 288,
+      "icon": "smartphone",
+      "gradient": "linear-gradient(135deg, #1E1E1E, #333333)",
+      "link": "pages/categories.html?cat=electronics",
+      "subcategories": [
+        {
+          "id": "smartphones",
+          "name": "Smartfonlar"
+        },
+        {
+          "id": "laptops",
+          "name": "Noutbuklar"
+        },
+        {
+          "id": "audio",
+          "name": "Audio"
+        },
+        {
+          "id": "tv",
+          "name": "TV"
+        },
+        {
+          "id": "gaming",
+          "name": "Oyun"
+        },
+        {
+          "id": "cameras",
+          "name": "Kameralar"
+        },
+        {
+          "id": "wearables",
+          "name": "Geyilə bilən"
+        },
+        {
+          "id": "printers",
+          "name": "Printerlər"
+        },
+        {
+          "id": "ups",
+          "name": "UPS"
+        }
+      ],
+      "image": "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "fashion",
+      "name": "Moda",
+      "slug": "moda",
+      "count": 64,
+      "icon": "shirt",
+      "gradient": "linear-gradient(135deg, #330000, #FF0000)",
+      "link": "pages/categories.html?cat=fashion",
+      "subcategories": [
+        {
+          "id": "shoes",
+          "name": "Ayaqqabı"
+        },
+        {
+          "id": "accessories",
+          "name": "Aksessuarlar"
+        }
+      ],
+      "image": "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "home",
+      "name": "Ev & Bağça",
+      "slug": "ev-bagca",
+      "count": 52,
+      "icon": "home",
+      "gradient": "linear-gradient(135deg, #1a472a, #2e7d32)",
+      "link": "pages/categories.html?cat=home",
+      "subcategories": [
+        {
+          "id": "cleaning",
+          "name": "Təmizlik"
+        },
+        {
+          "id": "smart-home",
+          "name": "Smart Home"
+        },
+        {
+          "id": "appliances",
+          "name": "Məişət texnikası"
+        }
+      ],
+      "image": "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "beauty",
+      "name": "Gözəllik",
+      "slug": "gozellik",
+      "count": 32,
+      "icon": "sparkles",
+      "gradient": "linear-gradient(135deg, #4a148c, #7b1fa2)",
+      "link": "pages/categories.html?cat=beauty",
+      "subcategories": [],
+      "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "sports",
+      "name": "İdman",
+      "slug": "idman",
+      "count": 52,
+      "icon": "dumbbell",
+      "gradient": "linear-gradient(135deg, #0d47a1, #1565c0)",
+      "link": "pages/categories.html?cat=sports",
+      "subcategories": [
+        {
+          "id": "shoes",
+          "name": "İdman ayaqqabısı"
+        },
+        {
+          "id": "apparel",
+          "name": "Geyim"
+        }
+      ],
+      "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "kids",
+      "name": "Uşaq",
+      "slug": "usaq",
+      "count": 38,
+      "icon": "baby",
+      "gradient": "linear-gradient(135deg, #e65100, #ff9800)",
+      "link": "pages/categories.html?cat=kids",
+      "subcategories": [
+        {
+          "id": "toys",
+          "name": "Oyuncaqlar"
+        }
+      ],
+      "image": "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "auto",
+      "name": "Avtomobil",
+      "slug": "avtomobil",
+      "count": 32,
+      "icon": "car",
+      "gradient": "linear-gradient(135deg, #212121, #424242)",
+      "link": "pages/categories.html?cat=auto",
+      "subcategories": [],
+      "image": "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "books",
+      "name": "Kitab & Hobi",
+      "slug": "kitab-hobi",
+      "count": 32,
+      "icon": "book",
+      "gradient": "linear-gradient(135deg, #3e2723, #5d4037)",
+      "link": "pages/categories.html?cat=books",
+      "subcategories": [],
+      "image": "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&h=800&q=80"
+    },
+    {
+      "id": "server",
+      "name": "Server & Şəbəkə",
+      "slug": "server-shebeke",
+      "count": 44,
+      "icon": "server",
+      "gradient": "linear-gradient(135deg, #0d1b2a, #1b3a4b)",
+      "link": "pages/categories.html?cat=server",
+      "subcategories": [
+        {
+          "id": "switches",
+          "name": "Switch-lər"
+        },
+        {
+          "id": "routers",
+          "name": "Router-lər"
+        },
+        {
+          "id": "racks",
+          "name": "Server rak / kabinet"
+        },
+        {
+          "id": "servers",
+          "name": "Serverlər"
+        }
+      ],
+      "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Rack_Servers_Fujitsu_Primergy_2.jpg/960px-Rack_Servers_Fujitsu_Primergy_2.jpg"
+    }
+  ]
+}

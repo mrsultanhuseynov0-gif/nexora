@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Əlaqə | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span><span data-i18n="contact">Əlaqə</span>
+          </nav>
+          <h1 data-i18n="contact">Əlaqə</h1>
+          <p class="section-subtitle">Bizimlə əlaqə saxlayın</p>
+        </div>
+      </div>
+      <div class="container contact-layout">
+        <form id="contactForm" class="card">
+          <div class="card-body">
+            <h2 class="card-title">Mesaj göndər</h2>
+            <div class="form-group"><label class="form-label">Ad</label>
+              <input class="input" id="contactName" required></div>
+            <div class="form-group"><label class="form-label">E-poçt</label>
+              <input type="email" class="input" id="contactEmail" required></div>
+            <div class="form-group"><label class="form-label">Mövzu</label>
+              <select class="input" id="contactSubject">
+                <option>Ümumi sual</option>
+                <option>Sifariş</option>
+                <option>Qaytarma</option>
+                <option>Əməkdaşlıq</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Mesaj</label>
+              <textarea class="input" id="contactMessage" rows="5" required></textarea></div>
+            <button type="submit" class="btn btn-primary">Göndər</button>
+          </div>
+        </form>
+        <div>
+          <div class="card mb-4"><div class="card-body">
+            <h3 class="card-title">Ofis</h3>
+            <p class="flex items-start gap-3 mb-3"><span class="icon icon-sm" data-icon="mapPin"></span>
+              Bakı, Nizami küç. 123, NEXORA Plaza</p>
+            <p class="flex items-start gap-3 mb-3"><span class="icon icon-sm" data-icon="phone"></span>
+              +994 12 555 00 00</p>
+            <p class="flex items-start gap-3 mb-3"><span class="icon icon-sm" data-icon="mail"></span>
+              info@nexora.az</p>
+            <p class="flex items-start gap-3"><span class="icon icon-sm" data-icon="clock"></span>
+              B.e–Ş.: 10:00–20:00 · Bazar: 11:00–18:00</p>
+          </div></div>
+          <div class="card"><div class="card-body" style="min-height:220px;background:linear-gradient(135deg,#111,#333);border-radius:inherit;color:#fff;display:flex;align-items:center;justify-content:center">
+            <div class="text-center">
+              <span class="icon icon-xl" data-icon="mapPin"></span>
+              <p class="mt-2">Xəritə (demo)</p>
+            </div>
+          </div></div>
+        </div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/pages-content.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.getElementById('contactForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const messages = NexoraApp.storageGet('nexora-contact-messages', []);
+      messages.push({
+        name: document.getElementById('contactName').value,
+        email: document.getElementById('contactEmail').value,
+        subject: document.getElementById('contactSubject').value,
+        message: document.getElementById('contactMessage').value,
+        at: new Date().toISOString()
+      });
+      NexoraApp.storageSet('nexora-contact-messages', messages);
+      e.target.reset();
+      NexoraToast.success('Mesajınız qəbul olundu (demo)');
+    });
+  </script>
+</body>
+</html>

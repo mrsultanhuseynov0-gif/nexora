@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>NEXORA Admin CMS</title>
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/admin.css">
+  <style>
+    #adminGate .auth-card { max-width: 420px; margin: 0 auto; }
+    #loginError {
+      display: none; margin: 12px 0; padding: 10px 12px; border-radius: 8px;
+      background: #ffebee; color: #c62828; font-size: 14px;
+    }
+    #loginError.is-visible { display: block; }
+  </style>
+</head>
+<body>
+  <div id="adminGate" class="page-wrapper">
+    <div class="container" style="padding-top:48px;padding-bottom:48px">
+      <div class="auth-card">
+        <a href="../../index.html" class="site-logo mb-4" style="display:inline-block">NEXORA</a>
+        <h1 class="heading-3 mb-2">Admin CMS</h1>
+        <p class="text-sm text-muted mb-4">Peşəkar idarə paneli — məhsul, sifariş, kontent, sayt</p>
+        <div id="loginError"></div>
+        <form id="adminLoginForm" action="#" method="post" autocomplete="on" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="adminEmail">E-poçt</label>
+            <input type="email" class="input" id="adminEmail" autocomplete="username" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="adminPassword">Şifrə</label>
+            <input type="password" class="input" id="adminPassword" autocomplete="current-password" required minlength="8">
+          </div>
+          <button type="submit" class="btn btn-primary w-full" id="adminLoginBtn">Daxil ol</button>
+        </form>
+        <button type="button" class="btn btn-outline w-full mt-3" id="adminResetUsers">Auth sıfırla (seed)</button>
+        <p class="text-xs text-muted mt-3" id="adminDemoHint" hidden></p>
+        <a href="../../index.html" class="btn btn-ghost w-full mt-4">Mağazaya qayıt</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="adminApp" class="admin-layout" hidden>
+    <aside class="admin-sidebar" id="adminSidebar">
+      <a href="index.html" class="admin-logo"><span class="admin-logo-badge">N</span> NEXORA CMS</a>
+
+      <div class="admin-nav-group">
+        <div class="admin-nav-label">Ümumi</div>
+        <button type="button" class="admin-nav-link is-active" data-admin-nav="dashboard">
+          <span class="icon icon-sm" data-icon="dashboard"></span> Dashboard</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="analytics">
+          <span class="icon icon-sm" data-icon="dashboard"></span> Analytics</button>
+      </div>
+
+      <div class="admin-nav-group">
+        <div class="admin-nav-label">Ticarət</div>
+        <button type="button" class="admin-nav-link" data-admin-nav="products">
+          <span class="icon icon-sm" data-icon="package"></span> Məhsullar</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="inventory">
+          <span class="icon icon-sm" data-icon="barcode"></span> Stok</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="orders">
+          <span class="icon icon-sm" data-icon="creditCard"></span> Sifarişlər</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="coupons">
+          <span class="icon icon-sm" data-icon="percent"></span> Kuponlar</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="users">
+          <span class="icon icon-sm" data-icon="users"></span> İstifadəçilər</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="business">
+          <span class="icon icon-sm" data-icon="package"></span> Business / B2B</button>
+      </div>
+
+      <div class="admin-nav-group">
+        <div class="admin-nav-label">Kataloq</div>
+        <button type="button" class="admin-nav-link" data-admin-nav="categories">
+          <span class="icon icon-sm" data-icon="grid"></span> Kateqoriyalar</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="brands">
+          <span class="icon icon-sm" data-icon="award"></span> Brendlər</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="campaigns">
+          <span class="icon icon-sm" data-icon="zap"></span> Kampaniyalar</button>
+      </div>
+
+      <div class="admin-nav-group">
+        <div class="admin-nav-label">Kontent</div>
+        <button type="button" class="admin-nav-link" data-admin-nav="hero">
+          <span class="icon icon-sm" data-icon="image"></span> Hero / Banner</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="faq">
+          <span class="icon icon-sm" data-icon="helpCircle"></span> FAQ</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="site">
+          <span class="icon icon-sm" data-icon="settings"></span> Sayt ayarları</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="payments">
+          <span class="icon icon-sm" data-icon="creditCard"></span> Ödəniş</button>
+        <button type="button" class="admin-nav-link" data-admin-nav="referrals">
+          <span class="icon icon-sm" data-icon="gift"></span> Dost kodu</button>
+      </div>
+
+      <div class="admin-nav-group">
+        <div class="admin-nav-label">Sistem</div>
+        <a href="../../index.html" class="admin-nav-link" target="_blank" rel="noopener">
+          <span class="icon icon-sm" data-icon="externalLink"></span> Mağazanı aç</a>
+        <button type="button" class="admin-nav-link" id="adminLogout">
+          <span class="icon icon-sm" data-icon="logout"></span> Çıxış</button>
+      </div>
+    </aside>
+
+    <div class="admin-main-wrap">
+      <header class="admin-topbar">
+        <div class="flex items-center gap-3">
+          <button type="button" class="admin-mobile-toggle" id="adminMenuBtn">Menyu</button>
+          <div>
+            <h1 class="admin-topbar-title" id="adminTopTitle">Dashboard</h1>
+            <p class="text-xs text-muted mb-0" id="adminTopSub">İdarə paneli</p>
+          </div>
+        </div>
+        <div class="admin-topbar-meta">
+          <span class="admin-pill is-offline" id="adminApiPill">API yoxlanır…</span>
+          <span class="admin-pill" id="adminUserPill">Admin</span>
+        </div>
+      </header>
+      <main class="admin-main">
+        <div id="adminContent"></div>
+      </main>
+    </div>
+  </div>
+
+  <div class="admin-drawer-backdrop" id="adminDrawerBg"></div>
+  <aside class="admin-drawer" id="adminDrawer">
+    <div class="admin-drawer-head">
+      <h2 id="adminDrawerTitle">Redaktə</h2>
+      <button type="button" class="btn btn-ghost btn-sm" id="adminDrawerClose">Bağla</button>
+    </div>
+    <div class="admin-drawer-body" id="adminDrawerBody"></div>
+    <div class="admin-drawer-foot" id="adminDrawerFoot"></div>
+  </aside>
+
+  <script src="../../js/icons.js"></script>
+  <script src="../../js/components/modal.js"></script>
+  <script src="../../js/components/toast.js"></script>
+  <script src="../../js/api.js"></script>
+  <script src="../../js/app.js"></script>
+  <script src="../../js/security.js"></script>
+  <script src="../../js/cart.js"></script>
+  <script src="../../js/wishlist.js"></script>
+  <script src="../../js/search.js"></script>
+  <script src="../../js/smart.js"></script>
+  <script src="../../js/account.js"></script>
+  <script src="../../js/admin.js"></script>
+  <script src="../../js/main.js"></script>
+  <script>
+    (function () {
+      function showError(msg) {
+        var el = document.getElementById('loginError');
+        if (!el) return;
+        el.textContent = msg || '';
+        el.classList.toggle('is-visible', !!msg);
+      }
+
+      async function doLogin(email, password) {
+        showError('');
+        var btn = document.getElementById('adminLoginBtn');
+        if (btn) btn.disabled = true;
+        try {
+          var apiOk = false;
+          if (typeof NexoraApi !== 'undefined') {
+            try {
+              var h = await NexoraApi.health();
+              apiOk = !!(h && h.ok);
+            } catch (e) { apiOk = false; }
+          }
+          if (apiOk) {
+            var data = await NexoraApi.login(email, password);
+            if (!data.user || data.user.role !== 'admin') {
+              NexoraApi.clearToken();
+              throw new Error('Bu hesabın admin hüququ yoxdur');
+            }
+          } else {
+            if (typeof NexoraAccount === 'undefined') throw new Error('Auth modul yüklənmədi');
+            await NexoraAccount.seedUsers();
+            var user = await NexoraAccount.login(email, password);
+            if (!user || user.role !== 'admin') {
+              NexoraAccount.logout();
+              throw new Error('Bu hesabın admin hüququ yoxdur');
+            }
+          }
+          if (typeof window.NexoraAdminBoot === 'function') await window.NexoraAdminBoot();
+          else document.dispatchEvent(new CustomEvent('nexora:admin-login'));
+        } catch (e) {
+          showError(e.message || 'Giriş alınmadı');
+        } finally {
+          if (btn) btn.disabled = false;
+        }
+      }
+
+      function bind() {
+        var form = document.getElementById('adminLoginForm');
+        var resetBtn = document.getElementById('adminResetUsers');
+        var hint = document.getElementById('adminDemoHint');
+        if (hint && typeof NexoraAccount !== 'undefined' && NexoraAccount.DEMO_HINT) {
+          // Credentials only when explicitly requested: admin/?dev=1
+          var showHint = /[?&]dev=1\b/.test(location.search || '');
+          hint.hidden = !showHint;
+          if (showHint) {
+            hint.textContent = 'Dev: ' + NexoraAccount.DEMO_HINT.admin.email + ' / ' + NexoraAccount.DEMO_HINT.admin.password;
+          }
+        }
+        if (form) {
+          form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            doLogin(
+              document.getElementById('adminEmail').value,
+              document.getElementById('adminPassword').value
+            );
+          });
+        }
+        if (resetBtn) {
+          resetBtn.addEventListener('click', async function () {
+            if (!window.confirm('Bütün istifadəçi/sessiya məlumatı silinib seed-ə qayıdacaq. Davam?')) return;
+            try {
+              if (typeof NexoraApi !== 'undefined') NexoraApi.clearToken();
+              await NexoraAccount.resetAuthStore();
+              showError('');
+              if (hint) {
+                hint.hidden = false;
+                hint.textContent = 'Sıfırlandı. Demo: ' + NexoraAccount.DEMO_HINT.admin.email + ' / ' + NexoraAccount.DEMO_HINT.admin.password;
+              }
+              if (typeof NexoraToast !== 'undefined') NexoraToast.success('Auth sıfırlandı');
+            } catch (e) {
+              showError(e.message || 'Sıfırlama alınmadı');
+            }
+          });
+        }
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+      else bind();
+    })();
+  </script>
+</body>
+</html>

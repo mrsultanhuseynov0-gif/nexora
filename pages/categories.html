@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NEXORA kateqoriyaları">
+  <title>Kateqoriyalar | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Əsas məzmuna keç</a>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main id="main-content" class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a>
+            <span class="breadcrumb-sep">/</span>
+            <span data-i18n="categories">Kateqoriyalar</span>
+          </nav>
+          <h1 id="catPageTitle">Kateqoriyalar</h1>
+          <p class="section-subtitle" id="catPageSubtitle">Bütün kateqoriyalar</p>
+        </div>
+      </div>
+
+      <div class="container section" style="padding-top:var(--space-8)">
+        <div class="cat-grid mb-8" id="categoriesGrid"></div>
+
+        <div id="subcatsWrap" hidden>
+          <h2 class="section-title mb-4">Alt kateqoriyalar</h2>
+          <div class="flex flex-wrap gap-2 mb-8" id="subcatsList"></div>
+        </div>
+
+        <div class="section-header">
+          <div>
+            <h2 class="section-title" id="catProductsTitle">Məhsullar</h2>
+            <p class="section-subtitle" id="catProductsMeta"></p>
+          </div>
+        </div>
+        <div class="product-grid" id="catProducts"></div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      const categories = await NexoraApp.loadCategories();
+      const products = await NexoraApp.loadProducts();
+      const catId = NexoraApp.getQueryParam('cat');
+      const sub = NexoraApp.getQueryParam('sub');
+      const grid = document.getElementById('categoriesGrid');
+      const productsEl = document.getElementById('catProducts');
+
+      function tt(k) {
+        return typeof NexoraI18n !== 'undefined' ? NexoraI18n.t(k) : k;
+      }
+      function cname(c) {
+        return typeof NexoraI18n !== 'undefined' ? NexoraI18n.categoryName(c.id, c.name) : c.name;
+      }
+
+      grid.innerHTML = categories.map(function (c) {
+        const active = catId === c.id ? ' style="outline:3px solid var(--color-primary);outline-offset:2px"' : '';
+        const name = cname(c);
+        return '<a class="cat-card" href="categories.html?cat=' + c.id + '"' + active + ' style="background:' + c.gradient + '">' +
+          (c.image ? '<img class="cat-card-img" src="' + c.image + '" alt="' + name + '" loading="lazy">' : '') +
+          '<span class="cat-card-shade"></span>' +
+          '<span class="cat-card-icon icon icon-lg" data-icon="' + c.icon + '"></span>' +
+          '<div><div class="cat-card-title">' + name + '</div>' +
+          '<div class="cat-card-count">' + c.count + ' ' + tt('products_count') + '</div></div></a>';
+      }).join('');
+
+      let list = products;
+      const current = categories.find(function (c) { return c.id === catId; });
+
+      if (current) {
+        document.getElementById('catPageTitle').textContent = cname(current);
+        document.getElementById('catPageSubtitle').textContent = current.count + ' ' + tt('products_count');
+        list = products.filter(function (p) { return p.category === current.id; });
+
+        const subWrap = document.getElementById('subcatsWrap');
+        const subList = document.getElementById('subcatsList');
+        if (current.subcategories && current.subcategories.length) {
+          subWrap.hidden = false;
+          subList.innerHTML = current.subcategories.map(function (s) {
+            const isActive = sub === s.id;
+            return '<a class="btn ' + (isActive ? 'btn-primary' : 'btn-outline') + ' btn-sm" href="categories.html?cat=' +
+              current.id + '&sub=' + s.id + '">' + s.name + '</a>';
+          }).join('') +
+            '<a class="btn ' + (!sub ? 'btn-primary' : 'btn-outline') + ' btn-sm" href="categories.html?cat=' + current.id + '">' +
+            tt('filter_all') + '</a>';
+        }
+        if (sub) list = list.filter(function (p) { return p.subcategory === sub; });
+      }
+
+      document.getElementById('catProductsTitle').textContent = current
+        ? (cname(current) + ' — ' + tt('products_count'))
+        : tt('all_products');
+      document.getElementById('catProductsMeta').textContent = list.length + ' ' + tt('results_count');
+      productsEl.innerHTML = list.length
+        ? list.map(function (p) { return NexoraApp.productCardHTML(p); }).join('')
+        : '<div class="empty-state" style="grid-column:1/-1"><p>' + tt('cat_empty') + '</p></div>';
+
+      NexoraApp.bindProductActions(productsEl);
+      if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
+      if (typeof NexoraI18n !== 'undefined') NexoraI18n.apply(document);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ödəniş | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    .pay-wrap { max-width: 480px; margin: 40px auto; }
+    .pay-card {
+      background: var(--color-bg-card, #fff);
+      border: 1px solid var(--color-border, #e5e5e5);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.06);
+    }
+    .pay-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #111;
+      margin: 8px 0 4px;
+    }
+    .pay-secure {
+      font-size: 12px;
+      color: #777;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .pay-bank {
+      background: #f7f7f8;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .pay-bank code { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div id="header-placeholder"></div>
+  <main class="page-wrapper">
+    <div class="container pay-wrap">
+      <div class="pay-card" id="payBox">
+        <p class="text-sm text-muted mb-0">Ödəniş yüklənir…</p>
+      </div>
+    </div>
+  </main>
+  <div id="footer-placeholder"></div>
+
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    (function () {
+      function qs(name) {
+        return new URLSearchParams(window.location.search).get(name);
+      }
+      function money(n, c) {
+        try { return NexoraApp.formatPrice(n, c === 'AZN' ? '₼' : c); }
+        catch (e) { return (n || 0).toFixed(2) + ' ₼'; }
+      }
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      async function load() {
+        var paymentId = qs('paymentId');
+        var box = document.getElementById('payBox');
+        if (!paymentId) {
+          box.innerHTML = '<h1 class="heading-3">Ödəniş tapılmadı</h1><p class="text-muted"><a href="products.html">Mağazaya qayıt</a></p>';
+          return;
+        }
+
+        var res = await fetch('/api/payments/' + encodeURIComponent(paymentId));
+        var data = await res.json();
+        if (!res.ok) {
+          box.innerHTML = '<h1 class="heading-3">Xəta</h1><p class="text-muted">' + esc(data.error || 'Yüklənmədi') + '</p>';
+          return;
+        }
+
+        var p = data.payment;
+        var cfg = data.config || {};
+
+        if (p.status === 'paid') {
+          box.innerHTML =
+            '<div style="text-align:center">' +
+              '<div class="icon icon-2xl" data-icon="checkCircle" style="color:var(--color-success);margin:0 auto 12px"></div>' +
+              '<h1 class="heading-3">Ödəniş uğurlu!</h1>' +
+              '<p class="pay-amount">' + money(p.amount, p.currency) + '</p>' +
+              '<p class="text-muted text-sm">Sifariş: <strong>' + esc(p.orderId || '—') + '</strong></p>' +
+              '<p class="text-muted text-sm mb-4">Ref: ' + esc(p.providerRef || '—') + '</p>' +
+              '<a class="btn btn-primary" href="track.html?id=' + encodeURIComponent(p.orderId || '') +
+                '&email=' + encodeURIComponent((p.customer && p.customer.email) || '') + '">Sifarişi izlə</a>' +
+            '</div>';
+          if (window.NexoraIcons) NexoraIcons.init();
+          return;
+        }
+
+        if (p.method === 'transfer') {
+          var b = data.bank || {};
+          box.innerHTML =
+            '<h1 class="heading-3 mb-2">Bank köçürməsi</h1>' +
+            '<p class="text-muted text-sm mb-3">Köçürmə edib admin təsdiqini gözləyin.</p>' +
+            '<p class="pay-amount">' + money(p.amount, p.currency) + '</p>' +
+            '<div class="pay-bank mt-3">' +
+              '<div><strong>Bank:</strong> ' + esc(b.bankName || '—') + '</div>' +
+              '<div><strong>Alan:</strong> ' + esc(b.accountName || '—') + '</div>' +
+              '<div><strong>IBAN:</strong> <code>' + esc(b.iban || '—') + '</code></div>' +
+              (b.voen ? '<div><strong>VÖEN:</strong> ' + esc(b.voen) + '</div>' : '') +
+              '<div class="mt-2"><strong>Təyinat:</strong> ' + esc(p.orderId || p.id) + '</div>' +
+            '</div>' +
+            '<p class="pay-secure">Ödəniş statusu: gözləmədə · Admin təsdiqi lazımdır</p>' +
+            '<a class="btn btn-outline w-full mt-4" href="track.html?id=' + encodeURIComponent(p.orderId || '') +
+              '&email=' + encodeURIComponent((p.customer && p.customer.email) || '') + '">Sifarişi izlə</a>';
+          return;
+        }
+
+        if (p.method === 'cash') {
+          box.innerHTML =
+            '<h1 class="heading-3">Nağd ödəniş</h1>' +
+            '<p class="pay-amount">' + money(p.amount, p.currency) + '</p>' +
+            '<p class="text-muted">Məbləği kuryerə çatdırılma zamanı ödəyəcəksiniz.</p>' +
+            '<a class="btn btn-primary w-full mt-4" href="track.html?id=' + encodeURIComponent(p.orderId || '') +
+              '&email=' + encodeURIComponent((p.customer && p.customer.email) || '') + '">Sifarişi izlə</a>';
+          return;
+        }
+
+        // Card form
+        box.innerHTML =
+          '<h1 class="heading-3 mb-1">Kart ilə ödəniş</h1>' +
+          '<p class="text-sm text-muted mb-0">' + esc(cfg.merchantName || 'NEXORA') +
+            (cfg.mode === 'sandbox' ? ' · <strong>Sandbox</strong>' : ' · Live') + '</p>' +
+          '<p class="pay-amount">' + money(p.amount, p.currency) + '</p>' +
+          (cfg.sandboxHint ? '<p class="text-xs text-muted mb-3">' + esc(cfg.sandboxHint) + '</p>' : '') +
+          '<form id="cardPayForm">' +
+            '<div class="form-group"><label class="form-label">Kart nömrəsi</label>' +
+              '<input class="input" id="cardNumber" inputmode="numeric" autocomplete="cc-number" placeholder="4111 1111 1111 1111" maxlength="19" required></div>' +
+            '<div class="form-row">' +
+              '<div class="form-group"><label class="form-label">MM/YY</label>' +
+                '<input class="input" id="cardExp" placeholder="12/30" maxlength="5" required></div>' +
+              '<div class="form-group"><label class="form-label">CVV</label>' +
+                '<input class="input" id="cardCvv" inputmode="numeric" placeholder="123" maxlength="4" required></div>' +
+            '</div>' +
+            '<div class="form-group"><label class="form-label">Kart üzərindəki ad</label>' +
+              '<input class="input" id="cardName" autocomplete="cc-name" placeholder="AD SOYAD"></div>' +
+            '<button type="submit" class="btn btn-primary btn-lg w-full" id="payBtn">Ödə ' + money(p.amount, p.currency) + '</button>' +
+          '</form>' +
+          '<p class="pay-secure"><span class="icon icon-sm" data-icon="check"></span> SSL · Kart məlumatı yalnız ödəniş üçün istifadə olunur</p>' +
+          '<p id="payErr" class="text-sm mt-3" style="color:#c62828;display:none"></p>';
+
+        if (window.NexoraIcons) NexoraIcons.init();
+
+        var num = document.getElementById('cardNumber');
+        num.addEventListener('input', function () {
+          var v = num.value.replace(/\D/g, '').slice(0, 16);
+          num.value = v.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+        });
+        document.getElementById('cardExp').addEventListener('input', function (e) {
+          var v = e.target.value.replace(/\D/g, '').slice(0, 4);
+          if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+          e.target.value = v;
+        });
+
+        document.getElementById('cardPayForm').addEventListener('submit', async function (e) {
+          e.preventDefault();
+          var err = document.getElementById('payErr');
+          var btn = document.getElementById('payBtn');
+          err.style.display = 'none';
+          btn.disabled = true;
+          try {
+            var r = await fetch('/api/payments/' + encodeURIComponent(paymentId) + '/charge', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                card: {
+                  number: document.getElementById('cardNumber').value,
+                  expiry: document.getElementById('cardExp').value,
+                  cvv: document.getElementById('cardCvv').value,
+                  name: document.getElementById('cardName').value
+                }
+              })
+            });
+            var j = await r.json();
+            if (!r.ok) throw new Error(j.error || 'Ödəniş alınmadı');
+            if (window.NexoraToast) NexoraToast.success('Ödəniş uğurlu!');
+            window.location.href = 'payment.html?paymentId=' + encodeURIComponent(paymentId) + '&status=success';
+          } catch (ex) {
+            err.textContent = ex.message || 'Xəta';
+            err.style.display = 'block';
+            btn.disabled = false;
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', load);
+      else load();
+    })();
+  </script>
+</body>
+</html>

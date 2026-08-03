@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seçilmişlər | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span><span data-i18n="wishlist">Seçilmişlər</span>
+          </nav>
+          <div class="flex justify-between items-center flex-wrap gap-4">
+            <div>
+              <h1 data-i18n="wishlist">Seçilmişlər</h1>
+              <p class="section-subtitle" id="wishlistMeta"></p>
+            </div>
+            <div class="flex gap-2 flex-wrap">
+              <button type="button" class="btn btn-outline" id="wishShare" data-i18n="share">Paylaş</button>
+              <button type="button" class="btn btn-primary" id="wishToCart" data-i18n="add_all">Hamısını səbətə at</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container section">
+        <div class="product-grid" id="wishlistGrid"></div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/wishlist-page.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>

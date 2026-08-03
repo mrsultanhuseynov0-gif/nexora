@@ -1,0 +1,64 @@
+{
+  "faqs": [
+    {
+      "id": "f01",
+      "category": "Sifariş",
+      "question": "Sifarişi necə verə bilərəm?",
+      "answer": "Məhsulu səbətə əlavə edin, checkout səhifəsində çatdırılma və ödəniş məlumatlarını doldurun və sifarişi təsdiqləyin."
+    },
+    {
+      "id": "f02",
+      "category": "Sifariş",
+      "question": "Sifarişimi ləğv edə bilərəmmi?",
+      "answer": "Sifariş göndərilməmişdən əvvəl hesab səhifəsindən və ya dəstək xidmətimizlə əlaqə saxlayaraq ləğv edə bilərsiniz."
+    },
+    {
+      "id": "f03",
+      "category": "Çatdırılma",
+      "question": "Çatdırılma nə qədər çəkir?",
+      "answer": "Bakı daxilində 1–2 iş günü, regionlara 2–5 iş günü. 100 ₼-dən yuxarı sifarişlərdə çatdırılma pulsuzdur."
+    },
+    {
+      "id": "f04",
+      "category": "Çatdırılma",
+      "question": "Çatdırılma haqqı nə qədərdir?",
+      "answer": "Standart çatdırılma 5 ₼-dir. 100 ₼ və yuxarı sifarişlərdə pulsuz çatdırılır."
+    },
+    {
+      "id": "f05",
+      "category": "Ödəniş",
+      "question": "Hansı ödəniş üsulları qəbul olunur?",
+      "answer": "Kart (Visa/Mastercard), nağd ödəniş (çatdırılmada) və taksit seçimləri mövcuddur. Bu demo versiyada ödəniş simulyasiya olunur."
+    },
+    {
+      "id": "f06",
+      "category": "Ödəniş",
+      "question": "Taksit mümkündürmü?",
+      "answer": "Bəli, seçilmiş məhsullarda 3, 6 və 12 aylıq taksit imkanı var."
+    },
+    {
+      "id": "f07",
+      "category": "Qaytarma",
+      "question": "Məhsulu necə qaytara bilərəm?",
+      "answer": "14 gün ərzində istifadə olunmamış məhsulları orijinal qablaşdırması ilə qaytara bilərsiniz. Əlaqə səhifəsindən müraciət edin."
+    },
+    {
+      "id": "f08",
+      "category": "Hesab",
+      "question": "Şifrəmi unutdum. Nə etməliyəm?",
+      "answer": "Hesab səhifəsində «Şifrəni unutdum» seçiminə klikləyin və e-poçtunuza göndərilən təlimatları izləyin. Demo rejimdə şifrə localStorage-də saxlanır."
+    },
+    {
+      "id": "f09",
+      "category": "Zəmanət",
+      "question": "Zəmanət şərtləri necədir?",
+      "answer": "Bütün rəsmi məhsullara istehsalçı zəmanəti tətbiq olunur. Zəmanət müddəti məhsul kateqoriyasından asılıdır (adətən 12–24 ay)."
+    },
+    {
+      "id": "f10",
+      "category": "Ümumi",
+      "question": "NEXORA harada yerləşir?",
+      "answer": "Baş ofisimiz Bakı, Nizami küçəsi 123 ünvanındadır. Əlaqə səhifəsində xəritə və iş saatları göstərilib."
+    }
+  ]
+}

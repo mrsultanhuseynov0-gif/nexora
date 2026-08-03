@@ -1,0 +1,3 @@
+# Cloudflare Pages — SPA-style fallbacks not required (multi-page HTML).
+# API must be on Render; set config.static.json → apiBase before deploy.
+/config.json  /config.static.json  200

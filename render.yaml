@@ -1,0 +1,29 @@
+# NEXORA — free Render Blueprint (monolith: API + static storefront)
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: nexora
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES
+        value: 8h
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: TRUST_PROXY
+        value: "1"
+      # Set after first deploy to your public URL (optional, improves sitemap absolute URLs)
+      - key: PUBLIC_SITE_URL
+        sync: false
+      - key: PUBLIC_API_URL
+        sync: false

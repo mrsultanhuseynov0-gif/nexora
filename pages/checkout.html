@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span>
+            <a href="cart.html">Səbət</a><span class="breadcrumb-sep">/</span><span data-i18n="checkout_title">Checkout</span>
+          </nav>
+          <h1>Sifarişi rəsmiləşdir</h1>
+          <p class="section-subtitle">Demo ödəniş — real gateway yoxdur</p>
+        </div>
+      </div>
+      <div class="container checkout-layout">
+        <form id="checkoutForm">
+          <div class="card mb-6">
+            <div class="card-header"><h2 class="card-title mb-0">Çatdırılma</h2></div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Ad Soyad</label>
+                  <input class="input" id="shipName" required></div>
+                <div class="form-group"><label class="form-label">E-poçt</label>
+                  <input type="email" class="input" id="shipEmail" required></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Telefon</label>
+                  <input class="input" id="shipPhone" required placeholder="+994 ..."></div>
+                <div class="form-group"><label class="form-label">Şəhər</label>
+                  <input class="input" id="shipCity" required value="Bakı"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Rayon</label>
+                  <input class="input" id="shipDistrict"></div>
+                <div class="form-group"><label class="form-label">Poçt indeksi</label>
+                  <input class="input" id="shipPostal"></div>
+              </div>
+              <div class="form-group"><label class="form-label">Ünvan</label>
+                <textarea class="input" id="shipAddress" rows="2" required></textarea></div>
+            </div>
+          </div>
+
+          <div class="card mb-6">
+            <div class="card-header"><h2 class="card-title mb-0">Faktura ünvanı</h2></div>
+            <div class="card-body">
+              <label class="form-check mb-4">
+                <input type="checkbox" class="form-check-input" id="sameAsShipping" checked>
+                <span class="form-check-label">Çatdırılma ünvanı ilə eyni</span>
+              </label>
+              <div id="billingFields" hidden>
+                <div class="form-group"><label class="form-label">Ad</label>
+                  <input class="input" id="billName"></div>
+                <div class="form-group"><label class="form-label">Ünvan</label>
+                  <input class="input" id="billAddress"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-6">
+            <div class="card-header"><h2 class="card-title mb-0">Ödəniş üsulu</h2></div>
+            <div class="card-body">
+              <label class="form-check mb-3">
+                <input type="radio" name="paymentMethod" value="card" class="form-check-input" checked>
+                <span class="form-check-label">Kart (Visa / Mastercard)</span>
+              </label>
+              <label class="form-check mb-3">
+                <input type="radio" name="paymentMethod" value="transfer" class="form-check-input">
+                <span class="form-check-label">Bank köçürməsi</span>
+              </label>
+              <label class="form-check mb-3">
+                <input type="radio" name="paymentMethod" value="cash" class="form-check-input">
+                <span class="form-check-label">Nağd (çatdırılmada)</span>
+              </label>
+              <label class="form-check mb-4">
+                <input type="radio" name="paymentMethod" value="installment" class="form-check-input">
+                <span class="form-check-label">Taksit / kart</span>
+              </label>
+              <div id="cardFields" hidden>
+                <p class="text-sm text-muted mb-0">Kart məlumatı növbəti təhlükəsiz ödəniş səhifəsində daxil ediləcək.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card mb-6">
+            <div class="card-header"><h2 class="card-title mb-0">Dost kodu</h2></div>
+            <div class="card-body">
+              <div class="form-group mb-2">
+                <label class="form-label" for="referralCode">Dostunuzun kodu</label>
+                <div class="flex gap-2">
+                  <input class="input" id="referralCode" placeholder="məs: DOSTAB12CD" style="flex:1">
+                  <button type="button" class="btn btn-outline" id="referralCheckBtn">Yoxla</button>
+                </div>
+                <p class="text-xs text-muted mt-2 mb-0" id="referralHint">Dostunuzun şəxsi kodunu yazın — endirim avtomatik tətbiq olunur.</p>
+                <p class="text-sm mt-2" id="referralStatus" hidden></p>
+              </div>
+              <label class="flex items-center gap-2 text-sm" id="creditWrap" hidden>
+                <input type="checkbox" id="useReferralCredit">
+                <span id="creditLabel">Referral balansını istifadə et</span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg w-full">Sifarişi təsdiqlə</button>
+        </form>
+
+        <aside class="order-summary" id="checkoutSummary"></aside>
+      </div>
+      <div class="container" id="checkoutSuccess" hidden></div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/smart.js"></script>
+  <script src="../js/account.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/checkout.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>

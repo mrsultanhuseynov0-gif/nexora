@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NEXORA - Qaytarma aktı</title>
+  <link rel="stylesheet" href="../_base.css" />
+</head>
+<body>
+  <div class="sheet">
+    <p class="brand">NEXORA</p>
+    <h1 class="doc-title">Qaytarma aktı</h1>
+    <div class="meta">
+      <div>Sened No: <strong class="placeholder">{{docNo}}</strong> (prefiks: RTN)</div>
+      <div>Tarix: <strong class="placeholder">{{date}}</strong></div>
+      <div>Kod: <strong>return</strong> / Sablon: <strong>07-qaytarma-akti.html</strong></div>
+      <div>Teref: <strong class="placeholder">{{party}}</strong></div>
+      <div>Elaqeli: <strong class="placeholder">{{relatedTo}}</strong></div>
+    </div>
+    <p>Sebeb: <span class="placeholder">{{reason}}</span></p><table>
+  <thead><tr><th>#</th><th>SKU</th><th>Mehsul</th><th>Miqdar</th><th>Qiymet</th><th>Cem</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td class="placeholder">{{sku}}</td>
+      <td class="placeholder">{{productName}}</td>
+      <td class="placeholder">{{qty}}</td>
+      <td class="placeholder">{{unitPrice}}</td>
+      <td class="placeholder">{{lineTotal}}</td>
+    </tr>
+  </tbody>
+  <tfoot><tr><td colspan="5" class="total">Yekun (AZN)</td><td class="total placeholder">{{total}}</td></tr></tfoot>
+</table>
+    <div class="sig">
+      <div>Hazirladi<br/><span class="placeholder">{{preparedBy}}</span></div>
+      <div>Tesdiq etdi<br/><span class="placeholder">{{approvedBy}}</span></div>
+    </div>
+    <div class="footer">NEXORA sened dovriyyesi. Avtomatik nomreleme Excel Documents vereqinden. Cap / PDF ucun brauzerden Print.</div>
+  </div>
+</body>
+</html>

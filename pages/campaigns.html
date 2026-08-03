@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kampaniyalar | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span><span data-i18n="campaigns">Kampaniyalar</span>
+          </nav>
+          <h1 data-i18n="campaigns">Kampaniyalar</h1>
+          <p class="section-subtitle">Flash sale, promo və endirimlər</p>
+        </div>
+      </div>
+      <div class="container section" id="campaignsRoot"></div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    function countdownHTML(endDate) {
+      return '<div class="campaign-countdown" data-countdown="' + endDate + '"></div>';
+    }
+    function tickAll() {
+      document.querySelectorAll('[data-countdown]').forEach(function (el) {
+        const end = new Date(el.getAttribute('data-countdown')).getTime();
+        const diff = Math.max(0, end - Date.now());
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        el.innerHTML = [['Gün', d], ['Saat', h], ['Dəq', m], ['San', s]].map(function (u) {
+          return '<div class="countdown-unit"><span class="countdown-value">' +
+            String(u[1]).padStart(2, '0') + '</span><span class="countdown-label">' + u[0] + '</span></div>';
+        }).join('');
+      });
+    }
+    document.addEventListener('DOMContentLoaded', async function () {
+      const data = await NexoraApp.loadCampaigns();
+      const products = await NexoraApp.loadProducts();
+      const focus = NexoraApp.getQueryParam('id');
+      const root = document.getElementById('campaignsRoot');
+      const list = data.campaigns || [];
+
+      root.innerHTML = list.map(function (c) {
+        const highlight = focus === c.id ? ' style="box-shadow:0 0 0 3px var(--color-primary)"' : '';
+        const campaignProducts = (c.productIds || []).map(function (id) {
+          return products.find(function (p) { return p.id === id; });
+        }).filter(Boolean);
+
+        return '<section class="mb-8" id="' + c.id + '">' +
+          '<div class="campaign-banner mb-6"' + highlight + ' style="background:' + c.gradient + '">' +
+            (c.image ? '<img class="campaign-banner-img" src="' + c.image + '" alt="" aria-hidden="true">' : '') +
+            '<span class="campaign-banner-shade"></span>' +
+            '<div class="campaign-banner-content"><span class="badge badge-dark mb-2">' + (c.type === 'flash' ? 'Flash Sale' : 'Promo') + '</span>' +
+            '<h2 class="heading-2 mb-2" style="color:#fff">' + c.title + '</h2>' +
+            '<p style="color:rgba(255,255,255,.85)">' + c.description + '</p>' +
+            '<p class="mt-2" style="color:#fff;font-weight:700">−' + c.discount + '%-dək</p></div>' +
+            countdownHTML(c.endDate) +
+          '</div>' +
+          '<div class="product-grid">' +
+            campaignProducts.map(function (p) { return NexoraApp.productCardHTML(p); }).join('') +
+          '</div></section>';
+      }).join('');
+
+      tickAll();
+      setInterval(tickAll, 1000);
+      NexoraApp.bindProductActions(root);
+      if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
+      if (focus) {
+        const t = document.getElementById(focus);
+        if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  </script>
+</body>
+</html>

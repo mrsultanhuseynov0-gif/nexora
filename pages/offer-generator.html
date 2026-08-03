@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Offer Generator | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero og-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span><span data-i18n="offer_generator">PDF Offer</span>
+          </nav>
+          <p class="og-kicker">🧾 12. PDF Offer Generator</p>
+          <h1>Bir kliklə peşəkar qiymət təklifi</h1>
+          <p class="section-subtitle">Şirkət məlumatı + məhsul siyahısı → rəsmi PDF. Office Builder, səbət və ya əl ilə.</p>
+        </div>
+      </div>
+
+      <div class="container section og-layout">
+        <div class="og-panel">
+          <h2 class="heading-4 mb-3">Alıcı şirkət</h2>
+          <form id="offerForm" class="og-form">
+            <div class="form-group">
+              <label class="form-label" for="ogCompany">Şirkət adı *</label>
+              <input class="input" id="ogCompany" required maxlength="160" placeholder="Məs: NEXORA Demo MMC">
+            </div>
+            <div class="og-form-row">
+              <div class="form-group">
+                <label class="form-label" for="ogVoen">VÖEN</label>
+                <input class="input" id="ogVoen" maxlength="40" placeholder="1400000001">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ogContact">Əlaqə şəxsi</label>
+                <input class="input" id="ogContact" maxlength="120" placeholder="Ad Soyad">
+              </div>
+            </div>
+            <div class="og-form-row">
+              <div class="form-group">
+                <label class="form-label" for="ogPhone">Telefon</label>
+                <input class="input" id="ogPhone" maxlength="40" placeholder="+994…">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="ogEmail">E-poçt</label>
+                <input type="email" class="input" id="ogEmail" maxlength="120" placeholder="info@sirket.az">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ogAddress">Hüquqi ünvan</label>
+              <input class="input" id="ogAddress" maxlength="240" placeholder="Bakı…">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ogTitle">Təklif başlığı</label>
+              <input class="input" id="ogTitle" maxlength="120" value="Qiymət təklifi">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ogNotes">Qeyd</label>
+              <textarea class="input" id="ogNotes" rows="2" maxlength="1000" placeholder="Ödəniş / çatdırılma qeydləri…"></textarea>
+            </div>
+            <label class="form-check mb-4" id="ogSaveWrap" hidden>
+              <input type="checkbox" class="form-check-input" id="ogSave">
+              <span class="form-check-label">Biznes hesabımda da saxla</span>
+            </label>
+            <button type="submit" class="btn btn-primary w-full" id="ogPdfBtn">PDF təklifi yüklə</button>
+            <p class="text-sm text-muted mt-3 mb-0" id="ogApiHint">API yoxlanır…</p>
+          </form>
+        </div>
+
+        <div class="og-main">
+          <div class="og-toolbar flex justify-between items-center flex-wrap gap-2 mb-4">
+            <h2 class="heading-3 mb-0">Məhsul siyahısı</h2>
+            <div class="flex gap-2 flex-wrap">
+              <button type="button" class="btn btn-outline btn-sm" id="ogFromCart">Səbətdən götür</button>
+              <a class="btn btn-ghost btn-sm" href="office-builder.html">Office Builder</a>
+              <a class="btn btn-ghost btn-sm" href="business.html">Business Panel</a>
+            </div>
+          </div>
+
+          <div class="og-add card mb-4">
+            <div class="card-body">
+              <div class="og-add-row">
+                <input class="input" id="ogSearch" placeholder="Məhsul axtar (ad / SKU)…" autocomplete="off">
+                <input type="number" class="input" id="ogQty" min="1" max="500" value="1" title="Ədəd">
+                <button type="button" class="btn btn-outline" id="ogAddBtn">Əlavə et</button>
+              </div>
+              <div id="ogSearchResults" class="og-search-results" hidden></div>
+            </div>
+          </div>
+
+          <div id="ogLines" class="og-lines">
+            <p class="text-muted">Hələ məhsul yoxdur — səbətdən, Office Builder-dən və ya axtarışdan əlavə edin.</p>
+          </div>
+
+          <div class="og-totals card mt-4" id="ogTotals" hidden>
+            <div class="card-body">
+              <div class="og-totals-grid">
+                <div><span class="text-muted">Ara cəm</span><strong id="ogSub">—</strong></div>
+                <div><span class="text-muted">B2B endirim</span><strong id="ogDisc">—</strong></div>
+                <div><span class="text-muted">ƏDV 18%</span><strong id="ogTax">—</strong></div>
+                <div class="og-totals-grand"><span class="text-muted">Yekun</span><strong class="price" id="ogGrand">—</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js"></script>
+  <script src="../js/components/modal.js"></script>
+  <script src="../js/components/toast.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../js/security.js"></script>
+  <script src="../js/cart.js"></script>
+  <script src="../js/wishlist.js"></script>
+  <script src="../js/search.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/shell.js"></script>
+  <script src="../js/offer-generator.js"></script>
+  <script src="../js/main.js"></script>
+</body>
+</html>

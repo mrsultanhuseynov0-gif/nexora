@@ -1,0 +1,85 @@
+{
+    "campaigns":  [
+                      {
+                          "id":  "flash-1",
+                          "title":  "Flash Satış",
+                          "subtitle":  "Məhdud vaxt endirimi",
+                          "description":  "Seçilmiş elektronika məhsullarında 40%-dək endirim",
+                          "endDate":  "2026-08-10T23:59:59",
+                          "discount":  40,
+                          "type":  "flash",
+                          "productIds":  [
+                                             "p001",
+                                             "p003",
+                                             "p006",
+                                             "p008",
+                                             "p012"
+                                         ],
+                          "link":  "pages/campaigns.html?id=flash-1",
+                          "gradient":  "linear-gradient(135deg, #FF0000, #990000)",
+                          "image":  "https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format\u0026fit=crop\u0026w=1400\u0026h=700\u0026q=80"
+                      },
+                      {
+                          "id":  "summer-2",
+                          "title":  "Yay Kampaniyası",
+                          "subtitle":  "Moda \u0026 İdman",
+                          "description":  "Nike, Adidas və digər brendlərdə 30%-dək endirim",
+                          "endDate":  "2026-08-31T23:59:59",
+                          "discount":  30,
+                          "type":  "promo",
+                          "productIds":  [
+                                             "p005",
+                                             "p010",
+                                             "p015"
+                                         ],
+                          "link":  "pages/campaigns.html?id=summer-2",
+                          "gradient":  "linear-gradient(135deg, #0d47a1, #1565c0)",
+                          "image":  "https://images.unsplash.com/photo-1517649763962-0c623066027b?auto=format\u0026fit=crop\u0026w=1400\u0026h=700\u0026q=80"
+                      },
+                      {
+                          "id":  "home-3",
+                          "title":  "Ev Alətləri Həftəsi",
+                          "subtitle":  "Smart Home",
+                          "description":  "Ev və bağça kateqoriyasında xüsusi qiymətlər",
+                          "endDate":  "2026-09-15T23:59:59",
+                          "discount":  25,
+                          "type":  "promo",
+                          "productIds":  [
+                                             "p004",
+                                             "p009",
+                                             "p011",
+                                             "p013"
+                                         ],
+                          "link":  "pages/campaigns.html?id=home-3",
+                          "gradient":  "linear-gradient(135deg, #1a472a, #2e7d32)",
+                          "image":  "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format\u0026fit=crop\u0026w=1400\u0026h=700\u0026q=80"
+                      }
+                  ],
+    "promoBar":  {
+                     "text":  "Pulsuz çatdırılma — 100 ₼-dən yuxarı bütün sifarişlərə!",
+                     "link":  "pages/campaigns.html",
+                     "linkText":  "Kampaniyalar"
+                 },
+    "features":  [
+                     {
+                         "icon":  "truck",
+                         "title":  "Pulsuz Çatdırılma",
+                         "description":  "100 ₼-dən yuxarı sifarişlərə"
+                     },
+                     {
+                         "icon":  "shield",
+                         "title":  "Zəmanət",
+                         "description":  "Rəsmi zəmanət bütün məhsullara"
+                     },
+                     {
+                         "icon":  "refresh",
+                         "title":  "14 Gün Qaytarma",
+                         "description":  "Problemsiz geri qaytarma"
+                     },
+                     {
+                         "icon":  "creditCard",
+                         "title":  "Taksit İmkanı",
+                         "description":  "12 aya qədər taksit"
+                     }
+                 ]
+}
