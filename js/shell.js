@@ -382,10 +382,16 @@ const NexoraShell = (function () {
         const wrap = btn.closest('[data-nav-more]');
         if (!wrap) return;
         const menu = wrap.querySelector('.nav-more-menu');
-        const open = menu && menu.hasAttribute('hidden');
-        document.querySelectorAll('.nav-more-menu').forEach(function (m) { m.setAttribute('hidden', ''); });
-        document.querySelectorAll('[data-nav-more-toggle]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
-        if (open && menu) {
+        const willOpen = menu && menu.hasAttribute('hidden');
+        document.querySelectorAll('[data-nav-more]').forEach(function (w) {
+          w.classList.remove('is-open');
+          const m = w.querySelector('.nav-more-menu');
+          if (m) m.setAttribute('hidden', '');
+          const b = w.querySelector('[data-nav-more-toggle]');
+          if (b) b.setAttribute('aria-expanded', 'false');
+        });
+        if (willOpen && menu) {
+          wrap.classList.add('is-open');
           menu.removeAttribute('hidden');
           btn.setAttribute('aria-expanded', 'true');
         }
@@ -393,8 +399,23 @@ const NexoraShell = (function () {
     });
     document.addEventListener('click', function (e) {
       if (e.target.closest('[data-nav-more]')) return;
-      document.querySelectorAll('.nav-more-menu').forEach(function (m) { m.setAttribute('hidden', ''); });
-      document.querySelectorAll('[data-nav-more-toggle]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+      document.querySelectorAll('[data-nav-more]').forEach(function (w) {
+        w.classList.remove('is-open');
+        const m = w.querySelector('.nav-more-menu');
+        if (m) m.setAttribute('hidden', '');
+        const b = w.querySelector('[data-nav-more-toggle]');
+        if (b) b.setAttribute('aria-expanded', 'false');
+      });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      document.querySelectorAll('[data-nav-more]').forEach(function (w) {
+        w.classList.remove('is-open');
+        const m = w.querySelector('.nav-more-menu');
+        if (m) m.setAttribute('hidden', '');
+        const b = w.querySelector('[data-nav-more-toggle]');
+        if (b) b.setAttribute('aria-expanded', 'false');
+      });
     });
     document.querySelectorAll('[data-lang-switch]').forEach(function (sel) {
       sel.addEventListener('change', function () {
