@@ -375,48 +375,76 @@ const NexoraShell = (function () {
         }
       });
     });
+    function closeNavMore() {
+      document.querySelectorAll('[data-nav-more]').forEach(function (w) {
+        w.classList.remove('is-open');
+        const b = w.querySelector('[data-nav-more-toggle]');
+        if (b) b.setAttribute('aria-expanded', 'false');
+      });
+      document.querySelectorAll('.nav-more-portal').forEach(function (p) {
+        p.classList.remove('is-open');
+        p.setAttribute('hidden', '');
+        if (p.parentNode) p.parentNode.removeChild(p);
+      });
+      document.querySelectorAll('.nav-more-menu').forEach(function (m) {
+        m.classList.remove('is-open');
+        m.setAttribute('hidden', '');
+        m.style.top = '';
+        m.style.right = '';
+        m.style.left = '';
+      });
+    }
+
+    function openNavMore(btn) {
+      const wrap = btn.closest('[data-nav-more]');
+      if (!wrap) return;
+      const source = wrap.querySelector('.nav-more-menu');
+      if (!source) return;
+      closeNavMore();
+
+      const portal = document.createElement('div');
+      portal.className = 'nav-more-portal is-open';
+      portal.setAttribute('data-nav-more-portal', '1');
+      portal.innerHTML = source.innerHTML;
+      document.body.appendChild(portal);
+
+      const rect = btn.getBoundingClientRect();
+      const width = Math.min(280, Math.max(220, portal.offsetWidth || 220));
+      let left = rect.right - width;
+      if (left < 12) left = 12;
+      if (left + width > window.innerWidth - 12) left = Math.max(12, window.innerWidth - width - 12);
+      let top = rect.bottom + 8;
+      const maxH = Math.min(window.innerHeight * 0.7, 440);
+      if (top + 120 > window.innerHeight) {
+        top = Math.max(12, rect.top - 8 - Math.min(maxH, portal.scrollHeight || 200));
+      }
+      portal.style.top = top + 'px';
+      portal.style.left = left + 'px';
+      portal.style.right = 'auto';
+
+      wrap.classList.add('is-open');
+      btn.setAttribute('aria-expanded', 'true');
+    }
+
     document.querySelectorAll('[data-nav-more-toggle]').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
         const wrap = btn.closest('[data-nav-more]');
-        if (!wrap) return;
-        const menu = wrap.querySelector('.nav-more-menu');
-        const willOpen = menu && menu.hasAttribute('hidden');
-        document.querySelectorAll('[data-nav-more]').forEach(function (w) {
-          w.classList.remove('is-open');
-          const m = w.querySelector('.nav-more-menu');
-          if (m) m.setAttribute('hidden', '');
-          const b = w.querySelector('[data-nav-more-toggle]');
-          if (b) b.setAttribute('aria-expanded', 'false');
-        });
-        if (willOpen && menu) {
-          wrap.classList.add('is-open');
-          menu.removeAttribute('hidden');
-          btn.setAttribute('aria-expanded', 'true');
-        }
+        const isOpen = wrap && wrap.classList.contains('is-open');
+        if (isOpen) closeNavMore();
+        else openNavMore(btn);
       });
     });
     document.addEventListener('click', function (e) {
-      if (e.target.closest('[data-nav-more]')) return;
-      document.querySelectorAll('[data-nav-more]').forEach(function (w) {
-        w.classList.remove('is-open');
-        const m = w.querySelector('.nav-more-menu');
-        if (m) m.setAttribute('hidden', '');
-        const b = w.querySelector('[data-nav-more-toggle]');
-        if (b) b.setAttribute('aria-expanded', 'false');
-      });
+      if (e.target.closest('[data-nav-more]') || e.target.closest('[data-nav-more-portal]')) return;
+      closeNavMore();
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
-      document.querySelectorAll('[data-nav-more]').forEach(function (w) {
-        w.classList.remove('is-open');
-        const m = w.querySelector('.nav-more-menu');
-        if (m) m.setAttribute('hidden', '');
-        const b = w.querySelector('[data-nav-more-toggle]');
-        if (b) b.setAttribute('aria-expanded', 'false');
-      });
+      if (e.key === 'Escape') closeNavMore();
     });
+    window.addEventListener('resize', closeNavMore);
+    window.addEventListener('scroll', closeNavMore, true);
     document.querySelectorAll('[data-lang-switch]').forEach(function (sel) {
       sel.addEventListener('change', function () {
         if (typeof NexoraI18n !== 'undefined') {

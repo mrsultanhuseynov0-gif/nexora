@@ -2,20 +2,20 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
 
-@import 'reset.css';
-@import 'variables.css';
-@import 'typography.css';
-@import 'utilities.css';
-@import 'buttons.css';
-@import 'cards.css';
-@import 'forms.css';
-@import 'inputs.css';
-@import 'modals.css';
-@import 'toasts.css';
-@import 'icons.css';
-@import 'layout.css';
-@import 'mobile.css';
-@import 'features.css';
+@import 'reset.css?v=20260804e';
+@import 'variables.css?v=20260804e';
+@import 'typography.css?v=20260804e';
+@import 'utilities.css?v=20260804e';
+@import 'buttons.css?v=20260804e';
+@import 'cards.css?v=20260804e';
+@import 'forms.css?v=20260804e';
+@import 'inputs.css?v=20260804e';
+@import 'modals.css?v=20260804e';
+@import 'toasts.css?v=20260804e';
+@import 'icons.css?v=20260804e';
+@import 'layout.css?v=20260804e';
+@import 'mobile.css?v=20260804e';
+@import 'features.css?v=20260804e';
 
 /* Global Layout Helpers */
 .page-wrapper {
@@ -197,4 +197,70 @@
   background: var(--color-bg-alt);
   border-radius: var(--radius-sm);
   color: var(--color-primary);
+}
+
+/* ---- Nav "Daha çox" portal (must live in main.css so ?v= bust works) ---- */
+.site-header,
+.site-nav,
+.site-nav-inner {
+  overflow: visible !important;
+}
+
+.nav-more {
+  position: relative;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.nav-more-menu,
+.nav-more-portal {
+  position: fixed;
+  z-index: 10050;
+  min-width: 220px;
+  max-width: min(280px, calc(100vw - 24px));
+  max-height: min(70vh, 440px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 8px;
+  margin: 0;
+  background: #fff;
+  color: #111;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+}
+
+[data-theme="dark"] .nav-more-menu,
+[data-theme="dark"] .nav-more-portal {
+  background: #1a1a1a;
+  color: #f5f5f5;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.nav-more-menu.is-open,
+.nav-more-portal.is-open {
+  display: flex !important;
+}
+
+.nav-more-menu[hidden] {
+  display: none !important;
+}
+
+.nav-more-link {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.nav-more-link:hover {
+  background: rgba(255, 0, 0, 0.08);
+  color: #e00;
 }
