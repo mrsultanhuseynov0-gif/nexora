@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Daha çox | NEXORA</title>
+  <link rel="stylesheet" href="../css/main.css?v=20260804g">
+  <link rel="manifest" href="../manifest.webmanifest">
+  <meta name="theme-color" content="#FF0000">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div id="site-header"></div>
+    <main class="page-content">
+      <div class="page-hero">
+        <div class="container">
+          <nav class="breadcrumb">
+            <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span><span data-i18n="more">Daha çox</span>
+          </nav>
+          <h1 data-i18n="more">Daha çox</h1>
+          <p class="section-subtitle">Bütün bölmələr bir yerdə</p>
+        </div>
+      </div>
+      <div class="container section" style="padding-top:0">
+        <div id="moreLinks" class="more-links-grid"></div>
+      </div>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+  <script src="../js/icons.js?v=20260804g"></script>
+  <script src="../js/components/modal.js?v=20260804g"></script>
+  <script src="../js/components/toast.js?v=20260804g"></script>
+  <script src="../js/app.js?v=20260804g"></script>
+  <script src="../js/api.js?v=20260804g"></script>
+  <script src="../js/security.js?v=20260804g"></script>
+  <script src="../js/account.js?v=20260804g"></script>
+  <script src="../js/cart.js?v=20260804g"></script>
+  <script src="../js/wishlist.js?v=20260804g"></script>
+  <script src="../js/search.js?v=20260804g"></script>
+  <script src="../js/i18n.js?v=20260804g"></script>
+  <script src="../js/shell.js?v=20260804g"></script>
+  <script src="../js/main.js?v=20260804g"></script>
+  <script>
+    (function () {
+      var links = [
+        { href: 'lookbook.html', title: 'Lookbook', desc: 'Stil və kolleksiya baxışı' },
+        { href: 'compare.html', title: 'Müqayisə', desc: 'Məhsulları yan-yana müqayisə et' },
+        { href: 'brands.html', title: 'Brendlər', desc: 'Bütün brendlər' },
+        { href: 'news.html', title: 'Xəbərlər', desc: 'Texnologiya yenilikləri' },
+        { href: 'about.html', title: 'Haqqımızda', desc: 'NEXORA haqqında' },
+        { href: 'contact.html', title: 'Əlaqə', desc: 'Bizimlə əlaqə' },
+        { href: 'faq.html', title: 'FAQ', desc: 'Tez-tez verilən suallar' },
+        { href: 'track.html', title: 'Sifariş izlə', desc: 'Sifariş statusuna bax' }
+      ];
+      var el = document.getElementById('moreLinks');
+      if (!el) return;
+      el.innerHTML = links.map(function (l) {
+        return '<a class="more-link-card" href="' + l.href + '">' +
+          '<strong>' + l.title + '</strong>' +
+          '<span>' + l.desc + '</span>' +
+          '</a>';
+      }).join('');
+    })();
+  </script>
+  <style>
+    .more-links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+      padding-bottom: 40px;
+    }
+    .more-link-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 18px 16px;
+      border: 1px solid var(--color-border, #e5e5e5);
+      border-radius: 14px;
+      text-decoration: none;
+      color: inherit;
+      background: var(--color-bg-card, #fff);
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .more-link-card strong { font-size: 1.05rem; }
+    .more-link-card span { font-size: 0.9rem; color: var(--color-text-muted, #777); }
+    .more-link-card:hover {
+      border-color: var(--color-primary, #e00);
+      box-shadow: 0 8px 24px rgba(0,0,0,.06);
+    }
+    .nav-more-link-btn { margin-left: auto; }
+  </style>
+</body>
+</html>

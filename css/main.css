@@ -2,20 +2,20 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
 
-@import 'reset.css?v=20260804f';
-@import 'variables.css?v=20260804f';
-@import 'typography.css?v=20260804f';
-@import 'utilities.css?v=20260804f';
-@import 'buttons.css?v=20260804f';
-@import 'cards.css?v=20260804f';
-@import 'forms.css?v=20260804f';
-@import 'inputs.css?v=20260804f';
-@import 'modals.css?v=20260804f';
-@import 'toasts.css?v=20260804f';
-@import 'icons.css?v=20260804f';
-@import 'layout.css?v=20260804f';
-@import 'mobile.css?v=20260804f';
-@import 'features.css?v=20260804f';
+@import 'reset.css?v=20260804g';
+@import 'variables.css?v=20260804g';
+@import 'typography.css?v=20260804g';
+@import 'utilities.css?v=20260804g';
+@import 'buttons.css?v=20260804g';
+@import 'cards.css?v=20260804g';
+@import 'forms.css?v=20260804g';
+@import 'inputs.css?v=20260804g';
+@import 'modals.css?v=20260804g';
+@import 'toasts.css?v=20260804g';
+@import 'icons.css?v=20260804g';
+@import 'layout.css?v=20260804g';
+@import 'mobile.css?v=20260804g';
+@import 'features.css?v=20260804g';
 
 /* Global Layout Helpers */
 .page-wrapper {
@@ -263,4 +263,9 @@
 .nav-more-link:hover {
   background: rgba(255, 0, 0, 0.08);
   color: #e00;
+}
+
+.site-nav-inner .nav-more-link-btn {
+  margin-left: auto;
+  font-weight: 600;
 }
