@@ -7,13 +7,20 @@
   font-size: var(--font-size-sm);
   text-align: center;
   padding: var(--space-2) var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  line-height: 1.35;
 }
 
 .promo-bar a {
   color: var(--color-white);
   text-decoration: underline;
   font-weight: var(--font-weight-semibold);
-  margin-left: var(--space-2);
+  margin-left: 0;
+  white-space: nowrap;
 }
 
 /* Site header */
@@ -31,6 +38,7 @@
   gap: var(--space-4);
   padding: var(--space-3) 0;
   min-height: var(--header-height);
+  position: relative;
 }
 
 .site-logo {
@@ -223,6 +231,12 @@
   gap: var(--space-1);
   overflow-x: auto;
   padding: var(--space-2) 0;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.site-nav-inner::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-link {
@@ -1498,27 +1512,49 @@
   .nav-toggle,
   .header-action.nav-toggle {
     display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
   }
 
   .site-nav {
     display: none;
   }
 
+  /* Always-visible search row on phones (iOS + Android) */
+  .header-top {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+
   .header-search {
-    display: none;
+    display: block !important;
+    order: 5;
+    flex: 1 1 100%;
+    max-width: none;
+    width: 100%;
+    position: relative;
   }
 
   .header-search.is-mobile-visible {
-    display: block;
-    position: absolute;
-    left: var(--space-4);
-    right: var(--space-4);
-    top: 100%;
+    display: block !important;
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
     max-width: none;
-    z-index: var(--z-dropdown);
-    background: var(--color-bg);
-    padding: var(--space-3) 0;
-    border-bottom: 1px solid var(--color-border);
+    padding: 0;
+    border-bottom: none;
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+  }
+
+  [data-mobile-search-toggle] {
+    display: none !important;
   }
 
   .hero-slides {

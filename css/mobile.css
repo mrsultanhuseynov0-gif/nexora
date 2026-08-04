@@ -48,16 +48,21 @@ body {
     font-size: 12px;
     padding: 8px 12px;
     line-height: 1.35;
+    gap: 6px 10px;
+  }
+
+  .promo-bar a {
+    display: inline-block;
   }
 
   .header-top {
     gap: 8px;
     min-height: var(--header-height);
-    padding: 8px 0;
+    padding: 10px 0 12px;
   }
 
   .site-logo {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     letter-spacing: 0.06em;
     flex: 1;
     min-width: 0;
@@ -91,36 +96,44 @@ body {
     min-width: 72px !important;
   }
 
-  /* Full-width search under header when opened */
-  .header-search.is-mobile-visible {
-    left: 0;
-    right: 0;
-    top: 100%;
-    padding: 10px 16px 14px;
-    box-shadow: var(--shadow-md);
-    border-bottom: none;
-    animation: mobileSearchIn 0.2s ease;
+  /* Search always in header row on mobile — polish field */
+  .header-search {
+    display: block !important;
+    order: 5;
+    flex: 1 1 100%;
+    max-width: none;
+    width: 100%;
+    position: relative;
+    z-index: 2;
   }
 
-  @keyframes mobileSearchIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .header-search.is-mobile-visible .form-search {
+  .header-search .form-search {
     border-radius: 999px;
-    overflow: hidden;
-    box-shadow: 0 0 0 1px var(--color-border);
   }
 
-  .header-search.is-mobile-visible .input {
-    min-height: 44px;
-    font-size: 16px; /* prevents iOS zoom */
+  .header-search .form-search .input {
+    min-height: 46px;
+    font-size: 16px;
+    background: var(--color-bg-alt);
+    border-color: var(--color-border);
+  }
+
+  .header-search .form-search .btn {
+    min-height: 36px;
+    font-size: 13px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 
   .header-search-results {
-    max-height: 55vh;
+    max-height: min(55vh, 420px);
     border-radius: 16px;
+    left: 0;
+    right: 0;
+  }
+
+  [data-mobile-search-toggle] {
+    display: none !important;
   }
 
   /* Drawer menu */

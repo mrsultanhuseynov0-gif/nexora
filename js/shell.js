@@ -75,8 +75,8 @@ const NexoraShell = (function () {
           logoHTML(b + 'index.html') +
           '<div class="header-search" data-header-search>' +
             '<form class="form-search" action="' + b + 'pages/search.html" method="get" role="search">' +
-              '<span class="icon icon-sm" data-icon="search"></span>' +
-              '<input type="search" name="q" class="input" placeholder="' + t('search_ph') + '" autocomplete="off" data-live-search>' +
+              '<span class="form-search-icon icon icon-sm" data-icon="search" aria-hidden="true"></span>' +
+              '<input type="search" name="q" class="input" placeholder="' + t('search_ph') + '" autocomplete="off" enterkeyhint="search" data-live-search>' +
               '<button type="submit" class="btn btn-primary btn-sm">' + t('search_btn') + '</button>' +
             '</form>' +
             '<div class="header-search-results" data-search-results></div>' +
