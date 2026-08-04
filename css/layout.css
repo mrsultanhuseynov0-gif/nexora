@@ -628,8 +628,10 @@
 /* Product grid helpers */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-6);
+  width: 100%;
+  max-width: 100%;
 }
 
 .product-card-link {
@@ -1537,7 +1539,7 @@
   .cat-grid,
   .product-grid,
   .features-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .brand-strip {
@@ -1651,15 +1653,25 @@
 
 @media (max-width: 480px) {
   .cat-grid,
-  .product-grid,
   .features-grid,
   .brand-strip,
   .admin-stats {
     grid-template-columns: 1fr;
   }
 
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-3);
+  .product-grid,
+  #productsGrid,
+  #homeProducts,
+  #homeBestsellers,
+  #homeDeals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .card-product {
+    min-width: 0;
+    max-width: 100%;
   }
 }

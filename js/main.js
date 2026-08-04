@@ -161,15 +161,17 @@
   }
 
   function registerPWA() {
+    // No offline app — clear any old SW/cache so the site cannot work without internet
     if (!('serviceWorker' in navigator)) return;
-    const path = (window.location.pathname || '').replace(/\\/g, '/');
-    const swUrl = path.includes('/pages/admin')
-      ? '../../sw.js'
-      : (path.includes('/pages/') ? '../sw.js' : 'sw.js');
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register(swUrl).then(function (reg) {
-        if (reg && reg.update) reg.update();
-      }).catch(function () { /* optional */ });
+      navigator.serviceWorker.getRegistrations().then(function (regs) {
+        regs.forEach(function (r) { r.unregister(); });
+      }).catch(function () { /* ignore */ });
+      if (window.caches && caches.keys) {
+        caches.keys().then(function (keys) {
+          keys.forEach(function (k) { caches.delete(k); });
+        }).catch(function () { /* ignore */ });
+      }
     });
   }
 

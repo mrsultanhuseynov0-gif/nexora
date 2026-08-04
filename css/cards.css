@@ -99,6 +99,9 @@
   position: relative;
   border: none;
   box-shadow: var(--shadow-sm);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .card-product:hover {
