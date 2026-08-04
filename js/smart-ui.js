@@ -97,17 +97,21 @@
   }
 
   function boot() {
-    // Wait until home content paints — avoid covering a blank/loading page
+    // Wheel only on home, after content — and never on tiny/unstable mobile sessions mid-load
     function showWheelLater() {
-      setTimeout(ensureWheel, 2500);
+      try {
+        if (sessionStorage.getItem('nexora-wheel-skip') === '1') return;
+      } catch (e) { /* ignore */ }
+      if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+        setTimeout(ensureWheel, 4500);
+      } else {
+        setTimeout(ensureWheel, 2500);
+      }
     }
     if (document.getElementById('homeProducts')) {
       document.addEventListener('nexora:home-ready', showWheelLater, { once: true });
-      setTimeout(showWheelLater, 8000);
-    } else {
-      setTimeout(ensureWheel, 4000);
     }
-    setTimeout(wishlistAlerts, 3500);
+    setTimeout(wishlistAlerts, 4000);
   }
 
   if (document.readyState === 'loading') {

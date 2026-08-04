@@ -1,35 +1,14 @@
-/* NEXORA Service Worker — network-first for app shell, cache for offline */
-const CACHE = 'nexora-v31';
-const PRECACHE = [
-  './',
-  './index.html',
-  './css/main.css',
-  './js/app.js',
-  './js/shell.js',
-  './js/main.js',
-  './js/cart.js',
-  './js/wishlist.js',
-  './js/i18n.js',
-  './pages/wishlist.html',
-  './manifest.webmanifest'
-];
+/* NEXORA Service Worker — network only (site must not work offline) */
+const CACHE = 'nexora-v32-net';
 
 self.addEventListener('install', function (event) {
-  event.waitUntil(
-    caches.open(CACHE).then(function (cache) {
-      return cache.addAll(PRECACHE.map(function (u) {
-        return new Request(u, { cache: 'reload' });
-      })).catch(function () { /* ignore individual failures */ });
-    }).then(function () { return self.skipWaiting(); })
-  );
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (keys) {
-      return Promise.all(keys.filter(function (k) { return k !== CACHE; }).map(function (k) {
-        return caches.delete(k);
-      }));
+      return Promise.all(keys.map(function (k) { return caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
 });
@@ -39,37 +18,23 @@ self.addEventListener('fetch', function (event) {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Always prefer network for HTML/JS/CSS/JSON so updates show immediately
-  const isAppAsset = /\.(html?|js|css|json|webmanifest)$/i.test(url.pathname) ||
-    url.pathname.endsWith('/') ||
-    url.pathname.includes('/data/');
-
-  if (isAppAsset) {
-    event.respondWith(
-      fetch(event.request).then(function (res) {
-        if (res && res.ok) {
-          const clone = res.clone();
-          caches.open(CACHE).then(function (cache) { cache.put(event.request, clone); });
-        }
-        return res;
-      }).catch(function () {
-        return caches.match(event.request).then(function (cached) {
-          return cached || caches.match('./index.html');
-        });
-      })
-    );
-    return;
-  }
-
+  // Always network — no offline cache fallback for HTML/app
   event.respondWith(
-    caches.match(event.request).then(function (cached) {
-      return cached || fetch(event.request).then(function (res) {
-        if (res && res.ok) {
-          const clone = res.clone();
-          caches.open(CACHE).then(function (cache) { cache.put(event.request, clone); });
-        }
-        return res;
-      });
+    fetch(event.request).catch(function () {
+      const accepts = event.request.headers.get('accept') || '';
+      if (event.request.mode === 'navigate' || accepts.indexOf('text/html') !== -1) {
+        return new Response(
+          '<!DOCTYPE html><html lang="az"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+            '<title>İnternet yoxdur | NEXORA</title>' +
+            '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;' +
+            'background:#111;color:#fff;font-family:system-ui,sans-serif;text-align:center;padding:24px}' +
+            'h1{color:#FF0000;letter-spacing:.16em}p{color:#bbb;max-width:320px;line-height:1.45}</style></head>' +
+            '<body><div><h1>NEXORA</h1><h2>İnternet yoxdur</h2>' +
+            '<p>Sayt yalnız onlayn işləyir. Bağlantını yoxlayıb yenidən açın.</p></div></body></html>',
+          { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+        );
+      }
+      return new Response('Offline', { status: 503, statusText: 'Offline' });
     })
   );
 });

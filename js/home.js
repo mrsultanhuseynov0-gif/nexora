@@ -257,7 +257,17 @@
     renderCategories(categories);
     if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
 
-    const products = await safeLoad('products', function () {
+    // Home only needs a small slice — avoid pulling the full catalog at once
+    const products = await safeLoad('products', async function () {
+      try {
+        if (typeof NexoraApi !== 'undefined') {
+          if (NexoraApi.ensureApi) await NexoraApi.ensureApi();
+          if (NexoraApi.getProducts) {
+            const d = await NexoraApi.getProducts({ limit: 48 });
+            if (d && d.products && d.products.length) return d.products;
+          }
+        }
+      } catch (e) { /* fall through */ }
       return NexoraApp.loadProducts();
     }, []);
     if (products.length) {
@@ -266,16 +276,22 @@
       NexoraToast.error(typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('load_error') : 'Məlumatlar yüklənmədi');
     }
 
+    await new Promise(function (r) { setTimeout(r, 60); });
+
     const campaigns = await safeLoad('campaigns', function () {
       return NexoraApp.loadCampaigns();
     }, { campaigns: [], features: [] });
     renderCampaign(campaigns);
     renderFeatures(campaigns.features || []);
 
+    await new Promise(function (r) { setTimeout(r, 60); });
+
     const brands = await safeLoad('brands', function () {
       return NexoraApp.loadBrands();
     }, []);
     renderBrands(brands);
+
+    await new Promise(function (r) { setTimeout(r, 60); });
 
     const news = await safeLoad('news', function () {
       return NexoraApp.loadTechNews();
