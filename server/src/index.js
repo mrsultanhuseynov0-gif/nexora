@@ -70,9 +70,16 @@ app.get('/config.json', (_req, res) => {
 });
 
 app.get('/api/health', (_req, res) => {
-  const products = db.prepare('SELECT COUNT(*) AS n FROM products').get().n;
-  const users = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
-  res.json({
+  // Always 200 so Render/host health checks pass even during cold seed.
+  let products = null;
+  let users = null;
+  try {
+    products = db.prepare('SELECT COUNT(*) AS n FROM products').get().n;
+    users = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
+  } catch (e) {
+    /* DB may still be initializing */
+  }
+  res.status(200).json({
     ok: true,
     service: 'nexora-api',
     products,
@@ -162,37 +169,45 @@ function ensureSeeded() {
   ensureCmsSeed();
 }
 
-ensureSeeded();
+function runBootTasks() {
+  try {
+    ensureSeeded();
+  } catch (e) {
+    console.error('Seed failed:', e);
+  }
 
-try {
-  const { getPaymentSettings, savePaymentSettings } = require('./payments');
-  const row = db.prepare("SELECT key FROM cms_docs WHERE key = 'payments'").get();
-  if (!row) savePaymentSettings(getPaymentSettings());
-} catch (e) {
-  console.warn('Payment settings seed:', e.message);
-}
+  try {
+    const { getPaymentSettings, savePaymentSettings } = require('./payments');
+    const row = db.prepare("SELECT key FROM cms_docs WHERE key = 'payments'").get();
+    if (!row) savePaymentSettings(getPaymentSettings());
+  } catch (e) {
+    console.warn('Payment settings seed:', e.message);
+  }
 
-try {
-  const { ensureAllUserCodes, getReferralSettings, saveReferralSettings } = require('./referrals');
-  const row = db.prepare("SELECT key FROM cms_docs WHERE key = 'referrals'").get();
-  if (!row) saveReferralSettings(getReferralSettings());
-  ensureAllUserCodes();
-} catch (e) {
-  console.warn('Referral seed:', e.message);
-}
+  try {
+    const { ensureAllUserCodes, getReferralSettings, saveReferralSettings } = require('./referrals');
+    const row = db.prepare("SELECT key FROM cms_docs WHERE key = 'referrals'").get();
+    if (!row) saveReferralSettings(getReferralSettings());
+    ensureAllUserCodes();
+  } catch (e) {
+    console.warn('Referral seed:', e.message);
+  }
 
-try {
-  require('./business').ensureDemoBusiness();
-} catch (e) {
-  console.warn('Business demo seed:', e.message);
+  try {
+    require('./business').ensureDemoBusiness();
+  } catch (e) {
+    console.warn('Business demo seed:', e.message);
+  }
 }
 
 if (cfg.isProd && (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'nexora-dev-secret-change-me')) {
   console.warn('[WARN] Set a strong JWT_SECRET in production environment variables.');
 }
 
+// Listen first so host health checks succeed; seed after bind.
 app.listen(cfg.port, cfg.host, () => {
   console.log(`NEXORA API + storefront: http://${cfg.host}:${cfg.port}`);
   console.log(`Health: http://${cfg.host}:${cfg.port}/api/health`);
   console.log('Demo: demo@nexora.az / Demo1234 | admin@nexora.az / Admin1234');
+  setImmediate(runBootTasks);
 });
