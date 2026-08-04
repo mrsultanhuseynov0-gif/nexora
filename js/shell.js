@@ -123,7 +123,7 @@ const NexoraShell = (function () {
                   '<button type="button" class="nav-link nav-more-btn" data-nav-more-toggle aria-expanded="false">' +
                     (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('more') : 'Daha çox') +
                     ' <span aria-hidden="true">▾</span></button>' +
-                  '<div class="nav-more-menu" hidden>' +
+                  '<div class="nav-more-menu" hidden style="display:none!important" aria-hidden="true">' +
                     more.map(function (n) {
                       return '<a class="nav-more-link" href="' + n.href + '" data-nav="' + n.id + '">' + n.label + '</a>';
                     }).join('') +
@@ -380,18 +380,14 @@ const NexoraShell = (function () {
         w.classList.remove('is-open');
         const b = w.querySelector('[data-nav-more-toggle]');
         if (b) b.setAttribute('aria-expanded', 'false');
+        const src = w.querySelector('.nav-more-menu');
+        if (src) {
+          src.setAttribute('hidden', '');
+          src.style.setProperty('display', 'none', 'important');
+        }
       });
       document.querySelectorAll('.nav-more-portal').forEach(function (p) {
-        p.classList.remove('is-open');
-        p.setAttribute('hidden', '');
         if (p.parentNode) p.parentNode.removeChild(p);
-      });
-      document.querySelectorAll('.nav-more-menu').forEach(function (m) {
-        m.classList.remove('is-open');
-        m.setAttribute('hidden', '');
-        m.style.top = '';
-        m.style.right = '';
-        m.style.left = '';
       });
     }
 
@@ -402,10 +398,64 @@ const NexoraShell = (function () {
       if (!source) return;
       closeNavMore();
 
+      // Always keep source hidden (prevents smashed inline links under the button)
+      source.setAttribute('hidden', '');
+      source.style.setProperty('display', 'none', 'important');
+      source.setAttribute('aria-hidden', 'true');
+
       const portal = document.createElement('div');
       portal.className = 'nav-more-portal is-open';
       portal.setAttribute('data-nav-more-portal', '1');
-      portal.innerHTML = source.innerHTML;
+      // Inline styles so menu works even if CSS cache is stale
+      portal.style.cssText = [
+        'position:fixed',
+        'z-index:10050',
+        'min-width:220px',
+        'max-width:min(280px,calc(100vw - 24px))',
+        'max-height:min(70vh,440px)',
+        'overflow-x:hidden',
+        'overflow-y:auto',
+        'padding:8px',
+        'margin:0',
+        'background:#fff',
+        'color:#111',
+        'border:1px solid rgba(0,0,0,.12)',
+        'border-radius:14px',
+        'box-shadow:0 16px 48px rgba(0,0,0,.18)',
+        'display:flex',
+        'flex-direction:column',
+        'gap:2px',
+        'box-sizing:border-box'
+      ].join(';');
+
+      source.querySelectorAll('a').forEach(function (a) {
+        const link = document.createElement('a');
+        link.href = a.getAttribute('href') || '#';
+        link.textContent = a.textContent || '';
+        link.className = 'nav-more-link';
+        if (a.getAttribute('data-nav')) link.setAttribute('data-nav', a.getAttribute('data-nav'));
+        link.style.cssText = [
+          'display:block',
+          'padding:12px 14px',
+          'border-radius:10px',
+          'color:inherit',
+          'text-decoration:none',
+          'font-size:14px',
+          'line-height:1.35',
+          'white-space:nowrap',
+          'font-family:inherit'
+        ].join(';');
+        link.addEventListener('mouseenter', function () {
+          link.style.background = 'rgba(255,0,0,0.08)';
+          link.style.color = '#e00';
+        });
+        link.addEventListener('mouseleave', function () {
+          link.style.background = 'transparent';
+          link.style.color = 'inherit';
+        });
+        portal.appendChild(link);
+      });
+
       document.body.appendChild(portal);
 
       const rect = btn.getBoundingClientRect();
@@ -414,13 +464,11 @@ const NexoraShell = (function () {
       if (left < 12) left = 12;
       if (left + width > window.innerWidth - 12) left = Math.max(12, window.innerWidth - width - 12);
       let top = rect.bottom + 8;
-      const maxH = Math.min(window.innerHeight * 0.7, 440);
-      if (top + 120 > window.innerHeight) {
-        top = Math.max(12, rect.top - 8 - Math.min(maxH, portal.scrollHeight || 200));
+      if (top + 160 > window.innerHeight) {
+        top = Math.max(12, rect.top - 8 - Math.min(440, portal.scrollHeight || 200));
       }
       portal.style.top = top + 'px';
       portal.style.left = left + 'px';
-      portal.style.right = 'auto';
 
       wrap.classList.add('is-open');
       btn.setAttribute('aria-expanded', 'true');
