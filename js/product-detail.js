@@ -154,7 +154,7 @@
             '</div>' +
             '<button type="button" class="btn btn-primary btn-lg" id="addCartBtn"' + (stockOk ? '' : ' disabled') + '>' +
               (stockOk
-                ? (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('add_cart') : 'Səbətə at')
+                ? (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('add_cart') : 'Səbətə əlavə et')
                 : (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('out_of_stock') : 'Stokda yoxdur')) +
             '</button>' +
             '<button type="button" class="btn btn-outline btn-lg" id="wishBtn" data-wishlist-toggle="' + product.id + '"' +
@@ -426,7 +426,7 @@
       '<button type="button" class="btn btn-primary" id="stickyAddCart"' +
         (stockOk ? '' : ' disabled') + '>' +
         (stockOk
-          ? (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('add_cart') : 'Səbətə at')
+          ? (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('add_cart') : 'Səbətə əlavə et')
           : (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('sold_out') : 'Bitib')) + '</button>';
     document.body.appendChild(sticky);
     const stickyBtn = document.getElementById('stickyAddCart');

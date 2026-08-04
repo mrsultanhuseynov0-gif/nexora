@@ -453,6 +453,10 @@ const NexoraAccount = (function () {
     return err;
   }
 
+  function ttAuth(key, fallback) {
+    return typeof NexoraI18n !== 'undefined' ? NexoraI18n.t(key) : (fallback || key);
+  }
+
   function promptLogin(opts) {
     opts = opts || {};
     const tab = opts.tab === 'login' ? 'login' : 'register';
@@ -469,12 +473,58 @@ const NexoraAccount = (function () {
     let url = typeof NexoraApp !== 'undefined' ? NexoraApp.pageUrl('account.html') : 'account.html';
     url += (url.indexOf('?') === -1 ? '?' : '&') + 'tab=' + tab;
     if (next) url += '&next=' + encodeURIComponent(next);
-    if (opts.message && typeof NexoraToast !== 'undefined') {
-      NexoraToast.info(opts.message);
-    }
     if (opts.redirect === false) return url;
     if (typeof location !== 'undefined') location.href = url;
     return url;
+  }
+
+  /** Friendly gate: side/bottom sheet instead of abrupt redirect */
+  function showAuthGate(opts) {
+    opts = opts || {};
+    const title = opts.title || ttAuth('auth_gate_title', 'Əvvəlcə hesab yaradın');
+    const message = opts.message || ttAuth('auth_gate_cart',
+      'Səbətə məhsul əlavə etmək üçün qeydiyyatdan keçin və ya daxil olun. Cəmi 20 saniyə çəkir!');
+    const next = opts.next;
+
+    let el = document.getElementById('nexoraAuthGate');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'nexoraAuthGate';
+      el.className = 'auth-gate';
+      el.setAttribute('hidden', '');
+      el.innerHTML =
+        '<div class="auth-gate-backdrop" data-auth-gate-close></div>' +
+        '<div class="auth-gate-panel" role="dialog" aria-modal="true" aria-labelledby="authGateTitle">' +
+          '<button type="button" class="auth-gate-close" data-auth-gate-close aria-label="Bağla">×</button>' +
+          '<div class="auth-gate-icon" aria-hidden="true">🛒</div>' +
+          '<h3 id="authGateTitle" class="auth-gate-title"></h3>' +
+          '<p class="auth-gate-text"></p>' +
+          '<div class="auth-gate-actions">' +
+            '<a class="btn btn-primary w-full" data-auth-gate-register>Qeydiyyatdan keç</a>' +
+            '<a class="btn btn-outline w-full" data-auth-gate-login>Giriş et</a>' +
+          '</div>' +
+          '<p class="auth-gate-hint">Qonaqlar məhsullara baxa bilər — alış üçün hesab lazımdır.</p>' +
+        '</div>';
+      document.body.appendChild(el);
+      el.addEventListener('click', function (e) {
+        if (e.target.closest('[data-auth-gate-close]')) {
+          el.setAttribute('hidden', '');
+          document.body.classList.remove('auth-gate-open');
+        }
+      });
+    }
+
+    el.querySelector('.auth-gate-title').textContent = title;
+    el.querySelector('.auth-gate-text').textContent = message;
+    const reg = el.querySelector('[data-auth-gate-register]');
+    const log = el.querySelector('[data-auth-gate-login]');
+    reg.textContent = ttAuth('register', 'Qeydiyyatdan keç');
+    log.textContent = ttAuth('login', 'Giriş et');
+    reg.href = promptLogin({ tab: 'register', next: next, redirect: false });
+    log.href = promptLogin({ tab: 'login', next: next, redirect: false });
+    el.removeAttribute('hidden');
+    document.body.classList.add('auth-gate-open');
+    return el;
   }
 
   async function requireShopAuth(opts) {
@@ -486,9 +536,14 @@ const NexoraAccount = (function () {
         return { id: 'api', email: '' };
       }
     }
-    const message = opts.message || 'Səbətə əlavə etmək və alış-veriş üçün qeydiyyat / giriş lazımdır';
+    const message = opts.message || ttAuth('auth_gate_cart',
+      'Səbətə məhsul əlavə etmək üçün qeydiyyatdan keçin və ya daxil olun. Cəmi 20 saniyə çəkir!');
     if (opts.redirect !== false) {
-      promptLogin({ tab: 'register', message: message, next: opts.next });
+      showAuthGate({
+        title: opts.title || ttAuth('auth_gate_title', 'Əvvəlcə hesab yaradın'),
+        message: message,
+        next: opts.next
+      });
     }
     throw authRequiredError(message);
   }
@@ -653,6 +708,7 @@ const NexoraAccount = (function () {
     getSessionCached: getSessionCached,
     isLoggedIn: isLoggedIn,
     promptLogin: promptLogin,
+    showAuthGate: showAuthGate,
     requireShopAuth: requireShopAuth,
     requireUser: requireUser,
     register: register,

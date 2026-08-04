@@ -231,7 +231,7 @@
                 '<h2 class="compare-col-title"><a href="product.html?id=' + p.id + '">' + p.name + '</a></h2>' +
                 '<div class="compare-col-actions">' +
                   '<button type="button" class="btn btn-primary btn-sm" data-add="' + p.id + '">' +
-                    (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('add_cart') : 'Səbətə at') + '</button>' +
+                    (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('add_cart') : 'Səbətə əlavə et') + '</button>' +
                   '<a class="btn btn-outline btn-sm" href="product.html?id=' + p.id + '">Ətraflı</a>' +
                 '</div>' +
               '</article>'

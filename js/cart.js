@@ -39,7 +39,8 @@ const NexoraCart = (function () {
     qty = qty || 1;
     if (typeof NexoraAccount !== 'undefined' && NexoraAccount.requireShopAuth) {
       await NexoraAccount.requireShopAuth({
-        message: tt('auth_required_cart', 'Səbətə əlavə etmək üçün qeydiyyat / giriş lazımdır')
+        title: 'Səbət üçün hesab lazımdır',
+        message: tt('auth_gate_cart', 'Səbətə məhsul əlavə etmək üçün əvvəlcə qeydiyyatdan keçin. Pulsuzdur və 20 saniyə çəkir!')
       });
     }
     const products = await NexoraApp.loadProducts();
@@ -282,10 +283,17 @@ const NexoraCart = (function () {
     if (typeof NexoraAccount !== 'undefined' && NexoraAccount.requireShopAuth) {
       // Sync gate — share import must not fill cart for guests
       if (!NexoraAccount.isLoggedIn || !NexoraAccount.isLoggedIn()) {
-        NexoraAccount.promptLogin({
-          message: tt('auth_required_cart', 'Səbətə əlavə etmək üçün qeydiyyat / giriş lazımdır')
-        });
-        throw Object.assign(new Error(tt('auth_required_cart', 'Səbətə əlavə etmək üçün qeydiyyat / giriş lazımdır')), { code: 'AUTH_REQUIRED' });
+        if (NexoraAccount.showAuthGate) {
+          NexoraAccount.showAuthGate({
+            title: 'Səbət üçün hesab lazımdır',
+            message: tt('auth_gate_cart', 'Səbətə məhsul əlavə etmək üçün əvvəlcə qeydiyyatdan keçin. Pulsuzdur və 20 saniyə çəkir!')
+          });
+        } else if (NexoraAccount.promptLogin) {
+          NexoraAccount.promptLogin({
+            message: tt('auth_gate_cart', 'Səbətə məhsul əlavə etmək üçün əvvəlcə qeydiyyatdan keçin!')
+          });
+        }
+        throw Object.assign(new Error(tt('auth_gate_cart', 'Səbətə məhsul əlavə etmək üçün əvvəlcə qeydiyyatdan keçin!')), { code: 'AUTH_REQUIRED' });
       }
     }
     mode = mode === 'merge' ? 'merge' : 'replace';

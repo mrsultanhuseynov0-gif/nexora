@@ -8,7 +8,8 @@
     if (typeof NexoraAccount === 'undefined' || !NexoraAccount.requireShopAuth) return true;
     try {
       await NexoraAccount.requireShopAuth({
-        message: 'Sifariş vermək üçün qeydiyyat / giriş lazımdır',
+        title: 'Sifariş üçün hesab lazımdır',
+        message: 'Sifarişi rəsmiləşdirmək üçün əvvəlcə qeydiyyatdan keçin və ya daxil olun — cəmi bir dəqiqə!',
         next: location.pathname + location.search
       });
       return true;

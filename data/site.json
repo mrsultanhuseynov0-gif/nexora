@@ -19,8 +19,8 @@
     { "id": "campaigns", "label": "Kampaniyalar", "href": "pages/campaigns.html", "visible": true },
     { "id": "lookbook", "label": "Lookbook", "href": "pages/lookbook.html", "visible": true },
     { "id": "consultant", "label": "AI Məsləhətçi", "href": "pages/consultant.html", "visible": true },
-    { "id": "office_builder", "label": "Office Builder", "href": "pages/office-builder.html", "visible": true },
-    { "id": "offer_generator", "label": "PDF Offer", "href": "pages/offer-generator.html", "visible": true },
+    { "id": "office_builder", "label": "Ofis qurucu", "href": "pages/office-builder.html", "visible": true },
+    { "id": "offer_generator", "label": "PDF təklif", "href": "pages/offer-generator.html", "visible": true },
     { "id": "compare", "label": "Müqayisə", "href": "pages/compare.html", "visible": true },
     { "id": "brands", "label": "Brendlər", "href": "pages/brands.html", "visible": true },
     { "id": "news", "label": "Xəbərlər", "href": "pages/news.html", "visible": true },
@@ -53,7 +53,7 @@
     }
   },
   "home": {
-    "heroHeadline": "",
-    "heroCta": ""
+    "heroHeadline": "Premium alış-veriş — NEXORA",
+    "heroCta": "Kataloqa bax"
   }
 }

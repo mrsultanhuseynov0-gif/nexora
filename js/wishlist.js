@@ -26,10 +26,13 @@ const NexoraWishlist = (function () {
 
   function add(id) {
     if (typeof NexoraAccount !== 'undefined' && NexoraAccount.isLoggedIn && !NexoraAccount.isLoggedIn()) {
-      if (NexoraAccount.promptLogin) {
-        NexoraAccount.promptLogin({
-          message: 'Seçilmişlərə əlavə etmək üçün qeydiyyat / giriş lazımdır'
+      if (NexoraAccount.showAuthGate) {
+        NexoraAccount.showAuthGate({
+          title: 'Seçilmişlər üçün hesab lazımdır',
+          message: 'Bəyəndiyiniz məhsulları saxlamaq üçün qeydiyyatdan keçin — sonra bütün cihazlarda görünər.'
         });
+      } else if (NexoraAccount.promptLogin) {
+        NexoraAccount.promptLogin({ message: 'Seçilmişlərə əlavə etmək üçün qeydiyyat lazımdır' });
       }
       throw Object.assign(new Error('AUTH_REQUIRED'), { code: 'AUTH_REQUIRED' });
     }
@@ -47,10 +50,13 @@ const NexoraWishlist = (function () {
 
   function toggle(id) {
     if (typeof NexoraAccount !== 'undefined' && NexoraAccount.isLoggedIn && !NexoraAccount.isLoggedIn()) {
-      if (NexoraAccount.promptLogin) {
-        NexoraAccount.promptLogin({
-          message: 'Seçilmişlərə əlavə etmək üçün qeydiyyat / giriş lazımdır'
+      if (NexoraAccount.showAuthGate) {
+        NexoraAccount.showAuthGate({
+          title: 'Seçilmişlər üçün hesab lazımdır',
+          message: 'Bəyəndiyiniz məhsulları saxlamaq üçün qeydiyyatdan keçin — sonra bütün cihazlarda görünər.'
         });
+      } else if (NexoraAccount.promptLogin) {
+        NexoraAccount.promptLogin({ message: 'Seçilmişlərə əlavə etmək üçün qeydiyyat lazımdır' });
       }
       throw Object.assign(new Error('AUTH_REQUIRED'), { code: 'AUTH_REQUIRED' });
     }
@@ -94,7 +100,12 @@ const NexoraWishlist = (function () {
     const raw = NexoraApp.getQueryParam('ids');
     if (!raw) return false;
     if (typeof NexoraAccount !== 'undefined' && NexoraAccount.isLoggedIn && !NexoraAccount.isLoggedIn()) {
-      if (NexoraAccount.promptLogin) {
+      if (NexoraAccount.showAuthGate) {
+        NexoraAccount.showAuthGate({
+          title: 'Seçilmişlər üçün hesab lazımdır',
+          message: 'Paylaşılan seçilmişləri saxlamaq üçün əvvəlcə qeydiyyatdan keçin.'
+        });
+      } else if (NexoraAccount.promptLogin) {
         NexoraAccount.promptLogin({
           message: 'Seçilmişləri saxlamaq üçün qeydiyyat / giriş lazımdır'
         });

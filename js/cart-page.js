@@ -42,8 +42,8 @@
       ? NexoraAccount.promptLogin({ redirect: false, tab: 'register', next: NexoraApp.pageUrl('checkout.html') })
       : 'account.html?tab=register';
     return '<a href="' + esc(authUrl) + '" class="btn btn-primary w-full" id="cartCheckoutBtn">' +
-      tt('auth_to_checkout', 'Sifariş üçün qeydiyyat / giriş') + '</a>' +
-      '<p class="text-xs text-muted mt-2 text-center">Qonaqlar yalnız məhsullara baxa bilər</p>';
+      tt('auth_to_checkout', 'Qeydiyyat / giriş — sifariş ver') + '</a>' +
+      '<p class="auth-cart-hint">🔒 Səbətdən alış üçün əvvəlcə hesab yaradın. Məhsullara baxmaq pulsuzdur.</p>';
   }
 
   function absoluteCartUrl(query) {
@@ -412,7 +412,8 @@
         if (typeof NexoraAccount !== 'undefined' && NexoraAccount.requireShopAuth) {
           try {
             await NexoraAccount.requireShopAuth({
-              message: 'Sifariş vermək üçün qeydiyyat / giriş lazımdır'
+              title: 'Sifariş üçün hesab lazımdır',
+              message: 'WhatsApp sifarişi üçün əvvəlcə qeydiyyatdan keçin — hesabınız sifariş tarixçəsini saxlayır.'
             });
           } catch (err) {
             return;
