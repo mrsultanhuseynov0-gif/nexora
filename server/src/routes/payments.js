@@ -166,24 +166,26 @@ router.post('/checkout', authRequired, async (req, res) => {
   const referralCode = String(body.referralCode || body.friendCode || '').trim();
   let referralDiscount = 0;
   let referralMeta = null;
+  // Friend code is optional — invalid/empty codes never block checkout
   if (referralCode) {
     const v = validateReferralCode(referralCode, {
       userId: req.user && req.user.id,
       email: customer.email,
       subtotal: subtotalPreview
     });
-    if (!v.ok) return res.status(400).json({ error: v.error || 'Dost kodu etibarsızdır' });
-    if (v.kind === 'coupon' && !coupon) {
-      coupon = {
-        code: v.coupon.code,
-        type: v.coupon.type,
-        value: v.coupon.value,
-        min_order: v.coupon.minOrder,
-        description: v.coupon.description
-      };
-    } else if (v.kind === 'personal') {
-      referralDiscount = Number(v.discount) || 0;
-      referralMeta = v;
+    if (v && v.ok) {
+      if (v.kind === 'coupon' && !coupon) {
+        coupon = {
+          code: v.coupon.code,
+          type: v.coupon.type,
+          value: v.coupon.value,
+          min_order: v.coupon.minOrder,
+          description: v.coupon.description
+        };
+      } else if (v.kind === 'personal') {
+        referralDiscount = Number(v.discount) || 0;
+        referralMeta = v;
+      }
     }
   }
 

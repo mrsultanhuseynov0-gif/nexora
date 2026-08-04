@@ -170,8 +170,13 @@
     if (checkBtn) checkBtn.addEventListener('click', checkReferral);
     var refInput = document.getElementById('referralCode');
     if (refInput) {
-      refInput.addEventListener('change', checkReferral);
-      if (refInput.value) checkReferral();
+      refInput.addEventListener('input', function () {
+        referralOk = null;
+        var status = document.getElementById('referralStatus');
+        if (status) status.hidden = true;
+      });
+      // Prefill from ?ref= — try validate, but never block checkout if it fails
+      if (refInput.value) checkReferral().catch(function () { /* optional */ });
     }
 
     // Show referral credit if logged in
@@ -223,8 +228,8 @@
       const submitBtn = document.querySelector('#checkoutForm button[type="submit"]');
       if (submitBtn) submitBtn.disabled = true;
 
-      var refCode = (document.getElementById('referralCode') || {}).value || '';
-      refCode = String(refCode).trim();
+      // Dost kodu istəyə bağlıdır — boş/səhv kod sifarişi dayandırmır (server də ignore edir)
+      var refCode = String((document.getElementById('referralCode') || {}).value || '').trim();
       var creditCb = document.getElementById('useReferralCredit');
       var useCredit = creditCb && creditCb.checked ? Number(creditCb.dataset.max || 0) : 0;
 
