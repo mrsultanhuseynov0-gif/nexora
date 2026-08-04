@@ -215,4 +215,12 @@ app.listen(cfg.port, cfg.host, () => {
   console.log(`Health: http://${cfg.host}:${cfg.port}/api/health`);
   console.log('Demo: demo@nexora.az / Demo1234 | admin@nexora.az / Admin1234');
   setImmediate(runBootTasks);
+
+  // Keep free-tier hosts awake with a light self-ping (every 12 min)
+  if (cfg.isProd) {
+    const pingUrl = (cfg.publicSiteUrl || ('http://127.0.0.1:' + cfg.port)) + '/api/health';
+    setInterval(function () {
+      fetch(pingUrl).catch(function () { /* ignore */ });
+    }, 12 * 60 * 1000);
+  }
 });

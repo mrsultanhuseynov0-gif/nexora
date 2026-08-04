@@ -40,31 +40,48 @@ const NexoraApp = (function () {
     localStorage.setItem(key, JSON.stringify(value));
   }
 
-  async function loadProducts() {
-    const data = await fetchJSON('data/products.json');
-    const seed = data.products || [];
-    const catalogVer = data.version || seed.length;
+  function mergeProductOverrides(seed, catalogVer) {
     const savedVer = storageGet('nexora-catalog-ver', null);
     if (savedVer !== catalogVer) {
       localStorage.removeItem('nexora-products');
       storageSet('nexora-catalog-ver', catalogVer);
     }
     const override = storageGet('nexora-products', null);
-    if (!override || !Array.isArray(override)) return seed;
+    if (!override || !Array.isArray(override) || !override.length) return seed;
 
-    // Merge seed images into admin overrides so photos never disappear
     const byId = {};
     seed.forEach(function (p) { byId[p.id] = p; });
     return override.map(function (p) {
       const base = byId[p.id];
       if (!base) return p;
-      // Always prefer catalog seed images so name/brand art stays correct
       return Object.assign({}, p, {
         image: base.image || p.image,
         images: (base.images && base.images.length) ? base.images : p.images,
         gradient: p.gradient || base.gradient
       });
     });
+  }
+
+  async function loadProducts() {
+    // Prefer API (avoids hanging on 1.7MB JSON during Render cold start)
+    try {
+      if (typeof NexoraApi !== 'undefined') {
+        if (NexoraApi.ensureApi) await NexoraApi.ensureApi();
+        if (NexoraApi.getProducts) {
+          const apiData = await NexoraApi.getProducts({ limit: 1000 });
+          const seed = (apiData && apiData.products) || [];
+          if (seed.length) {
+            return mergeProductOverrides(seed, apiData.version || seed.length);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('API products failed, falling back to JSON', e);
+    }
+
+    const data = await fetchJSON('data/products.json');
+    const seed = data.products || [];
+    return mergeProductOverrides(seed, data.version || seed.length);
   }
 
   async function loadCategories() {

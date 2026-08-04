@@ -231,34 +231,61 @@
     }).join('');
   }
 
+  async function safeLoad(label, fn, fallback) {
+    try {
+      return await fn();
+    } catch (err) {
+      console.warn('[home]', label, err);
+      return fallback;
+    }
+  }
+
   async function init() {
     if (!document.getElementById('homeProducts')) return;
+    document.body.classList.add('is-booting');
 
-    try {
-      const [hero, categories, products, campaigns, brands, news] = await Promise.all([
-        NexoraApp.fetchJSON('data/hero-slides.json'),
-        NexoraApp.loadCategories(),
-        NexoraApp.loadProducts(),
-        NexoraApp.loadCampaigns(),
-        NexoraApp.loadBrands(),
-        NexoraApp.loadTechNews()
-      ]);
+    // Load independently — one slow/failing request must not blank the whole page
+    const hero = await safeLoad('hero', function () {
+      return NexoraApp.fetchJSON('data/hero-slides.json');
+    }, { slides: [] });
+    renderHero(hero);
+    if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
 
-      renderHero(hero);
-      renderCategories(categories);
+    const categories = await safeLoad('categories', function () {
+      return NexoraApp.loadCategories();
+    }, []);
+    renderCategories(categories);
+    if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
+
+    const products = await safeLoad('products', function () {
+      return NexoraApp.loadProducts();
+    }, []);
+    if (products.length) {
       renderProducts(products);
-      renderCampaign(campaigns);
-      renderBrands(brands);
-      renderNews(news);
-      renderFeatures(campaigns.features);
-
-      if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
-    } catch (err) {
-      console.error(err);
-      if (typeof NexoraToast !== 'undefined') {
-        NexoraToast.error(typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('load_error') : 'Məlumatlar yüklənmədi');
-      }
+    } else if (typeof NexoraToast !== 'undefined') {
+      NexoraToast.error(typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('load_error') : 'Məlumatlar yüklənmədi');
     }
+
+    const campaigns = await safeLoad('campaigns', function () {
+      return NexoraApp.loadCampaigns();
+    }, { campaigns: [], features: [] });
+    renderCampaign(campaigns);
+    renderFeatures(campaigns.features || []);
+
+    const brands = await safeLoad('brands', function () {
+      return NexoraApp.loadBrands();
+    }, []);
+    renderBrands(brands);
+
+    const news = await safeLoad('news', function () {
+      return NexoraApp.loadTechNews();
+    }, { articles: [], brands: [] });
+    renderNews(news);
+
+    if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
+    document.body.classList.remove('is-booting');
+    document.body.classList.add('is-ready');
+    document.dispatchEvent(new CustomEvent('nexora:home-ready'));
   }
 
   document.addEventListener('DOMContentLoaded', init);

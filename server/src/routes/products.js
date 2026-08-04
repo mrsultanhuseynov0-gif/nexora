@@ -11,7 +11,7 @@ router.get('/', (req, res) => {
   const category = String(req.query.category || '').trim();
   const subcategory = String(req.query.subcategory || '').trim();
   const brand = String(req.query.brand || req.query.brandId || '').trim();
-  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 200);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 1000);
   const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
   const sort = String(req.query.sort || 'name');
 

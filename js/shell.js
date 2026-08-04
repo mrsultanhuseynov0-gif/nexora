@@ -461,9 +461,14 @@ const NexoraShell = (function () {
   }
 
   async function mount() {
-    site = await NexoraApp.loadSiteSettings();
-    NexoraApp.applySiteTheme(site);
-    ensureHeadAssets();
+    try {
+      site = await NexoraApp.loadSiteSettings();
+    } catch (e) {
+      console.warn('site settings', e);
+      site = { brandName: 'NEXORA', logoText: 'NEXORA', tagline: 'Premium alış-veriş', nav: [], footer: {} };
+    }
+    try { NexoraApp.applySiteTheme(site); } catch (e) { /* ignore */ }
+    try { ensureHeadAssets(); } catch (e) { /* ignore */ }
 
     const headerMount = document.getElementById('site-header');
     const footerMount = document.getElementById('site-footer');

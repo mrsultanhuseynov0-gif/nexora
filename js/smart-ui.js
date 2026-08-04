@@ -97,8 +97,17 @@
   }
 
   function boot() {
-    setTimeout(ensureWheel, 1200);
-    setTimeout(wishlistAlerts, 2000);
+    // Wait until home content paints — avoid covering a blank/loading page
+    function showWheelLater() {
+      setTimeout(ensureWheel, 2500);
+    }
+    if (document.getElementById('homeProducts')) {
+      document.addEventListener('nexora:home-ready', showWheelLater, { once: true });
+      setTimeout(showWheelLater, 8000);
+    } else {
+      setTimeout(ensureWheel, 4000);
+    }
+    setTimeout(wishlistAlerts, 3500);
   }
 
   if (document.readyState === 'loading') {
