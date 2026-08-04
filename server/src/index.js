@@ -140,12 +140,17 @@ app.get('/sitemap.xml', (_req, res) => {
 // Static storefront (same origin as API)
 app.use(express.static(ROOT, {
   extensions: ['html'],
-  maxAge: cfg.isProd ? '7d' : 0,
+  etag: true,
+  lastModified: true,
+  maxAge: 0,
   setHeaders(res, filePath) {
     if (filePath.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'no-cache');
-    } else if (/\.(js|css|svg|png|jpg|webp|woff2)$/i.test(filePath)) {
-      res.setHeader('Cache-Control', cfg.isProd ? 'public, max-age=604800, immutable' : 'no-cache');
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    } else if (/\.(js|css)$/i.test(filePath)) {
+      // Short cache + revalidate so deploys show up without hard-refresh forever
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+    } else if (/\.(svg|png|jpg|webp|woff2)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', cfg.isProd ? 'public, max-age=86400' : 'no-cache');
     }
   }
 }));

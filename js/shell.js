@@ -62,9 +62,20 @@ const NexoraShell = (function () {
     );
   }
 
+  var PRIMARY_NAV_IDS = {
+    home: 1, products: 1, categories: 1, campaigns: 1,
+    consultant: 1, office_builder: 1, offer_generator: 1
+  };
+
   function headerHTML() {
     const b = NexoraApp.getBasePath();
     const nav = navItems();
+    const primary = [];
+    const more = [];
+    nav.forEach(function (n) {
+      if (PRIMARY_NAV_IDS[n.id]) primary.push(n);
+      else more.push(n);
+    });
     return (
       '<div class="promo-bar" id="promoBar" hidden></div>' +
       '<header class="site-header">' +
@@ -104,9 +115,20 @@ const NexoraShell = (function () {
         '</div>' +
         '<nav class="site-nav" aria-label="Əsas naviqasiya">' +
           '<div class="container site-nav-inner">' +
-            nav.map(function (n) {
+            primary.map(function (n) {
               return '<a class="nav-link" href="' + n.href + '" data-nav="' + n.id + '">' + n.label + '</a>';
             }).join('') +
+            (more.length
+              ? '<div class="nav-more" data-nav-more>' +
+                  '<button type="button" class="nav-link nav-more-btn" data-nav-more-toggle aria-expanded="false">' +
+                    (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('more') : 'Daha çox') +
+                    ' <span aria-hidden="true">▾</span></button>' +
+                  '<div class="nav-more-menu" hidden>' +
+                    more.map(function (n) {
+                      return '<a class="nav-more-link" href="' + n.href + '" data-nav="' + n.id + '">' + n.label + '</a>';
+                    }).join('') +
+                  '</div></div>'
+              : '') +
           '</div>' +
         '</nav>' +
       '</header>' +
@@ -352,6 +374,27 @@ const NexoraShell = (function () {
           if (input) setTimeout(function () { input.focus(); }, 50);
         }
       });
+    });
+    document.querySelectorAll('[data-nav-more-toggle]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const wrap = btn.closest('[data-nav-more]');
+        if (!wrap) return;
+        const menu = wrap.querySelector('.nav-more-menu');
+        const open = menu && menu.hasAttribute('hidden');
+        document.querySelectorAll('.nav-more-menu').forEach(function (m) { m.setAttribute('hidden', ''); });
+        document.querySelectorAll('[data-nav-more-toggle]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+        if (open && menu) {
+          menu.removeAttribute('hidden');
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('[data-nav-more]')) return;
+      document.querySelectorAll('.nav-more-menu').forEach(function (m) { m.setAttribute('hidden', ''); });
+      document.querySelectorAll('[data-nav-more-toggle]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
     });
     document.querySelectorAll('[data-lang-switch]').forEach(function (sel) {
       sel.addEventListener('change', function () {
