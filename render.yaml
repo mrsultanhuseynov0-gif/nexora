@@ -6,7 +6,7 @@ services:
     runtime: node
     plan: free
     rootDir: server
-    buildCommand: npm install && npm rebuild better-sqlite3
+    buildCommand: npm install && npm rebuild better-sqlite3 && rm -rf catalog-data && cp -R ../data catalog-data
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
@@ -14,6 +14,8 @@ services:
         value: production
       - key: HOST
         value: 0.0.0.0
+      - key: DATA_DIR
+        value: catalog-data
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_EXPIRES

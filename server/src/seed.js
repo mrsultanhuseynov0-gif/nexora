@@ -5,11 +5,24 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const { db, productToRow } = require('./db');
 
-const ROOT = path.join(__dirname, '..', '..');
-const DATA = path.join(ROOT, 'data');
+function resolveDataDir() {
+  const candidates = [
+    process.env.DATA_DIR,
+    path.join(__dirname, '..', 'catalog-data'),
+    path.join(process.cwd(), 'catalog-data'),
+    path.join(__dirname, '..', '..', 'data'),
+    path.join(process.cwd(), '..', 'data'),
+    path.join(process.cwd(), 'data')
+  ].filter(Boolean).map((p) => path.resolve(p));
+
+  for (const dir of candidates) {
+    if (fs.existsSync(path.join(dir, 'products.json'))) return dir;
+  }
+  throw new Error('Catalog data not found. Tried: ' + candidates.join(' | '));
+}
 
 function readJson(name) {
-  const full = path.join(DATA, name);
+  const full = path.join(resolveDataDir(), name);
   return JSON.parse(fs.readFileSync(full, 'utf8'));
 }
 
@@ -49,56 +62,67 @@ function seed() {
     INSERT OR REPLACE INTO categories (id, data_json) VALUES (@id, @data_json)
   `);
 
-  const tx = db.transaction(() => {
-    db.exec('DELETE FROM products; DELETE FROM users; DELETE FROM coupons; DELETE FROM categories;');
+  db.pragma('foreign_keys = OFF');
+  try {
+    const tx = db.transaction(() => {
+      // Child tables (orders, business_*, etc.) may already reference users.
+      db.exec(`
+        DELETE FROM products;
+        DELETE FROM users;
+        DELETE FROM coupons;
+        DELETE FROM categories;
+      `);
 
-    for (const p of productsData.products || []) {
-      insertProduct.run(productToRow(p));
-    }
-
-    for (const u of usersData.users || []) {
-      insertUser.run({
-        id: u.id,
-        email: String(u.email).toLowerCase(),
-        password_hash: bcrypt.hashSync(String(u.password), 10),
-        name: u.name || 'User',
-        phone: u.phone || '',
-        role: u.role === 'admin' ? 'admin' : 'customer',
-        addresses_json: JSON.stringify(u.addresses || []),
-        created_at: u.createdAt || new Date().toISOString()
-      });
-    }
-
-    for (const c of couponsData.coupons || []) {
-      insertCoupon.run({
-        code: String(c.code).toUpperCase(),
-        type: c.type,
-        value: Number(c.value) || 0,
-        min_order: Number(c.minOrder) || 0,
-        description: c.description || ''
-      });
-    }
-
-    const cats = categoriesData.categories || categoriesData;
-    if (Array.isArray(cats)) {
-      for (const cat of cats) {
-        insertCategory.run({ id: cat.id || cat.slug || uid('c'), data_json: JSON.stringify(cat) });
+      for (const p of productsData.products || []) {
+        insertProduct.run(productToRow(p));
       }
-    } else if (cats && typeof cats === 'object') {
-      insertCategory.run({ id: 'all', data_json: JSON.stringify(categoriesData) });
-    }
 
-    db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run(
-      'catalog_version',
-      String(productsData.version || 1)
-    );
-    db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run(
-      'seeded_at',
-      new Date().toISOString()
-    );
-  });
+      for (const u of usersData.users || []) {
+        insertUser.run({
+          id: u.id,
+          email: String(u.email).toLowerCase(),
+          password_hash: bcrypt.hashSync(String(u.password), 10),
+          name: u.name || 'User',
+          phone: u.phone || '',
+          role: u.role === 'admin' ? 'admin' : 'customer',
+          addresses_json: JSON.stringify(u.addresses || []),
+          created_at: u.createdAt || new Date().toISOString()
+        });
+      }
 
-  tx();
+      for (const c of couponsData.coupons || []) {
+        insertCoupon.run({
+          code: String(c.code).toUpperCase(),
+          type: c.type,
+          value: Number(c.value) || 0,
+          min_order: Number(c.minOrder) || 0,
+          description: c.description || ''
+        });
+      }
+
+      const cats = categoriesData.categories || categoriesData;
+      if (Array.isArray(cats)) {
+        for (const cat of cats) {
+          insertCategory.run({ id: cat.id || cat.slug || uid('c'), data_json: JSON.stringify(cat) });
+        }
+      } else if (cats && typeof cats === 'object') {
+        insertCategory.run({ id: 'all', data_json: JSON.stringify(categoriesData) });
+      }
+
+      db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run(
+        'catalog_version',
+        String(productsData.version || 1)
+      );
+      db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run(
+        'seeded_at',
+        new Date().toISOString()
+      );
+    });
+
+    tx();
+  } finally {
+    db.pragma('foreign_keys = ON');
+  }
 
   const counts = {
     products: db.prepare('SELECT COUNT(*) AS n FROM products').get().n,

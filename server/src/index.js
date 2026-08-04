@@ -173,7 +173,7 @@ function runBootTasks() {
   try {
     ensureSeeded();
   } catch (e) {
-    console.error('Seed failed:', e);
+    console.error('Seed failed:', e && e.stack ? e.stack : e);
   }
 
   try {
