@@ -97,6 +97,7 @@
   <script src="../js/api.js"></script>
   <script src="../js/app.js"></script>
   <script src="../js/security.js"></script>
+  <script src="../js/account.js"></script>
   <script src="../js/cart.js"></script>
   <script src="../js/wishlist.js"></script>
   <script src="../js/i18n.js"></script>
@@ -155,9 +156,14 @@
       async function detectApi() {
         const el = document.getElementById('consultApiStatus');
         try {
-          const r = await fetch('/api/ai/health');
-          const j = await r.json();
-          apiLive = !!(r.ok && j && j.ok);
+          if (typeof NexoraApi !== 'undefined' && NexoraApi.health) {
+            const j = await NexoraApi.health();
+            apiLive = !!(j && j.ok);
+          } else {
+            const r = await fetch('/api/ai/health');
+            const j = await r.json();
+            apiLive = !!(r.ok && j && j.ok);
+          }
         } catch (e) {
           apiLive = false;
         }

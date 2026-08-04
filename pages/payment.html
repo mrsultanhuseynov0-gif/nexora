@@ -39,7 +39,7 @@
   </style>
 </head>
 <body>
-  <div id="header-placeholder"></div>
+  <div id="site-header"></div>
   <main class="page-wrapper">
     <div class="container pay-wrap">
       <div class="pay-card" id="payBox">
@@ -47,13 +47,14 @@
       </div>
     </div>
   </main>
-  <div id="footer-placeholder"></div>
+  <div id="site-footer"></div>
 
   <script src="../js/icons.js"></script>
   <script src="../js/components/toast.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/app.js"></script>
   <script src="../js/security.js"></script>
+  <script src="../js/account.js"></script>
   <script src="../js/shell.js"></script>
   <script src="../js/main.js"></script>
   <script>
@@ -78,10 +79,22 @@
           return;
         }
 
-        var res = await fetch('/api/payments/' + encodeURIComponent(paymentId));
-        var data = await res.json();
-        if (!res.ok) {
-          box.innerHTML = '<h1 class="heading-3">Xəta</h1><p class="text-muted">' + esc(data.error || 'Yüklənmədi') + '</p>';
+        var data;
+        try {
+          if (typeof NexoraApi !== 'undefined' && NexoraApi.ensureApi) await NexoraApi.ensureApi();
+          data = await (typeof NexoraApi !== 'undefined' && NexoraApi.request
+            ? NexoraApi.request('/api/payments/' + encodeURIComponent(paymentId))
+            : fetch('/api/payments/' + encodeURIComponent(paymentId)).then(async function (r) {
+                var d = await r.json();
+                if (!r.ok) throw Object.assign(new Error(d.error || 'Yüklənmədi'), { data: d });
+                return d;
+              }));
+        } catch (ex) {
+          box.innerHTML = '<h1 class="heading-3">Xəta</h1><p class="text-muted">' + esc(ex.message || 'Yüklənmədi') + '</p>';
+          return;
+        }
+        if (!data || !data.payment) {
+          box.innerHTML = '<h1 class="heading-3">Xəta</h1><p class="text-muted">' + esc((data && data.error) || 'Yüklənmədi') + '</p>';
           return;
         }
 
@@ -175,20 +188,34 @@
           err.style.display = 'none';
           btn.disabled = true;
           try {
-            var r = await fetch('/api/payments/' + encodeURIComponent(paymentId) + '/charge', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                card: {
-                  number: document.getElementById('cardNumber').value,
-                  expiry: document.getElementById('cardExp').value,
-                  cvv: document.getElementById('cardCvv').value,
-                  name: document.getElementById('cardName').value
-                }
-              })
-            });
-            var j = await r.json();
-            if (!r.ok) throw new Error(j.error || 'Ödəniş alınmadı');
+            var j = await (typeof NexoraApi !== 'undefined' && NexoraApi.request
+              ? NexoraApi.request('/api/payments/' + encodeURIComponent(paymentId) + '/charge', {
+                  method: 'POST',
+                  body: JSON.stringify({
+                    card: {
+                      number: document.getElementById('cardNumber').value,
+                      expiry: document.getElementById('cardExp').value,
+                      cvv: document.getElementById('cardCvv').value,
+                      name: document.getElementById('cardName').value
+                    }
+                  })
+                })
+              : fetch('/api/payments/' + encodeURIComponent(paymentId) + '/charge', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    card: {
+                      number: document.getElementById('cardNumber').value,
+                      expiry: document.getElementById('cardExp').value,
+                      cvv: document.getElementById('cardCvv').value,
+                      name: document.getElementById('cardName').value
+                    }
+                  })
+                }).then(async function (resp) {
+                  var d = await resp.json();
+                  if (!resp.ok) throw new Error(d.error || 'Ödəniş alınmadı');
+                  return d;
+                }));
             if (window.NexoraToast) NexoraToast.success('Ödəniş uğurlu!');
             window.location.href = 'payment.html?paymentId=' + encodeURIComponent(paymentId) + '&status=success';
           } catch (ex) {

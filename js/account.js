@@ -166,16 +166,44 @@ const NexoraAccount = (function () {
 
   async function getSession() {
     const raw = getSessionSync();
-    if (!raw) return null;
+    if (!raw) {
+      if (typeof NexoraApi !== 'undefined' && NexoraApi.getToken && NexoraApi.getToken() && NexoraApi.me) {
+        try {
+          const me = await NexoraApi.me();
+          if (me && me.user) {
+            await upsertLocalUserFromApi(me.user);
+            await setSession(me.user);
+            return {
+              id: me.user.id,
+              email: me.user.email,
+              name: me.user.name,
+              phone: me.user.phone || '',
+              role: me.user.role
+            };
+          }
+        } catch (e) { /* token invalid */ }
+      }
+      return null;
+    }
     const verified = await sec().verifySession(raw);
     if (!verified) {
       localStorage.removeItem(SESSION_KEY);
       return null;
     }
-    const user = getUsers().find(function (u) { return u.id === verified.id; });
+    let user = getUsers().find(function (u) { return u.id === verified.id; });
     if (!user) {
-      localStorage.removeItem(SESSION_KEY);
-      return null;
+      if (typeof NexoraApi !== 'undefined' && NexoraApi.getToken && NexoraApi.getToken() && NexoraApi.me) {
+        try {
+          const me = await NexoraApi.me();
+          if (me && me.user && me.user.id === verified.id) {
+            user = await upsertLocalUserFromApi(me.user);
+          }
+        } catch (e) { /* ignore */ }
+      }
+      if (!user) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+      }
     }
     const sealOk = await sec().verifyRoleSeal(user);
     if (!sealOk || user.role !== verified.role) {
@@ -216,6 +244,31 @@ const NexoraAccount = (function () {
     return mail;
   }
 
+  async function upsertLocalUserFromApi(apiUser, passwordHint) {
+    const users = getUsers();
+    const mail = String(apiUser.email || '').toLowerCase();
+    let idx = users.findIndex(function (u) {
+      return u.id === apiUser.id || String(u.email || '').toLowerCase() === mail;
+    });
+    const prev = idx >= 0 ? users[idx] : null;
+    const base = {
+      id: apiUser.id,
+      email: apiUser.email,
+      name: apiUser.name || (prev && prev.name) || 'User',
+      phone: apiUser.phone || (prev && prev.phone) || '',
+      role: apiUser.role || 'customer',
+      addresses: apiUser.addresses || (prev && prev.addresses) || [],
+      createdAt: apiUser.createdAt || (prev && prev.createdAt) || new Date().toISOString(),
+      password: (prev && prev.password) || passwordHint || ('ApiLogin!' + String(apiUser.id || Date.now()).slice(-8) + 'x1')
+    };
+    const hardened = await hardenUser(base);
+    if (prev && prev.password) hardened.password = prev.password;
+    if (idx >= 0) users[idx] = Object.assign({}, prev, hardened);
+    else users.push(hardened);
+    NexoraApp.storageSet(USERS_KEY, users);
+    return hardened;
+  }
+
   async function register(payload) {
     if (typeof NexoraApi !== 'undefined') {
       try {
@@ -233,6 +286,7 @@ const NexoraAccount = (function () {
           });
           if (data && data.token) NexoraApi.setToken(data.token);
           if (data && data.user) {
+            await upsertLocalUserFromApi(data.user, payload.password);
             await setSession({
               id: data.user.id,
               email: data.user.email,
@@ -301,6 +355,7 @@ const NexoraAccount = (function () {
           var api = await NexoraApi.login(email, password);
           if (api && api.token) NexoraApi.setToken(api.token);
           if (api && api.user) {
+            await upsertLocalUserFromApi(api.user, password);
             await setSession({
               id: api.user.id,
               email: api.user.email,
@@ -405,6 +460,12 @@ const NexoraAccount = (function () {
     if (!next && typeof location !== 'undefined') {
       next = location.pathname + location.search + location.hash;
     }
+    if (next && next.charAt(0) !== '/' && next.indexOf('http') !== 0 && typeof location !== 'undefined') {
+      try {
+        const abs = new URL(next, location.href);
+        next = abs.pathname + abs.search + abs.hash;
+      } catch (e) { /* keep relative */ }
+    }
     let url = typeof NexoraApp !== 'undefined' ? NexoraApp.pageUrl('account.html') : 'account.html';
     url += (url.indexOf('?') === -1 ? '?' : '&') + 'tab=' + tab;
     if (next) url += '&next=' + encodeURIComponent(next);
@@ -486,7 +547,17 @@ const NexoraAccount = (function () {
     const session = await getSession();
     if (!session) return null;
     const user = getUsers().find(function (u) { return u.id === session.id; });
-    return user ? publicUser(user) : null;
+    if (user) return publicUser(user);
+    if (typeof NexoraApi !== 'undefined' && NexoraApi.getToken && NexoraApi.getToken() && NexoraApi.me) {
+      try {
+        const me = await NexoraApi.me();
+        if (me && me.user) {
+          await upsertLocalUserFromApi(me.user);
+          return publicUser(Object.assign({}, me.user));
+        }
+      } catch (e) { /* ignore */ }
+    }
+    return null;
   }
 
   function getOrders() {
@@ -1648,7 +1719,17 @@ const NexoraAccount = (function () {
         const params = new URLSearchParams(location.search || '');
         const next = params.get('next');
         if (!next) return false;
+        if (next.indexOf('javascript:') === 0 || next.indexOf('data:') === 0) return false;
         if (next.charAt(0) === '/') {
+          location.href = next;
+          return true;
+        }
+        // Relative paths like ../pages/checkout.html or checkout.html
+        if (next.indexOf('://') === -1) {
+          location.href = new URL(next, location.href).href;
+          return true;
+        }
+        if (next.indexOf(location.origin) === 0) {
           location.href = next;
           return true;
         }

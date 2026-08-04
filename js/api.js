@@ -149,7 +149,6 @@
     request: request,
     health: health,
     ensureApi: ensureApi,
-    getBase: function () { return API_BASE; },
     login: login,
     register: function (body) {
       return request('/api/auth/register', {

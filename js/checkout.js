@@ -68,11 +68,21 @@
     }
   }
 
+  async function apiCall(path, options) {
+    if (typeof NexoraApi !== 'undefined') {
+      if (NexoraApi.ensureApi) await NexoraApi.ensureApi();
+      if (NexoraApi.request) return NexoraApi.request(path, options || {});
+    }
+    const headers = Object.assign({ 'Content-Type': 'application/json' }, (options && options.headers) || {});
+    const res = await fetch(path, Object.assign({}, options || {}, { headers: headers }));
+    const data = await res.json().catch(function () { return {}; });
+    if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+    return data;
+  }
+
   async function loadPaymentLabels() {
     try {
-      const res = await fetch('/api/payments/config');
-      if (!res.ok) return;
-      const data = await res.json();
+      const data = await apiCall('/api/payments/config');
       const cfg = data.payment || {};
       const cardLabel = document.querySelector('input[name="paymentMethod"][value="card"]');
       if (cardLabel && cardLabel.parentElement) {
@@ -134,22 +144,15 @@
       }
       try {
         var totals = await NexoraCart.getTotals();
-        var headers = { 'Content-Type': 'application/json' };
-        if (typeof NexoraApi !== 'undefined' && NexoraApi.getToken()) {
-          headers.Authorization = 'Bearer ' + NexoraApi.getToken();
-        }
         var emailEl = document.getElementById('shipEmail');
-        var res = await fetch('/api/referrals/validate', {
+        var data = await apiCall('/api/referrals/validate', {
           method: 'POST',
-          headers: headers,
           body: JSON.stringify({
             code: code,
             email: emailEl ? emailEl.value.trim() : '',
             subtotal: totals.subtotal || 0
           })
         });
-        var data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Kod etibarsızdır');
         referralOk = data;
         status.hidden = false;
         status.style.color = '#1b7a3d';
@@ -245,17 +248,10 @@
       };
 
       try {
-        const headers = { 'Content-Type': 'application/json' };
-        if (typeof NexoraApi !== 'undefined' && NexoraApi.getToken()) {
-          headers.Authorization = 'Bearer ' + NexoraApi.getToken();
-        }
-        const res = await fetch('/api/payments/checkout', {
+        const data = await apiCall('/api/payments/checkout', {
           method: 'POST',
-          headers: headers,
           body: JSON.stringify(payload)
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Sifariş yaradılmadı');
 
         // Keep local copy for track page offline fallback
         try {
