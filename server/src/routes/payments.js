@@ -101,7 +101,7 @@ router.get('/admin/by-order/:orderId', adminRequired, (req, res) => {
 /**
  * Create order + payment session in one step (preferred checkout path)
  */
-router.post('/checkout', authOptional, async (req, res) => {
+router.post('/checkout', authRequired, async (req, res) => {
   const settings = getPaymentSettings();
   if (settings.enabled === false) {
     return res.status(503).json({ error: 'Ödəniş müvəqqəti deaktivdir' });

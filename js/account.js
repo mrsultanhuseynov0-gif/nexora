@@ -381,6 +381,55 @@ const NexoraAccount = (function () {
 
   function logout() {
     localStorage.removeItem(SESSION_KEY);
+    if (typeof NexoraApi !== 'undefined' && NexoraApi.clearToken) {
+      NexoraApi.clearToken();
+    }
+  }
+
+  function isLoggedIn() {
+    if (typeof NexoraApi !== 'undefined' && NexoraApi.getToken && NexoraApi.getToken()) return true;
+    const cached = getSessionCached();
+    return !!(cached && cached.id);
+  }
+
+  function authRequiredError(message) {
+    const err = new Error(message || 'Davam etmək üçün qeydiyyatdan keçin və ya daxil olun');
+    err.code = 'AUTH_REQUIRED';
+    return err;
+  }
+
+  function promptLogin(opts) {
+    opts = opts || {};
+    const tab = opts.tab === 'login' ? 'login' : 'register';
+    let next = opts.next;
+    if (!next && typeof location !== 'undefined') {
+      next = location.pathname + location.search + location.hash;
+    }
+    let url = typeof NexoraApp !== 'undefined' ? NexoraApp.pageUrl('account.html') : 'account.html';
+    url += (url.indexOf('?') === -1 ? '?' : '&') + 'tab=' + tab;
+    if (next) url += '&next=' + encodeURIComponent(next);
+    if (opts.message && typeof NexoraToast !== 'undefined') {
+      NexoraToast.info(opts.message);
+    }
+    if (opts.redirect === false) return url;
+    if (typeof location !== 'undefined') location.href = url;
+    return url;
+  }
+
+  async function requireShopAuth(opts) {
+    opts = opts || {};
+    if (isLoggedIn()) {
+      const session = await getSession();
+      if (session) return session;
+      if (typeof NexoraApi !== 'undefined' && NexoraApi.getToken && NexoraApi.getToken()) {
+        return { id: 'api', email: '' };
+      }
+    }
+    const message = opts.message || 'Səbətə əlavə etmək və alış-veriş üçün qeydiyyat / giriş lazımdır';
+    if (opts.redirect !== false) {
+      promptLogin({ tab: 'register', message: message, next: opts.next });
+    }
+    throw authRequiredError(message);
   }
 
   async function requireUser() {
@@ -531,6 +580,10 @@ const NexoraAccount = (function () {
     getUsers: getUsers,
     getSession: getSession,
     getSessionCached: getSessionCached,
+    isLoggedIn: isLoggedIn,
+    promptLogin: promptLogin,
+    requireShopAuth: requireShopAuth,
+    requireUser: requireUser,
     register: register,
     login: login,
     logout: logout,
@@ -1495,6 +1548,7 @@ const NexoraAccount = (function () {
           document.getElementById('loginPassword').value
         );
         NexoraToast.success('Xoş gəldiniz!');
+        if (consumeAuthNextRedirect()) return;
         await renderAuth();
         NexoraApp.initAuthUI();
       } catch (err) {
@@ -1513,6 +1567,7 @@ const NexoraAccount = (function () {
           referralCode: (document.getElementById('regReferral') || {}).value || ''
         });
         NexoraToast.success('Qeydiyyat tamamlandı');
+        if (consumeAuthNextRedirect()) return;
         await renderAuth();
         NexoraApp.initAuthUI();
       } catch (err) {
@@ -1587,5 +1642,29 @@ const NexoraAccount = (function () {
         }
       });
     }
+
+    function consumeAuthNextRedirect() {
+      try {
+        const params = new URLSearchParams(location.search || '');
+        const next = params.get('next');
+        if (!next) return false;
+        if (next.charAt(0) === '/') {
+          location.href = next;
+          return true;
+        }
+        return false;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    try {
+      const params = new URLSearchParams(location.search || '');
+      const tab = params.get('tab');
+      if (tab === 'register' || tab === 'login') {
+        const btn = document.querySelector('[data-auth-tab="' + tab + '"]');
+        if (btn) btn.click();
+      }
+    } catch (e) { /* ignore */ }
   });
 })();

@@ -333,6 +333,7 @@ const NexoraApp = (function () {
             updateBadges();
             if (typeof NexoraSmart !== 'undefined') NexoraSmart.trackCartAbort(id);
           }).catch(function (err) {
+            if (err && err.code === 'AUTH_REQUIRED') return;
             if (typeof NexoraToast !== 'undefined') {
               NexoraToast.error((err && err.message) || (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('sold_out') : 'Stokda yoxdur'));
             }
@@ -352,15 +353,22 @@ const NexoraApp = (function () {
         e.preventDefault();
         e.stopPropagation();
         if (typeof NexoraWishlist === 'undefined') return;
-        const added = NexoraWishlist.toggle(id);
-        btn.classList.toggle('is-active', added);
-        if (typeof NexoraToast !== 'undefined') {
-          const msg = typeof NexoraI18n !== 'undefined'
-            ? NexoraI18n.t(added ? 'added_wish' : 'removed_wish')
-            : (added ? 'Seçilmişlərə əlavə olundu' : 'Seçilmişlərdən silindi');
-          NexoraToast[added ? 'success' : 'info'](msg);
+        try {
+          const added = NexoraWishlist.toggle(id);
+          btn.classList.toggle('is-active', added);
+          if (typeof NexoraToast !== 'undefined') {
+            const msg = typeof NexoraI18n !== 'undefined'
+              ? NexoraI18n.t(added ? 'added_wish' : 'removed_wish')
+              : (added ? 'Seçilmişlərə əlavə olundu' : 'Seçilmişlərdən silindi');
+            NexoraToast[added ? 'success' : 'info'](msg);
+          }
+          updateBadges();
+        } catch (err) {
+          if (err && err.code === 'AUTH_REQUIRED') return;
+          if (typeof NexoraToast !== 'undefined') {
+            NexoraToast.error((err && err.message) || 'Xəta');
+          }
         }
-        updateBadges();
       });
     });
   }

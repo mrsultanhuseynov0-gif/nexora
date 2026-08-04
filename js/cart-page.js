@@ -33,6 +33,19 @@
     }
   }
 
+  function checkoutCtaHTML() {
+    var loggedIn = typeof NexoraAccount !== 'undefined' && NexoraAccount.isLoggedIn && NexoraAccount.isLoggedIn();
+    if (loggedIn) {
+      return '<a href="checkout.html" class="btn btn-primary w-full" id="cartCheckoutBtn">' + tt('checkout') + '</a>';
+    }
+    var authUrl = typeof NexoraAccount !== 'undefined' && NexoraAccount.promptLogin
+      ? NexoraAccount.promptLogin({ redirect: false, tab: 'register', next: NexoraApp.pageUrl('checkout.html') })
+      : 'account.html?tab=register';
+    return '<a href="' + esc(authUrl) + '" class="btn btn-primary w-full" id="cartCheckoutBtn">' +
+      tt('auth_to_checkout', 'Sifariş üçün qeydiyyat / giriş') + '</a>' +
+      '<p class="text-xs text-muted mt-2 text-center">Qonaqlar yalnız məhsullara baxa bilər</p>';
+  }
+
   function absoluteCartUrl(query) {
     var path = location.pathname.replace(/[^/]+$/, 'cart.html');
     return location.origin + path + (query || '');
@@ -328,7 +341,7 @@
       (totals.coupon
         ? '<p class="text-sm mb-4" style="color:var(--color-success)">' + tt('coupon') + ': ' + totals.coupon.description + '</p>'
         : '') +
-      '<a href="checkout.html" class="btn btn-primary w-full">' + tt('checkout') + '</a>' +
+      checkoutCtaHTML() +
       '<a href="#" class="btn btn-outline w-full mt-2" id="cartWhatsApp">' + tt('wa_order') + '</a>' +
       sharePanelHTML(shareLink);
 
@@ -396,6 +409,15 @@
     if (wa) {
       wa.addEventListener('click', async function (e) {
         e.preventDefault();
+        if (typeof NexoraAccount !== 'undefined' && NexoraAccount.requireShopAuth) {
+          try {
+            await NexoraAccount.requireShopAuth({
+              message: 'Sifariş vermək üçün qeydiyyat / giriş lazımdır'
+            });
+          } catch (err) {
+            return;
+          }
+        }
         const totals = await NexoraCart.getTotals();
         const lines = totals.items.map(function (i) {
           return i.qty + '× ' + (i.displayName || i.name);

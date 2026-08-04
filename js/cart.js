@@ -37,6 +37,11 @@ const NexoraCart = (function () {
 
   async function add(productId, qty, variant) {
     qty = qty || 1;
+    if (typeof NexoraAccount !== 'undefined' && NexoraAccount.requireShopAuth) {
+      await NexoraAccount.requireShopAuth({
+        message: tt('auth_required_cart', 'Səbətə əlavə etmək üçün qeydiyyat / giriş lazımdır')
+      });
+    }
     const products = await NexoraApp.loadProducts();
     const product = products.find(function (p) { return p.id === productId; });
     if (!product) throw new Error(tt('product_not_found', 'Məhsul tapılmadı'));
@@ -274,6 +279,15 @@ const NexoraCart = (function () {
   }
 
   function importShared(sharedItems, mode) {
+    if (typeof NexoraAccount !== 'undefined' && NexoraAccount.requireShopAuth) {
+      // Sync gate — share import must not fill cart for guests
+      if (!NexoraAccount.isLoggedIn || !NexoraAccount.isLoggedIn()) {
+        NexoraAccount.promptLogin({
+          message: tt('auth_required_cart', 'Səbətə əlavə etmək üçün qeydiyyat / giriş lazımdır')
+        });
+        throw Object.assign(new Error(tt('auth_required_cart', 'Səbətə əlavə etmək üçün qeydiyyat / giriş lazımdır')), { code: 'AUTH_REQUIRED' });
+      }
+    }
     mode = mode === 'merge' ? 'merge' : 'replace';
     var incoming = (sharedItems || []).map(function (item) {
       return {

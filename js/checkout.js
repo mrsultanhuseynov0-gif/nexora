@@ -4,6 +4,19 @@
 (function () {
   'use strict';
 
+  async function guardCheckoutAuth() {
+    if (typeof NexoraAccount === 'undefined' || !NexoraAccount.requireShopAuth) return true;
+    try {
+      await NexoraAccount.requireShopAuth({
+        message: 'Sifariş vermək üçün qeydiyyat / giriş lazımdır',
+        next: location.pathname + location.search
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   async function renderSummary() {
     const el = document.getElementById('checkoutSummary');
     if (!el) return;
@@ -96,6 +109,7 @@
 
   document.addEventListener('DOMContentLoaded', async function () {
     if (!document.getElementById('checkoutForm')) return;
+    if (!(await guardCheckoutAuth())) return;
     if (typeof NexoraAccount !== 'undefined') await NexoraAccount.seedUsers();
     await renderSummary();
     await fillFromSession();

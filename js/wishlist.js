@@ -25,6 +25,14 @@ const NexoraWishlist = (function () {
   }
 
   function add(id) {
+    if (typeof NexoraAccount !== 'undefined' && NexoraAccount.isLoggedIn && !NexoraAccount.isLoggedIn()) {
+      if (NexoraAccount.promptLogin) {
+        NexoraAccount.promptLogin({
+          message: 'Seçilmişlərə əlavə etmək üçün qeydiyyat / giriş lazımdır'
+        });
+      }
+      throw Object.assign(new Error('AUTH_REQUIRED'), { code: 'AUTH_REQUIRED' });
+    }
     const ids = getIds();
     if (ids.indexOf(id) === -1) {
       ids.push(id);
@@ -38,6 +46,14 @@ const NexoraWishlist = (function () {
   }
 
   function toggle(id) {
+    if (typeof NexoraAccount !== 'undefined' && NexoraAccount.isLoggedIn && !NexoraAccount.isLoggedIn()) {
+      if (NexoraAccount.promptLogin) {
+        NexoraAccount.promptLogin({
+          message: 'Seçilmişlərə əlavə etmək üçün qeydiyyat / giriş lazımdır'
+        });
+      }
+      throw Object.assign(new Error('AUTH_REQUIRED'), { code: 'AUTH_REQUIRED' });
+    }
     if (has(id)) {
       remove(id);
       return false;
@@ -77,6 +93,14 @@ const NexoraWishlist = (function () {
   function importSharedIds() {
     const raw = NexoraApp.getQueryParam('ids');
     if (!raw) return false;
+    if (typeof NexoraAccount !== 'undefined' && NexoraAccount.isLoggedIn && !NexoraAccount.isLoggedIn()) {
+      if (NexoraAccount.promptLogin) {
+        NexoraAccount.promptLogin({
+          message: 'Seçilmişləri saxlamaq üçün qeydiyyat / giriş lazımdır'
+        });
+      }
+      return false;
+    }
     const incoming = raw.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
     if (!incoming.length) return false;
     const merged = getIds().slice();

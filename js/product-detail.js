@@ -320,6 +320,7 @@
         NexoraToast.success(typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('added_cart') : 'Səbətə əlavə olundu');
         NexoraApp.updateBadges();
       } catch (e) {
+        if (e && e.code === 'AUTH_REQUIRED') return;
         NexoraToast.error(e.message || 'Xəta');
       }
     });
