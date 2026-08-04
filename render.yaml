@@ -6,7 +6,7 @@ services:
     runtime: node
     plan: free
     rootDir: server
-    buildCommand: npm install && npm rebuild better-sqlite3 && rm -rf catalog-data && cp -R ../data catalog-data
+    buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
