@@ -23,7 +23,7 @@ const SNIP = `  <script>
         var el = document.createElement('div');
         el.id = 'nexoraEarlyOffline';
         el.innerHTML = '<div class="box"><div class="logo">NEXORA</div><h1>Internet Xətası</h1>' +
-          '<p>İnternet yoxdur. Sayt yalnız onlayn açılır.</p></div>';
+          '<p>İnternet bağlantısı yoxdur.</p></div>';
         (document.body || document.documentElement).appendChild(el);
       }
       if (document.body) paint();

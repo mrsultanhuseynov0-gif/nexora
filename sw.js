@@ -29,8 +29,9 @@ self.addEventListener('fetch', function (event) {
             '<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;' +
             'background:#111;color:#fff;font-family:system-ui,sans-serif;text-align:center;padding:24px}' +
             'h1{color:#FF0000;letter-spacing:.16em}p{color:#bbb;max-width:320px;line-height:1.45}</style></head>' +
-            '<body><div><h1>NEXORA</h1><h2>İnternet yoxdur</h2>' +
-            '<p>Sayt yalnız onlayn işləyir. Bağlantını yoxlayıb yenidən açın.</p></div></body></html>',
+            '<body><div><h1>NEXORA</h1><h2>Internet Xətası</h2>' +
+            '<p>İnternet bağlantısı yoxdur.</p>' +
+            '<p><button onclick="location.reload()" style="min-height:48px;padding:0 18px;border:0;border-radius:12px;background:#FF0000;color:#fff;font-weight:700;font-size:1rem;cursor:pointer">Yenidən yoxla</button></p></div></body></html>',
           { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
         );
       }

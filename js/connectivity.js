@@ -154,19 +154,14 @@
           '<div class="og-logo">NEXORA</div>' +
           '<div class="og-icon" aria-hidden="true">📡</div>' +
           '<h2 id="nexoraOfflineTitle">Internet Xətası</h2>' +
-          '<p data-offline-msg>İnternet bağlantısı yoxdur. Sayt yalnız onlayn işləyir — telefon və ya kompüterdə interneti yandırın, sonra yenidən yoxlayın.</p>' +
+          '<p data-offline-msg>İnternet bağlantısı yoxdur. İnterneti yandırın və yenidən yoxlayın.</p>' +
           '<button type="button" data-offline-retry>Yenidən yoxla</button>' +
         '</div>';
       (document.body || document.documentElement).appendChild(el);
       el.addEventListener('click', function (e) {
         if (e.target && e.target.getAttribute('data-offline-retry') !== null) {
-          var btn = e.target;
-          btn.disabled = true;
-          btn.textContent = 'Yoxlanılır…';
-          probeAndSync(true).finally(function () {
-            btn.disabled = false;
-            btn.textContent = 'Yenidən yoxla';
-          });
+          // Always refresh the page (like a normal retry)
+          try { location.reload(); } catch (err) { location.href = location.href; }
         }
       });
     }
@@ -174,8 +169,8 @@
     var msg = el.querySelector('[data-offline-msg]');
     if (msg) {
       msg.textContent = lastReason === 'server'
-        ? 'Serverə qoşulmaq olmadı. İnterneti yoxlayın və bir az sonra yenidən cəhd edin.'
-        : 'İnternet bağlantısı yoxdur. Sayt yalnız onlayn işləyir — telefon və ya kompüterdə interneti yandırın, sonra yenidən yoxlayın.';
+        ? 'Serverə qoşulmaq olmadı. Bir az sonra yenidən yoxlayın.'
+        : 'İnternet bağlantısı yoxdur. İnterneti yandırın və yenidən yoxlayın.';
     }
 
     el.hidden = false;
