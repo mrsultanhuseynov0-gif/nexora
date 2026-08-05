@@ -2,9 +2,35 @@
 <html lang="az">
 <head>
   <meta charset="UTF-8">
+  <script>
+    /* Early Internet Xətası gate — before CSS/JS */
+    (function () {
+      if (navigator.onLine) return;
+      document.documentElement.classList.add('nexora-offline');
+      var css = document.createElement('style');
+      css.id = 'nexoraEarlyOfflineCss';
+      css.textContent = 'html,body{background:#0b0b0b!important;margin:0;overflow:hidden!important}' +
+        '#nexoraEarlyOffline{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;' +
+        'padding:24px;background:#0b0b0b;color:#fff;text-align:center;font-family:system-ui,sans-serif}' +
+        '#nexoraEarlyOffline .box{max-width:360px}#nexoraEarlyOffline .logo{font-weight:900;letter-spacing:.16em;color:#FF0000;font-size:1.4rem;margin-bottom:14px}' +
+        '#nexoraEarlyOffline h1{margin:0 0 10px;font-size:1.45rem}#nexoraEarlyOffline p{margin:0;color:#bbb;line-height:1.5}';
+      (document.head || document.documentElement).appendChild(css);
+      function paint() {
+        if (document.getElementById('nexoraEarlyOffline')) return;
+        var el = document.createElement('div');
+        el.id = 'nexoraEarlyOffline';
+        el.innerHTML = '<div class="box"><div class="logo">NEXORA</div><h1>Internet Xətası</h1>' +
+          '<p>İnternet yoxdur. Sayt yalnız onlayn açılır.</p></div>';
+        (document.body || document.documentElement).appendChild(el);
+      }
+      if (document.body) paint();
+      else document.addEventListener('DOMContentLoaded', paint);
+    })();
+  </script>
+
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>AI Məsləhətçi | NEXORA</title>
-  <link rel="stylesheet" href="../css/main.css?v=20260805f">
+  <link rel="stylesheet" href="../css/main.css?v=20260805g">
   <link rel="manifest" href="../manifest.webmanifest">
   <meta name="theme-color" content="#FF0000">
   <style>
@@ -91,21 +117,21 @@
     </main>
     <div id="site-footer"></div>
   </div>
-  <script src="../js/icons.js?v=20260805f"></script>
-  <script src="../js/components/modal.js?v=20260805f"></script>
-  <script src="../js/components/toast.js?v=20260805f"></script>
-  <script src="../js/api.js?v=20260805f"></script>
-  <script src="../js/connectivity.js?v=20260805f"></script>
-  <script src="../js/app.js?v=20260805f"></script>
-  <script src="../js/security.js?v=20260805f"></script>
-  <script src="../js/account.js?v=20260805f"></script>
-  <script src="../js/cart.js?v=20260805f"></script>
-  <script src="../js/wishlist.js?v=20260805f"></script>
-  <script src="../js/i18n.js?v=20260805f"></script>
-  <script src="../js/search.js?v=20260805f"></script>
-  <script src="../js/smart.js?v=20260805f"></script>
-  <script src="../js/shell.js?v=20260805f"></script>
-  <script src="../js/main.js?v=20260805f"></script>
+  <script src="../js/icons.js?v=20260805g"></script>
+  <script src="../js/components/modal.js?v=20260805g"></script>
+  <script src="../js/components/toast.js?v=20260805g"></script>
+  <script src="../js/api.js?v=20260805g"></script>
+  <script src="../js/connectivity.js?v=20260805g"></script>
+  <script src="../js/app.js?v=20260805g"></script>
+  <script src="../js/security.js?v=20260805g"></script>
+  <script src="../js/account.js?v=20260805g"></script>
+  <script src="../js/cart.js?v=20260805g"></script>
+  <script src="../js/wishlist.js?v=20260805g"></script>
+  <script src="../js/i18n.js?v=20260805g"></script>
+  <script src="../js/search.js?v=20260805g"></script>
+  <script src="../js/smart.js?v=20260805g"></script>
+  <script src="../js/shell.js?v=20260805g"></script>
+  <script src="../js/main.js?v=20260805g"></script>
   <script>
     (function () {
       const chat = document.getElementById('consultChat');

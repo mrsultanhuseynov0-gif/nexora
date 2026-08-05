@@ -1,6 +1,7 @@
 /**
- * NEXORA Connectivity — hard offline lock (like a normal website)
- * Must load early. No offline browsing.
+ * NEXORA Connectivity — hard offline lock
+ * No internet → site does not open. Full-screen "Internet Xətası".
+ * Must load early (before app shell).
  */
 (function () {
   'use strict';
@@ -10,6 +11,7 @@
   var healthTimer = null;
   var loadCount = 0;
   var offlineLocked = false;
+  var lastReason = 'offline';
 
   function pathInfo() {
     var path = (location.pathname || '').replace(/\\/g, '/');
@@ -59,18 +61,23 @@
     var style = document.createElement('style');
     style.id = 'nexoraConnectivityCss';
     style.textContent =
-      'html.nexora-offline, html.nexora-offline body{background:#111!important;overflow:hidden!important}' +
+      'html.nexora-offline,html.nexora-offline body{background:#0b0b0b!important;overflow:hidden!important;height:100%!important}' +
       'html.nexora-offline body > *:not(#' + OFFLINE_ID + '){display:none!important;visibility:hidden!important;pointer-events:none!important}' +
       '#' + OFFLINE_ID + '{' +
         'position:fixed;inset:0;z-index:2147483646;display:flex;align-items:center;justify-content:center;' +
-        'padding:24px;background:#111;color:#fff;text-align:center;font-family:system-ui,sans-serif' +
+        'padding:24px;background:radial-gradient(ellipse at 50% 30%,#1a1a1a 0%,#0b0b0b 70%);' +
+        'color:#fff;text-align:center;font-family:system-ui,-apple-system,sans-serif' +
       '}' +
       '#' + OFFLINE_ID + '[hidden]{display:none!important}' +
-      '#' + OFFLINE_ID + ' .og-box{max-width:360px;width:100%}' +
-      '#' + OFFLINE_ID + ' .og-logo{font-weight:900;letter-spacing:.16em;color:#FF0000;font-size:1.5rem;margin-bottom:14px}' +
-      '#' + OFFLINE_ID + ' h2{margin:0 0 10px;font-size:1.35rem}' +
-      '#' + OFFLINE_ID + ' p{margin:0 0 20px;color:#bbb;line-height:1.5;font-size:.98rem}' +
-      '#' + OFFLINE_ID + ' button{min-height:48px;padding:0 18px;border:0;border-radius:12px;background:#FF0000;color:#fff;font-weight:700;width:100%;cursor:pointer;font-size:1rem}' +
+      '#' + OFFLINE_ID + ' .og-box{max-width:380px;width:100%;padding:28px 22px;' +
+        'border:1px solid rgba(255,255,255,.1);border-radius:18px;background:rgba(20,20,20,.92)}' +
+      '#' + OFFLINE_ID + ' .og-logo{font-weight:900;letter-spacing:.16em;color:#FF0000;font-size:1.45rem;margin-bottom:18px}' +
+      '#' + OFFLINE_ID + ' .og-icon{font-size:2.4rem;line-height:1;margin-bottom:12px;opacity:.95}' +
+      '#' + OFFLINE_ID + ' h2{margin:0 0 10px;font-size:1.5rem;font-weight:800;letter-spacing:.02em}' +
+      '#' + OFFLINE_ID + ' p{margin:0 0 22px;color:#bdbdbd;line-height:1.55;font-size:1rem}' +
+      '#' + OFFLINE_ID + ' button{min-height:50px;padding:0 18px;border:0;border-radius:12px;' +
+        'background:#FF0000;color:#fff;font-weight:700;width:100%;cursor:pointer;font-size:1rem}' +
+      '#' + OFFLINE_ID + ' button:active{transform:scale(.98)}' +
       '#' + LOADER_ID + '{' +
         'position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;' +
         'gap:12px;background:rgba(255,255,255,.94);backdrop-filter:blur(6px)' +
@@ -98,17 +105,19 @@
   function lockInteraction() {
     if (offlineLocked) return;
     offlineLocked = true;
-    ['click', 'submit', 'keydown', 'touchstart'].forEach(function (type) {
+    ['click', 'submit', 'keydown', 'keyup', 'touchstart', 'touchmove', 'pointerdown', 'contextmenu', 'wheel'].forEach(function (type) {
       document.addEventListener(type, blockOfflineEvent, true);
     });
+    window.addEventListener('scroll', blockOfflineEvent, true);
   }
 
   function unlockInteraction() {
     if (!offlineLocked) return;
     offlineLocked = false;
-    ['click', 'submit', 'keydown', 'touchstart'].forEach(function (type) {
+    ['click', 'submit', 'keydown', 'keyup', 'touchstart', 'touchmove', 'pointerdown', 'contextmenu', 'wheel'].forEach(function (type) {
       document.removeEventListener(type, blockOfflineEvent, true);
     });
+    window.removeEventListener('scroll', blockOfflineEvent, true);
   }
 
   function purgeOfflineCaches() {
@@ -126,7 +135,8 @@
     } catch (e) { /* ignore */ }
   }
 
-  function showOffline() {
+  function showOffline(reason) {
+    lastReason = reason || 'offline';
     ensureOfflineStyles();
     purgeOfflineCaches();
     lockInteraction();
@@ -138,23 +148,44 @@
       el.id = OFFLINE_ID;
       el.setAttribute('role', 'alertdialog');
       el.setAttribute('aria-modal', 'true');
+      el.setAttribute('aria-labelledby', 'nexoraOfflineTitle');
       el.innerHTML =
         '<div class="og-box">' +
           '<div class="og-logo">NEXORA</div>' +
-          '<h2>İnternet yoxdur</h2>' +
-          '<p>Bu sayt oflayn işləmir. İnterneti yandırın və yenidən cəhd edin — digər saytlar kimi yalnız onlayn açılır.</p>' +
+          '<div class="og-icon" aria-hidden="true">📡</div>' +
+          '<h2 id="nexoraOfflineTitle">Internet Xətası</h2>' +
+          '<p data-offline-msg>İnternet bağlantısı yoxdur. Sayt yalnız onlayn işləyir — telefon və ya kompüterdə interneti yandırın, sonra yenidən yoxlayın.</p>' +
           '<button type="button" data-offline-retry>Yenidən yoxla</button>' +
         '</div>';
       (document.body || document.documentElement).appendChild(el);
       el.addEventListener('click', function (e) {
         if (e.target && e.target.getAttribute('data-offline-retry') !== null) {
-          probeAndSync(true);
+          var btn = e.target;
+          btn.disabled = true;
+          btn.textContent = 'Yoxlanılır…';
+          probeAndSync(true).finally(function () {
+            btn.disabled = false;
+            btn.textContent = 'Yenidən yoxla';
+          });
         }
       });
     }
+
+    var msg = el.querySelector('[data-offline-msg]');
+    if (msg) {
+      msg.textContent = lastReason === 'server'
+        ? 'Serverə qoşulmaq olmadı. İnterneti yoxlayın və bir az sonra yenidən cəhd edin.'
+        : 'İnternet bağlantısı yoxdur. Sayt yalnız onlayn işləyir — telefon və ya kompüterdə interneti yandırın, sonra yenidən yoxlayın.';
+    }
+
     el.hidden = false;
     document.documentElement.classList.add('nexora-offline');
-    try { document.title = 'İnternet yoxdur | NEXORA'; } catch (e2) { /* ignore */ }
+    try {
+      var early = document.getElementById('nexoraEarlyOffline');
+      if (early && early.parentNode) early.parentNode.removeChild(early);
+    } catch (e3) { /* ignore */ }
+    try { document.title = 'Internet Xətası | NEXORA'; } catch (e2) { /* ignore */ }
+    startHealthWatch(true);
   }
 
   function hideOffline() {
@@ -162,6 +193,7 @@
     if (el) el.hidden = true;
     document.documentElement.classList.remove('nexora-offline');
     unlockInteraction();
+    startHealthWatch(false);
   }
 
   function showLoader(msg) {
@@ -194,21 +226,24 @@
     if (el) el.hidden = true;
   }
 
+  function apiBasePrefix() {
+    try {
+      var p = (location.pathname || '').replace(/\\/g, '/');
+      if (p.indexOf('/pages/admin') !== -1) return '../../';
+      if (p.indexOf('/pages/') !== -1) return '../';
+    } catch (e) { /* ignore */ }
+    return '';
+  }
+
   async function probeAndSync(fromRetry) {
     if (!navigator.onLine) {
-      showOffline();
+      showOffline('offline');
       return false;
     }
     try {
-      var base = '';
-      try {
-        var p = (location.pathname || '').replace(/\\/g, '/');
-        if (p.indexOf('/pages/admin') !== -1) base = '../../';
-        else if (p.indexOf('/pages/') !== -1) base = '../';
-      } catch (e) { /* ignore */ }
       var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 2500) : null;
-      var res = await fetch(base + 'api/health?_=' + Date.now(), {
+      var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 4000) : null;
+      var res = await fetch(apiBasePrefix() + 'api/health?_=' + Date.now(), {
         cache: 'no-store',
         signal: ctrl ? ctrl.signal : undefined
       });
@@ -221,23 +256,27 @@
       }
       return true;
     } catch (e) {
-      showOffline();
+      // Network / DNS / airplane mode → Internet Xətası
+      // Server down while "online" still blocks the site (monolith needs API)
+      var netFail = !navigator.onLine ||
+        (e && (e.name === 'TypeError' || e.name === 'AbortError' || /fetch|network|failed/i.test(String(e.message || e))));
+      showOffline(netFail ? 'offline' : 'server');
       return false;
     }
   }
 
-  function startHealthWatch() {
+  function startHealthWatch(fast) {
     if (healthTimer) clearInterval(healthTimer);
     healthTimer = setInterval(function () {
-      if (!navigator.onLine) showOffline();
+      if (!navigator.onLine) showOffline('offline');
       else probeAndSync(false);
-    }, 30000);
+    }, fast ? 4000 : 20000);
   }
 
-  function bindLinkLoader() {
-    // Prefetch destination on hover/touch — next page feels instant
+  function bindGuards() {
     var prefetchDone = Object.create(null);
     function prefetchHref(href) {
+      if (offlineLocked || !navigator.onLine) return;
       try {
         var url = new URL(href, location.href);
         if (url.origin !== location.origin) return;
@@ -252,6 +291,7 @@
         document.head.appendChild(link);
       } catch (err) { /* ignore */ }
     }
+
     document.addEventListener('pointerover', function (e) {
       var a = e.target.closest && e.target.closest('a[href]');
       if (!a) return;
@@ -263,62 +303,71 @@
     document.addEventListener('click', function (e) {
       if (offlineLocked || !navigator.onLine) {
         e.preventDefault();
-        showOffline();
-        return;
+        showOffline('offline');
       }
-      // No full-screen "Keçid edilir…" — it makes every hop feel slow
     }, true);
   }
 
   function boot() {
-    // Instant offline paint before anything else
+    // Instant lock before any UI if already offline (phone airplane / Wi‑Fi off)
+    ensureOfflineStyles();
     if (!navigator.onLine) {
-      ensureOfflineStyles();
       document.documentElement.classList.add('nexora-offline');
+      showOffline('offline');
     }
 
     redirectRefreshToHome();
     bindExitToHome();
-    ensureOfflineStyles();
 
     try {
       if (sessionStorage.getItem('nexora-show-loader') === '1') {
         sessionStorage.removeItem('nexora-show-loader');
-        showLoader('Ana səhifə açılır…');
-        // Short flash only — don't hold 1.2s
-        setTimeout(function () { hideLoader(true); }, 180);
+        if (navigator.onLine) {
+          showLoader('Ana səhifə açılır…');
+          setTimeout(function () { hideLoader(true); }, 180);
+        }
       }
     } catch (e) { /* ignore */ }
 
-    if (!navigator.onLine) showOffline();
-    else {
-      // Don't block first paint — health check in background
-      setTimeout(function () { probeAndSync(false); }, 0);
+    if (!navigator.onLine) {
+      showOffline('offline');
+    } else {
+      // Verify real connectivity ASAP (not only navigator.onLine)
+      probeAndSync(false);
     }
 
-    window.addEventListener('offline', function () { showOffline(); });
+    window.addEventListener('offline', function () { showOffline('offline'); });
     window.addEventListener('online', function () { probeAndSync(true); });
-    startHealthWatch();
+    startHealthWatch(false);
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function () {
-        bindLinkLoader();
-        if (!navigator.onLine) showOffline();
-        hideLoader(true);
+        bindGuards();
+        if (!navigator.onLine) showOffline('offline');
+        else hideLoader(true);
       });
     } else {
-      bindLinkLoader();
-      hideLoader(true);
+      bindGuards();
+      if (!navigator.onLine) showOffline('offline');
+      else hideLoader(true);
     }
 
-    window.addEventListener('pageshow', function (ev) {
-      hideLoader(true);
-      if (!navigator.onLine) showOffline();
+    window.addEventListener('pageshow', function () {
+      if (!navigator.onLine) showOffline('offline');
+      else hideLoader(true);
     });
     window.addEventListener('load', function () {
-      hideLoader(true);
-      if (!navigator.onLine) showOffline();
+      if (!navigator.onLine) showOffline('offline');
+      else hideLoader(true);
     });
+  }
+
+  // Sync paint as early as this file runs
+  if (!navigator.onLine) {
+    try {
+      document.documentElement.classList.add('nexora-offline');
+      ensureOfflineStyles();
+    } catch (e) { /* ignore */ }
   }
 
   boot();
