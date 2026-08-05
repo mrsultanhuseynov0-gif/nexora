@@ -391,7 +391,7 @@ function suggestChips(intent) {
 
 function buildAdvice(intent, products, clarify) {
   if (!products.length) {
-    return 'Uyğun məhsul tapa bilmədim. Büdcə və məqsədi yazın — məsələn: «2000 AZN oyun noutbuku».';
+    return 'Bu sorğuya uyğun məhsul tapılmadı. Başqa büdcə və ya kateqoriya yazın — məsələn: «2000 AZN oyun noutbuku» və ya «smartfon».';
   }
 
   const parts = [];
@@ -505,6 +505,29 @@ function consult(text, opts) {
   const history = opts.history || [];
   const intent = parseIntent(text, history);
   const limit = Math.min(Math.max(opts.limit || 8, 1), 16);
+
+  const totalCount = Number((db.prepare('SELECT COUNT(*) AS c FROM products').get() || {}).c || 0);
+  if (!totalCount) {
+    return {
+      ok: true,
+      source: 'api',
+      advice: 'Kataloqda hələ məhsul yoxdur. Admin paneldən məhsul əlavə edin — sonra burada axtarıb tövsiyə edə bilərəm.',
+      intent: publicIntent(intent),
+      products: [],
+      questions: [
+        'Admin → Məhsullar → Yeni məhsul',
+        'Telefon əlavə etdikdən sonra yenidən yaz',
+        'Noutbuk əlavə etdikdən sonra soruş'
+      ],
+      chips: [
+        'Hansı smartfonu məsləhət görürsən?',
+        'Oyun üçün noutbuk',
+        '1500 AZN büdcəm var'
+      ],
+      totalCandidates: 0,
+      emptyCatalog: true
+    };
+  }
 
   const rows = fetchRows(intent);
   let ranked = rows

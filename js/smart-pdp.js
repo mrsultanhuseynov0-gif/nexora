@@ -74,13 +74,48 @@
         '<p class="text-sm mt-3">Paket qiyməti: <strong>' + NexoraApp.formatPrice(bundle.bundlePrice) + '</strong></p>' +
       '</div></div>' +
 
-      '<div class="card mb-4"><div class="card-body flex gap-4 flex-wrap items-center">' +
-        '<div><h3 class="card-title mb-2">' + (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('qr_code') : 'QR kod') + '</h3>' +
-        '<p class="text-sm text-muted">QR</p></div>' +
-        '<img src="' + NexoraSmart.qrUrl(product.id) + '" alt="QR" width="140" height="140" style="border-radius:12px;background:#fff;padding:8px">' +
+      '<div class="card mb-4"><div class="card-body">' +
+        '<h3 class="card-title mb-3">' + (typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('qr_code') : 'QR kod') + '</h3>' +
+        '<div class="qr-chat-grid">' +
+          '<div class="qr-chat-card">' +
+            '<img class="qr-chat-img" src="' + NexoraSmart.qrUrl(product.id) + '" alt="Məhsul QR" width="150" height="150">' +
+            '<strong>Məhsul linki</strong>' +
+            '<p class="text-sm text-muted mb-2">Skana et — məhsul səhifəsi açılsın</p>' +
+            '<button type="button" class="btn btn-outline btn-sm" id="qrCopyLink">Linki kopyala</button>' +
+          '</div>' +
+          '<div class="qr-chat-card">' +
+            '<img class="qr-chat-img" src="' + NexoraSmart.whatsappQrUrl(product) + '" alt="WhatsApp sohbet QR" width="150" height="150">' +
+            '<strong>WhatsApp sohbet</strong>' +
+            '<p class="text-sm text-muted mb-2">Skana et — bu məhsul haqqında yaz</p>' +
+            '<a class="btn btn-primary btn-sm" id="qrOpenWa" href="' + NexoraSmart.whatsappChatUrl(product) +
+              '" target="_blank" rel="noopener">Söhbətə başla</a>' +
+          '</div>' +
+        '</div>' +
       '</div></div>';
 
     root.appendChild(panel);
+
+    const copyLinkBtn = document.getElementById('qrCopyLink');
+    if (copyLinkBtn) {
+      copyLinkBtn.addEventListener('click', async function () {
+        const link = NexoraSmart.productShareUrl(product.id);
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(link);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = link;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+          }
+          NexoraToast.success('Link kopyalandı');
+        } catch (e) {
+          NexoraToast.info(link);
+        }
+      });
+    }
 
     const canvas = document.getElementById('priceHistoryChart');
     if (canvas) NexoraSmart.renderPriceChart(canvas, history);

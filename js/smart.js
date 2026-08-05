@@ -152,7 +152,11 @@ const NexoraSmart = (function () {
 
     let advice = 'Büdcənizə uyğun seçimləri topladım.';
     if (q.gaming) advice = 'Oyun üçün performans və soyutma vacibdir — aşağıdakı modelləri müqayisə edin.';
-    if (!ranked.length) advice = 'Bu büdcə/filtrə uyğun məhsul tapılmadı. Büdcəni artırın və ya kateqoriyanı dəyişin.';
+    if (!products.length) {
+      advice = 'Kataloqda hələ məhsul yoxdur. Admin-dən məhsul əlavə edin, sonra yenidən soruşun.';
+    } else if (!ranked.length) {
+      advice = 'Bu büdcə/filtrə uyğun məhsul tapılmadı. Büdcəni artırın və ya kateqoriyanı dəyişin.';
+    }
 
     return { query: q, products: ranked, advice: advice, source: 'local', questions: [], chips: [] };
   }
@@ -536,15 +540,42 @@ const NexoraSmart = (function () {
     return { total: total, labels: labels };
   }
 
-  function qrUrl(productId) {
-    const path = NexoraApp.pageUrl('product.html?id=' + encodeURIComponent(productId));
-    const abs = path.startsWith('http') ? path : (window.location.origin + '/' + path.replace(/^\.\.\//, '').replace(/^\//, ''));
-    // Prefer absolute URL for QR
-    let full = abs;
+  function absoluteUrl(pathOrUrl) {
     try {
-      full = new URL(path, window.location.href).href;
-    } catch (e) { /* keep */ }
-    return 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(full);
+      return new URL(pathOrUrl, window.location.href).href;
+    } catch (e) {
+      if (/^https?:/i.test(pathOrUrl)) return pathOrUrl;
+      return window.location.origin + '/' + String(pathOrUrl || '').replace(/^\.\.\//, '').replace(/^\//, '');
+    }
+  }
+
+  function productShareUrl(productId) {
+    const path = NexoraApp.pageUrl('product.html?id=' + encodeURIComponent(productId));
+    return absoluteUrl(path);
+  }
+
+  /** Same-origin QR PNG (CSP-safe). Falls back to data URL via canvas if needed. */
+  function qrImageUrl(data, size) {
+    size = size || 180;
+    const payload = String(data || '');
+    return '/api/qr?size=' + encodeURIComponent(size) + '&data=' + encodeURIComponent(payload);
+  }
+
+  function qrUrl(productId) {
+    return qrImageUrl(productShareUrl(productId), 180);
+  }
+
+  function whatsappChatUrl(product) {
+    const name = (product && product.name) || 'məhsul';
+    const sku = (product && (product.sku || product.id)) || '';
+    const link = product && product.id ? productShareUrl(product.id) : window.location.href;
+    const msg = 'Salam! "' + name + '"' + (sku ? ' (' + sku + ')' : '') +
+      ' haqqında söhbət etmək istəyirəm.\n' + link;
+    return NexoraApp.whatsappLink(msg);
+  }
+
+  function whatsappQrUrl(product, size) {
+    return qrImageUrl(whatsappChatUrl(product), size || 180);
   }
 
   return {
@@ -574,6 +605,10 @@ const NexoraSmart = (function () {
     buildLocalWarrantyPdf: buildLocalWarrantyPdf,
     configuratorOptions: configuratorOptions,
     configPrice: configPrice,
-    qrUrl: qrUrl
+    qrUrl: qrUrl,
+    qrImageUrl: qrImageUrl,
+    productShareUrl: productShareUrl,
+    whatsappChatUrl: whatsappChatUrl,
+    whatsappQrUrl: whatsappQrUrl
   };
 })();

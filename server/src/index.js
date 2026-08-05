@@ -103,6 +103,7 @@ app.use('/api/service', serviceRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/business', businessRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/qr', require('./routes/qr'));
 app.use('/api', catalogRoutes);
 
 /* Dynamic sitemap (SEO) */
