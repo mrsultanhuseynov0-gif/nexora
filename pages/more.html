@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Daha çox | NEXORA</title>
-  <link rel="stylesheet" href="../css/main.css?v=20260805e">
+  <link rel="stylesheet" href="../css/main.css?v=20260805f">
   <link rel="manifest" href="../manifest.webmanifest">
   <meta name="theme-color" content="#FF0000">
   <style>
@@ -85,20 +85,20 @@
     </main>
     <div id="site-footer"></div>
   </div>
-  <script src="../js/icons.js?v=20260805e"></script>
-  <script src="../js/components/modal.js?v=20260805e"></script>
-  <script src="../js/components/toast.js?v=20260805e"></script>
-  <script src="../js/connectivity.js?v=20260805e"></script>
-  <script src="../js/app.js?v=20260805e"></script>
-  <script src="../js/api.js?v=20260805e"></script>
-  <script src="../js/security.js?v=20260805e"></script>
-  <script src="../js/account.js?v=20260805e"></script>
-  <script src="../js/cart.js?v=20260805e"></script>
-  <script src="../js/wishlist.js?v=20260805e"></script>
-  <script src="../js/search.js?v=20260805e"></script>
-  <script src="../js/i18n.js?v=20260805e"></script>
-  <script src="../js/shell.js?v=20260805e"></script>
-  <script src="../js/main.js?v=20260805e"></script>
+  <script src="../js/icons.js?v=20260805f"></script>
+  <script src="../js/components/modal.js?v=20260805f"></script>
+  <script src="../js/components/toast.js?v=20260805f"></script>
+  <script src="../js/connectivity.js?v=20260805f"></script>
+  <script src="../js/app.js?v=20260805f"></script>
+  <script src="../js/api.js?v=20260805f"></script>
+  <script src="../js/security.js?v=20260805f"></script>
+  <script src="../js/account.js?v=20260805f"></script>
+  <script src="../js/cart.js?v=20260805f"></script>
+  <script src="../js/wishlist.js?v=20260805f"></script>
+  <script src="../js/search.js?v=20260805f"></script>
+  <script src="../js/i18n.js?v=20260805f"></script>
+  <script src="../js/shell.js?v=20260805f"></script>
+  <script src="../js/main.js?v=20260805f"></script>
   <script>
     (function () {
       'use strict';
@@ -116,10 +116,6 @@
         { href: 'cart.html', title: 'Səbət', desc: 'Sifarişə hazır məhsullar', id: 'cart' }
       ];
 
-      function sleep(ms) {
-        return new Promise(function (r) { setTimeout(r, ms); });
-      }
-
       function labelFor(item) {
         if (typeof NexoraI18n !== 'undefined' && item.id && NexoraI18n.t(item.id) !== item.id) {
           return NexoraI18n.t(item.id);
@@ -127,53 +123,24 @@
         return item.title;
       }
 
-      async function renderSequential() {
+      function renderLinks() {
         var el = document.getElementById('moreLinks');
         var loading = document.getElementById('moreLoading');
-        var loadingText = document.getElementById('moreLoadingText');
         if (!el) return;
-
-        // Light ping so backend stays awake without dumping all pages at once
-        try {
-          if (typeof NexoraApi !== 'undefined' && NexoraApi.ensureApi) await NexoraApi.ensureApi();
-        } catch (e) { /* ignore */ }
-
-        for (var i = 0; i < links.length; i++) {
-          var l = links[i];
-          if (loadingText) {
-            loadingText.textContent = 'Yüklənir: ' + labelFor(l) + ' (' + (i + 1) + '/' + links.length + ')';
-          }
-
-          var a = document.createElement('a');
-          a.className = 'more-link-card';
-          a.href = l.href;
-          a.innerHTML = '<strong></strong><span></span>';
-          a.querySelector('strong').textContent = labelFor(l);
-          a.querySelector('span').textContent = l.desc;
-          el.appendChild(a);
-
-          // Stagger paint — one card at a time
-          await sleep(140);
-          a.classList.add('is-in');
-
-          // Tiny spacing between cards so we never burst the main thread / network
-          await sleep(80);
-        }
-
+        el.innerHTML = links.map(function (l) {
+          return '<a class="more-link-card is-in" href="' + l.href + '"><strong>' +
+            labelFor(l).replace(/</g, '&lt;') + '</strong><span>' +
+            String(l.desc || '').replace(/</g, '&lt;') + '</span></a>';
+        }).join('');
         if (loading) loading.hidden = true;
         document.dispatchEvent(new CustomEvent('nexora:more-ready'));
       }
 
-      function start() {
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', function () {
-            setTimeout(renderSequential, 120);
-          });
-        } else {
-          setTimeout(renderSequential, 120);
-        }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderLinks);
+      } else {
+        renderLinks();
       }
-      start();
     })();
   </script>
 </body>

@@ -489,11 +489,11 @@ const NexoraShell = (function () {
     NexoraApp.updateBadges();
     NexoraApp.initAuthUI();
     document.dispatchEvent(new CustomEvent('nexora:shell-ready'));
-    // Non-home pages: clear boot/loader after shell paints
+    // Non-home pages: clear boot/loader as soon as shell paints
     if (!document.getElementById('homeProducts')) {
       document.body.classList.add('is-ready');
       if (window.NexoraConnectivity && NexoraConnectivity.hideLoader) {
-        setTimeout(function () { NexoraConnectivity.hideLoader(true); }, 200);
+        NexoraConnectivity.hideLoader(true);
       }
     }
   }

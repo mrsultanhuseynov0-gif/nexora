@@ -207,7 +207,7 @@
         else if (p.indexOf('/pages/') !== -1) base = '../';
       } catch (e) { /* ignore */ }
       var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 7000) : null;
+      var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 2500) : null;
       var res = await fetch(base + 'api/health?_=' + Date.now(), {
         cache: 'no-store',
         signal: ctrl ? ctrl.signal : undefined
@@ -235,24 +235,38 @@
   }
 
   function bindLinkLoader() {
+    // Prefetch destination on hover/touch — next page feels instant
+    var prefetchDone = Object.create(null);
+    function prefetchHref(href) {
+      try {
+        var url = new URL(href, location.href);
+        if (url.origin !== location.origin) return;
+        if (/\.(png|jpe?g|gif|webp|svg|pdf)$/i.test(url.pathname)) return;
+        var key = url.pathname + url.search;
+        if (prefetchDone[key]) return;
+        prefetchDone[key] = 1;
+        var link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = url.pathname + url.search;
+        link.as = 'document';
+        document.head.appendChild(link);
+      } catch (err) { /* ignore */ }
+    }
+    document.addEventListener('pointerover', function (e) {
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      var href = a.getAttribute('href') || '';
+      if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) return;
+      prefetchHref(href);
+    }, true);
+
     document.addEventListener('click', function (e) {
       if (offlineLocked || !navigator.onLine) {
         e.preventDefault();
         showOffline();
         return;
       }
-      var a = e.target.closest && e.target.closest('a[href]');
-      if (!a) return;
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      var href = a.getAttribute('href') || '';
-      if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) return;
-      if (a.target === '_blank' || a.hasAttribute('download')) return;
-      try {
-        var url = new URL(href, location.href);
-        if (url.origin === location.origin && !/\.(png|jpe?g|gif|webp|svg|pdf)$/i.test(url.pathname)) {
-          showLoader('Keçid edilir…');
-        }
-      } catch (err) { /* ignore */ }
+      // No full-screen "Keçid edilir…" — it makes every hop feel slow
     }, true);
   }
 
@@ -271,12 +285,16 @@
       if (sessionStorage.getItem('nexora-show-loader') === '1') {
         sessionStorage.removeItem('nexora-show-loader');
         showLoader('Ana səhifə açılır…');
-        setTimeout(function () { hideLoader(true); }, 1200);
+        // Short flash only — don't hold 1.2s
+        setTimeout(function () { hideLoader(true); }, 180);
       }
     } catch (e) { /* ignore */ }
 
     if (!navigator.onLine) showOffline();
-    else probeAndSync(false);
+    else {
+      // Don't block first paint — health check in background
+      setTimeout(function () { probeAndSync(false); }, 0);
+    }
 
     window.addEventListener('offline', function () { showOffline(); });
     window.addEventListener('online', function () { probeAndSync(true); });
@@ -286,17 +304,19 @@
       document.addEventListener('DOMContentLoaded', function () {
         bindLinkLoader();
         if (!navigator.onLine) showOffline();
+        hideLoader(true);
       });
     } else {
       bindLinkLoader();
+      hideLoader(true);
     }
 
     window.addEventListener('pageshow', function (ev) {
-      if (ev.persisted) hideLoader(true);
+      hideLoader(true);
       if (!navigator.onLine) showOffline();
     });
     window.addEventListener('load', function () {
-      setTimeout(function () { hideLoader(true); }, 300);
+      hideLoader(true);
       if (!navigator.onLine) showOffline();
     });
   }

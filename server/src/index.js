@@ -150,10 +150,14 @@ app.use(express.static(ROOT, {
     if (filePath.endsWith('.html')) {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     } else if (/\.(js|css)$/i.test(filePath)) {
-      // Short cache + revalidate so deploys show up without hard-refresh forever
-      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
-    } else if (/\.(svg|png|jpg|webp|woff2)$/i.test(filePath)) {
-      res.setHeader('Cache-Control', cfg.isProd ? 'public, max-age=86400' : 'no-cache');
+      // Versioned via ?v= — cache hard so page hops reuse scripts instantly
+      res.setHeader('Cache-Control', cfg.isProd
+        ? 'public, max-age=31536000, immutable'
+        : 'public, max-age=60');
+    } else if (/\.(svg|png|jpg|jpeg|webp|woff2|ico)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', cfg.isProd ? 'public, max-age=604800' : 'public, max-age=300');
+    } else if (/[\\/]data[\\/].*\.json$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
     }
   }
 }));

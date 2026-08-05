@@ -93,11 +93,21 @@
     }
   }
 
+  var _healthCache = null;
+  var _healthAt = 0;
+
   async function health() {
+    var now = Date.now();
+    if (_healthCache && (now - _healthAt) < 30000) return _healthCache;
+
     await loadRuntimeConfig();
 
     var same = await probeHealth(API_BASE || '');
-    if (same) return same;
+    if (same) {
+      _healthCache = same;
+      _healthAt = now;
+      return same;
+    }
 
     // Local development only: try sibling API port when storefront ≠ API origin
     if (typeof location !== 'undefined' &&
@@ -114,6 +124,8 @@
         var hit = await probeHealth(candidates[i]);
         if (hit) {
           try { localStorage.setItem('nexora-api-base', API_BASE); } catch (e3) { /* ignore */ }
+          _healthCache = hit;
+          _healthAt = now;
           return hit;
         }
       }

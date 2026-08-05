@@ -67,22 +67,19 @@ const NexoraApp = (function () {
 
   async function loadProducts() {
     // Prefer API — including empty catalog (do not resurrect old localStorage demos)
+    // Do not await ensureApi/health first — that adds an extra RTT before every catalog paint
     try {
-      if (typeof NexoraApi !== 'undefined') {
-        if (NexoraApi.ensureApi) await NexoraApi.ensureApi();
-        if (NexoraApi.getProducts) {
-          const apiData = await NexoraApi.getProducts({ limit: 1000 });
-          if (apiData && Array.isArray(apiData.products)) {
-            const seed = apiData.products;
-            const ver = apiData.version || seed.length || 1;
-            // Empty live catalog wins — wipe stale browser overrides
-            if (!seed.length) {
-              localStorage.removeItem('nexora-products');
-              storageSet('nexora-catalog-ver', ver);
-              return [];
-            }
-            return mergeProductOverrides(seed, ver);
+      if (typeof NexoraApi !== 'undefined' && NexoraApi.getProducts) {
+        const apiData = await NexoraApi.getProducts({ limit: 1000 });
+        if (apiData && Array.isArray(apiData.products)) {
+          const seed = apiData.products;
+          const ver = apiData.version || seed.length || 1;
+          if (!seed.length) {
+            localStorage.removeItem('nexora-products');
+            storageSet('nexora-catalog-ver', ver);
+            return [];
           }
+          return mergeProductOverrides(seed, ver);
         }
       }
     } catch (e) {

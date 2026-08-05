@@ -186,9 +186,14 @@
 
   async function init() {
     if (!document.getElementById('productsGrid')) return;
-    allProducts = await NexoraApp.loadProducts();
-    categories = await NexoraApp.loadCategories();
-    brands = await NexoraApp.loadBrands();
+    var loaded = await Promise.all([
+      NexoraApp.loadProducts(),
+      NexoraApp.loadCategories(),
+      NexoraApp.loadBrands()
+    ]);
+    allProducts = loaded[0];
+    categories = loaded[1];
+    brands = loaded[2];
 
     const state = stateFromURL();
     renderFilters(state);
