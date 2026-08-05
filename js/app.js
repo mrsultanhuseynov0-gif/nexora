@@ -66,15 +66,22 @@ const NexoraApp = (function () {
   }
 
   async function loadProducts() {
-    // Prefer API (avoids hanging on 1.7MB JSON during Render cold start)
+    // Prefer API — including empty catalog (do not resurrect old localStorage demos)
     try {
       if (typeof NexoraApi !== 'undefined') {
         if (NexoraApi.ensureApi) await NexoraApi.ensureApi();
         if (NexoraApi.getProducts) {
           const apiData = await NexoraApi.getProducts({ limit: 1000 });
-          const seed = (apiData && apiData.products) || [];
-          if (seed.length) {
-            return mergeProductOverrides(seed, apiData.version || seed.length);
+          if (apiData && Array.isArray(apiData.products)) {
+            const seed = apiData.products;
+            const ver = apiData.version || seed.length || 1;
+            // Empty live catalog wins — wipe stale browser overrides
+            if (!seed.length) {
+              localStorage.removeItem('nexora-products');
+              storageSet('nexora-catalog-ver', ver);
+              return [];
+            }
+            return mergeProductOverrides(seed, ver);
           }
         }
       }
@@ -84,7 +91,13 @@ const NexoraApp = (function () {
 
     const data = await fetchJSON('data/products.json');
     const seed = data.products || [];
-    return mergeProductOverrides(seed, data.version || seed.length);
+    const ver = data.version || seed.length || 1;
+    if (!seed.length) {
+      localStorage.removeItem('nexora-products');
+      storageSet('nexora-catalog-ver', ver);
+      return [];
+    }
+    return mergeProductOverrides(seed, ver);
   }
 
   async function loadCategories() {

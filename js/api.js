@@ -179,6 +179,12 @@
     deleteProduct: function (id) {
       return request('/api/products/' + encodeURIComponent(id), { method: 'DELETE' });
     },
+    uploadImage: function (dataUrl) {
+      return request('/api/uploads', {
+        method: 'POST',
+        body: JSON.stringify({ dataUrl: dataUrl })
+      });
+    },
     getOrders: function () { return request('/api/orders'); },
     myOrders: function () { return request('/api/orders/mine'); },
     trackOrder: function (id, email) {

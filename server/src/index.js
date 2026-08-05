@@ -21,6 +21,7 @@ const warrantyRoutes = require('./routes/warranties');
 const serviceRoutes = require('./routes/service');
 const analyticsRoutes = require('./routes/analytics');
 const businessRoutes = require('./routes/business');
+const uploadRoutes = require('./routes/uploads');
 
 const app = express();
 const ROOT = path.join(__dirname, '..', '..');
@@ -57,7 +58,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '12mb' }));
 
 /* Public runtime config for storefront (no secrets) */
 app.get('/config.json', (_req, res) => {
@@ -101,6 +102,7 @@ app.use('/api/warranties', warrantyRoutes);
 app.use('/api/service', serviceRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/business', businessRoutes);
+app.use('/api/uploads', uploadRoutes);
 app.use('/api', catalogRoutes);
 
 /* Dynamic sitemap (SEO) */

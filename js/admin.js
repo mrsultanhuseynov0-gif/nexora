@@ -699,16 +699,114 @@
     });
   }
 
+  function collectImageSlots() {
+    var srcs = [];
+    for (var i = 1; i <= 3; i++) {
+      var el = document.getElementById('pImg' + i);
+      var v = el ? el.value.trim() : '';
+      if (v && srcs.indexOf(v) === -1) srcs.push(v);
+    }
+    return srcs;
+  }
+
+  function renderSlotPreview(slot, url) {
+    var box = document.getElementById('pImgPreview' + slot);
+    if (!box) return;
+    if (!url) {
+      box.innerHTML = '<span class="text-xs text-muted">Şəkil ' + slot + '</span>';
+      return;
+    }
+    box.innerHTML = '<img src="' + esc(NexoraApp.resolveMediaUrl(url)) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px">';
+  }
+
+  function bindImageSlots() {
+    for (var i = 1; i <= 3; i++) {
+      (function (slot) {
+        var urlInput = document.getElementById('pImg' + slot);
+        var fileInput = document.getElementById('pImgFile' + slot);
+        var clearBtn = document.getElementById('pImgClear' + slot);
+        if (urlInput) {
+          urlInput.addEventListener('input', function () {
+            renderSlotPreview(slot, urlInput.value.trim());
+          });
+        }
+        if (clearBtn) {
+          clearBtn.addEventListener('click', function () {
+            if (urlInput) urlInput.value = '';
+            if (fileInput) fileInput.value = '';
+            renderSlotPreview(slot, '');
+          });
+        }
+        if (fileInput) {
+          fileInput.addEventListener('change', async function () {
+            var file = fileInput.files && fileInput.files[0];
+            if (!file) return;
+            if (!/^image\//.test(file.type)) {
+              NexoraToast.error('Yalnız şəkil faylı seçin');
+              return;
+            }
+            if (file.size > 6 * 1024 * 1024) {
+              NexoraToast.error('Şəkil 6MB-dan böyük ola bilməz');
+              return;
+            }
+            try {
+              NexoraToast.info('Şəkil ' + slot + ' yüklənir…');
+              var dataUrl = await new Promise(function (resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function () { resolve(reader.result); };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+              });
+              var uploaded = null;
+              if (state.apiLive && typeof NexoraApi !== 'undefined' && NexoraApi.uploadImage) {
+                uploaded = await NexoraApi.uploadImage(dataUrl);
+              }
+              var finalUrl = (uploaded && uploaded.url) || dataUrl;
+              if (urlInput) urlInput.value = finalUrl;
+              renderSlotPreview(slot, finalUrl);
+              NexoraToast.success('Şəkil ' + slot + ' hazırdır');
+            } catch (e) {
+              NexoraToast.error(e.message || 'Şəkil yüklənmədi');
+            }
+          });
+        }
+      })(i);
+    }
+  }
+
   function openProductDrawer(product, catList) {
     var isNew = !product;
     var p = product || { stock: 10, category: 'electronics', badge: 'Yeni' };
-    var mainImg = p.image || (p.images && p.images[0] && p.images[0].src) || '';
-    var extras = (p.images || []).map(function (img) { return img.src || ''; }).filter(Boolean);
-    if (mainImg && extras.indexOf(mainImg) === -1) extras = extras.filter(function (s) { return s !== mainImg; });
-    else if (mainImg) extras = extras.filter(function (s) { return s !== mainImg; });
+    var existing = [];
+    if (p.image) existing.push(p.image);
+    (p.images || []).forEach(function (img) {
+      var src = img && (img.src || img.url || img);
+      if (src && existing.indexOf(src) === -1) existing.push(src);
+    });
+    while (existing.length < 3) existing.push('');
+    existing = existing.slice(0, 3);
+
     var catOpts = (catList || []).map(function (c) {
       return '<option value="' + esc(c.id) + '"' + (p.category === c.id ? ' selected' : '') + '>' + esc(c.name) + '</option>';
     }).join('');
+
+    function slotHtml(n, url) {
+      var prev = url
+        ? '<img src="' + esc(NexoraApp.resolveMediaUrl(url)) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px">'
+        : '<span class="text-xs text-muted">Şəkil ' + n + '</span>';
+      return '<div class="admin-img-slot" style="border:1px solid var(--color-border);border-radius:12px;padding:10px;flex:1;min-width:140px">' +
+        '<div id="pImgPreview' + n + '" style="width:100%;aspect-ratio:1;background:var(--color-bg-alt);border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:8px">' +
+          prev +
+        '</div>' +
+        '<label class="btn btn-outline btn-sm w-full mb-2" style="cursor:pointer">' +
+          'Fayldan seç' +
+          '<input type="file" id="pImgFile' + n + '" accept="image/*" hidden>' +
+        '</label>' +
+        '<input class="input" id="pImg' + n + '" placeholder="və ya şəkil linki" value="' + esc(url) + '">' +
+        '<button type="button" class="btn btn-ghost btn-sm w-full mt-2" id="pImgClear' + n + '">Təmizlə</button>' +
+      '</div>';
+    }
+
     var body =
       '<form id="productDrawerForm">' +
         '<input type="hidden" id="pId" value="' + esc(p.id || '') + '">' +
@@ -722,9 +820,12 @@
         '<div class="form-group"><label class="form-label">Stok</label><input type="number" min="0" class="input" id="pStock" value="' + esc(p.stock != null ? p.stock : 10) + '"></div></div>' +
         '<div class="form-group"><label class="form-label">Badge</label><input class="input" id="pBadge" value="' + esc(p.badge || 'Yeni') + '"></div>' +
         '<div class="form-group"><label class="form-label">Təsvir</label><textarea class="input" id="pDesc" rows="3">' + esc(p.description || '') + '</textarea></div>' +
-        '<div class="form-group"><label class="form-label">Əsas şəkil URL</label><input class="input" id="pImage" value="' + esc(mainImg) + '"></div>' +
-        '<div id="pImagePreview" class="mb-3">' + (mainImg ? '<img class="admin-thumb" style="width:120px;height:120px" src="' + esc(NexoraApp.resolveMediaUrl(mainImg)) + '" alt="">' : '') + '</div>' +
-        '<div class="form-group"><label class="form-label">Əlavə şəkillər (hər sətirdə 1 URL)</label><textarea class="input" id="pImages" rows="2">' + esc(extras.join('\n')) + '</textarea></div>' +
+        '<div class="form-group"><label class="form-label">Şəkillər (3 ədəd) — fayldan seçin, saytda görünəcək</label>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:stretch">' +
+            slotHtml(1, existing[0]) + slotHtml(2, existing[1]) + slotHtml(3, existing[2]) +
+          '</div>' +
+          '<p class="text-xs text-muted mt-2 mb-0">1-ci şəkil əsasdır. 2 və 3 məhsul səhifəsində qalereyada çıxır.</p>' +
+        '</div>' +
         '<div class="form-group"><label class="form-label">Xüsusiyyətlər</label>' + specsEditorHtml(p.specs) + '</div>' +
       '</form>';
     var foot = '<button type="button" class="btn btn-ghost" id="drawerCancel">Ləğv</button>' +
@@ -732,15 +833,7 @@
       '<button type="button" class="btn btn-primary" id="drawerSave">Yadda saxla</button>';
     openDrawer(isNew ? 'Yeni məhsul' : 'Məhsul redaktə', body, foot);
     bindSpecsEditor();
-    var imgInput = document.getElementById('pImage');
-    if (imgInput) {
-      imgInput.addEventListener('input', function () {
-        var v = imgInput.value.trim();
-        document.getElementById('pImagePreview').innerHTML = v
-          ? '<img class="admin-thumb" style="width:120px;height:120px" src="' + esc(NexoraApp.resolveMediaUrl(v)) + '" alt="">'
-          : '';
-      });
-    }
+    bindImageSlots();
     document.getElementById('drawerCancel').addEventListener('click', closeDrawer);
     if (!isNew) {
       document.getElementById('drawerDelete').addEventListener('click', function () {
@@ -766,11 +859,7 @@
           return;
         }
         var id = document.getElementById('pId').value || ('p' + Date.now());
-        var mainImage = document.getElementById('pImage').value.trim();
-        var extraLines = document.getElementById('pImages').value.split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
-        var allSrc = [];
-        if (mainImage) allSrc.push(mainImage);
-        extraLines.forEach(function (src) { if (allSrc.indexOf(src) === -1) allSrc.push(src); });
+        var allSrc = collectImageSlots();
         var gradient = p.gradient || 'linear-gradient(135deg,#111,#FF0000)';
         var images = allSrc.length
           ? allSrc.map(function (src, i) { return { src: src, alt: name + (i ? ' ' + (i + 1) : ''), gradient: gradient }; })
@@ -793,7 +882,7 @@
         if (isNew) item._isNew = true;
         await saveProduct(item);
         closeDrawer();
-        NexoraToast.success('Məhsul saxlandı');
+        NexoraToast.success('Məhsul saxlandı — saytda görünəcək');
         render();
       } catch (e) {
         NexoraToast.error(e.message || 'Saxlama alınmadı');
