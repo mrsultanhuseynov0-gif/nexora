@@ -211,8 +211,51 @@ function syncCatalogFromDisk() {
   return counts;
 }
 
+/**
+ * Always ensure demo + admin accounts exist with known passwords.
+ * Fixes production DBs that lost admin after catalog wipes / partial seeds.
+ */
+function ensureCoreUsers() {
+  const usersData = readJson('users.json');
+  const list = usersData.users || [];
+  let fixed = 0;
+
+  for (const u of list) {
+    const email = String(u.email || '').trim().toLowerCase();
+    if (!email || !u.password) continue;
+    const role = u.role === 'admin' ? 'admin' : 'customer';
+    const hash = bcrypt.hashSync(String(u.password), 10);
+    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+    if (existing) {
+      db.prepare(`
+        UPDATE users
+        SET password_hash = ?, name = ?, phone = ?, role = ?
+        WHERE email = ?
+      `).run(hash, u.name || 'User', u.phone || '', role, email);
+    } else {
+      db.prepare(`
+        INSERT INTO users (id, email, password_hash, name, phone, role, addresses_json, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        u.id || uid('u'),
+        email,
+        hash,
+        u.name || 'User',
+        u.phone || '',
+        role,
+        JSON.stringify(u.addresses || []),
+        u.createdAt || new Date().toISOString()
+      );
+    }
+    fixed += 1;
+  }
+
+  console.log('Core users ensured:', fixed);
+  return { ok: true, fixed };
+}
+
 if (require.main === module) {
   seed();
 }
 
-module.exports = { seed, syncCatalogFromDisk };
+module.exports = { seed, syncCatalogFromDisk, ensureCoreUsers };

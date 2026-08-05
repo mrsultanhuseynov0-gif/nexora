@@ -6,7 +6,7 @@ const cors = require('cors');
 const compression = require('compression');
 const cfg = require('./config');
 const { db } = require('./db');
-const { seed, syncCatalogFromDisk } = require('./seed');
+const { seed, syncCatalogFromDisk, ensureCoreUsers } = require('./seed');
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
@@ -171,6 +171,12 @@ function ensureSeeded() {
     syncCatalogFromDisk();
   } catch (e) {
     console.warn('Catalog sync:', e && e.message ? e.message : e);
+  }
+  // Always restore admin/demo logins (catalog wipe must never leave admin broken)
+  try {
+    ensureCoreUsers();
+  } catch (e) {
+    console.warn('Core users ensure:', e && e.message ? e.message : e);
   }
   try {
     db.prepare(
