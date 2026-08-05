@@ -272,8 +272,13 @@
     }, []);
     if (products.length) {
       renderProducts(products);
-    } else if (typeof NexoraToast !== 'undefined') {
-      NexoraToast.error(typeof NexoraI18n !== 'undefined' ? NexoraI18n.t('load_error') : 'Məlumatlar yüklənmədi');
+    } else {
+      ['homeProducts', 'homeBestsellers', 'homeDeals'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.innerHTML = '<p class="text-muted" style="grid-column:1/-1;padding:12px 0">Hal-hazırda məhsul yoxdur. Tezliklə yenilənəcək.</p>';
+        }
+      });
     }
 
     await new Promise(function (r) { setTimeout(r, 60); });

@@ -44,6 +44,9 @@ const NexoraApp = (function () {
     const savedVer = storageGet('nexora-catalog-ver', null);
     if (savedVer !== catalogVer) {
       localStorage.removeItem('nexora-products');
+      localStorage.removeItem('nexora-cart');
+      localStorage.removeItem('nexora-cart-coupon');
+      localStorage.removeItem('nexora-wishlist');
       storageSet('nexora-catalog-ver', catalogVer);
     }
     const override = storageGet('nexora-products', null);

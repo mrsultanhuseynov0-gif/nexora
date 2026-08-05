@@ -135,8 +135,84 @@ function seed() {
   return counts;
 }
 
+/**
+ * Sync products + categories from disk when catalog version changes.
+ * Does NOT wipe users/orders — safe for production deploy after emptying products.json.
+ */
+function syncCatalogFromDisk() {
+  const productsData = readJson('products.json');
+  const categoriesData = readJson('categories.json');
+  const fileVer = String(productsData.version || 0);
+  const row = db.prepare("SELECT value FROM meta WHERE key = 'catalog_version'").get();
+  const dbVer = row ? String(row.value) : '';
+
+  if (dbVer === fileVer) {
+    return { synced: false, version: fileVer, products: db.prepare('SELECT COUNT(*) AS n FROM products').get().n };
+  }
+
+  const insertProduct = db.prepare(`
+    INSERT OR REPLACE INTO products (
+      id, sku, name, brand, brand_id, category, subcategory, price, old_price, currency,
+      rating, reviews, badge, badge_type, in_stock, stock, is_new, tags_json, description,
+      specs_json, images_json, gradient, image, review_list_json, raw_json
+    ) VALUES (
+      @id, @sku, @name, @brand, @brand_id, @category, @subcategory, @price, @old_price, @currency,
+      @rating, @reviews, @badge, @badge_type, @in_stock, @stock, @is_new, @tags_json, @description,
+      @specs_json, @images_json, @gradient, @image, @review_list_json, @raw_json
+    )
+  `);
+  const insertCategory = db.prepare(`
+    INSERT OR REPLACE INTO categories (id, data_json) VALUES (@id, @data_json)
+  `);
+
+  db.pragma('foreign_keys = OFF');
+  try {
+    const tx = db.transaction(() => {
+      db.exec('DELETE FROM products; DELETE FROM categories;');
+
+      for (const p of productsData.products || []) {
+        insertProduct.run(productToRow(p));
+      }
+
+      const cats = categoriesData.categories || categoriesData;
+      if (Array.isArray(cats)) {
+        for (const cat of cats) {
+          insertCategory.run({ id: cat.id || cat.slug || uid('c'), data_json: JSON.stringify(cat) });
+        }
+      }
+
+      db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run('catalog_version', fileVer);
+      db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run(
+        'catalog_synced_at',
+        new Date().toISOString()
+      );
+
+      // Keep CMS categories doc in sync (admin panel + storefront)
+      try {
+        db.prepare('INSERT OR REPLACE INTO cms_docs (key, data_json, updated_at) VALUES (?, ?, ?)').run(
+          'categories',
+          JSON.stringify(categoriesData),
+          new Date().toISOString()
+        );
+      } catch (e) { /* cms_docs may not exist yet on very early boot */ }
+    });
+    tx();
+  } finally {
+    db.pragma('foreign_keys = ON');
+  }
+
+  const counts = {
+    synced: true,
+    version: fileVer,
+    products: db.prepare('SELECT COUNT(*) AS n FROM products').get().n,
+    categories: db.prepare('SELECT COUNT(*) AS n FROM categories').get().n
+  };
+  console.log('Catalog synced from disk:', counts);
+  return counts;
+}
+
 if (require.main === module) {
   seed();
 }
 
-module.exports = { seed };
+module.exports = { seed, syncCatalogFromDisk };

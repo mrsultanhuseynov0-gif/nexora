@@ -6,9 +6,19 @@ const NexoraCart = (function () {
 
   const KEY = 'nexora-cart';
   const COUPON_KEY = 'nexora-cart-coupon';
+  const SESSION_KEY = 'nexora-cart-session';
   const SHIPPING_FLAT = 5;
   const FREE_SHIPPING_MIN = 100;
   const TAX_RATE = 0.18;
+
+  // Fresh site visit (new tab session) → empty cart so visitors never see old demo items
+  try {
+    if (typeof sessionStorage !== 'undefined' && !sessionStorage.getItem(SESSION_KEY)) {
+      localStorage.removeItem(KEY);
+      localStorage.removeItem(COUPON_KEY);
+      sessionStorage.setItem(SESSION_KEY, '1');
+    }
+  } catch (e) { /* ignore */ }
 
   function getItems() {
     return NexoraApp.storageGet(KEY, []);

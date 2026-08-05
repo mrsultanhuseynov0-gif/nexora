@@ -6,7 +6,7 @@ const cors = require('cors');
 const compression = require('compression');
 const cfg = require('./config');
 const { db } = require('./db');
-const { seed } = require('./seed');
+const { seed, syncCatalogFromDisk } = require('./seed');
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
@@ -161,10 +161,16 @@ app.use((err, _req, res, _next) => {
 });
 
 function ensureSeeded() {
-  const n = db.prepare('SELECT COUNT(*) AS n FROM products').get().n;
-  if (n === 0) {
+  const users = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
+  if (users === 0) {
     console.log('DB empty — seeding from data/*.json ...');
     seed();
+  }
+  // Apply products.json version changes (e.g. wipe demo catalog, keep categories)
+  try {
+    syncCatalogFromDisk();
+  } catch (e) {
+    console.warn('Catalog sync:', e && e.message ? e.message : e);
   }
   try {
     db.prepare(
