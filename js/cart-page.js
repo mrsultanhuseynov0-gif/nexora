@@ -333,14 +333,12 @@
         (totals.shipping === 0 ? tt('free') : NexoraApp.formatPrice(totals.shipping)) + '</span></div>' +
       '<div class="summary-total"><span>' + tt('total') + '</span><span>' + NexoraApp.formatPrice(totals.total) + '</span></div>' +
       '<p class="text-xs text-muted mt-2 mb-4">' + totals.freeShippingMin + ' ' + tt('free_ship_from') + '</p>' +
-      '<div class="flex gap-2 mb-4">' +
-        '<input type="text" class="input" id="couponInput" placeholder="' + tt('coupon') + '" value="' +
-          (totals.coupon ? totals.coupon.code : '') + '">' +
+      '<div class="flex gap-2 mb-2">' +
+        '<input type="text" class="input" id="couponInput" placeholder="' + tt('coupon') + ' (istəyə bağlı)" value="' +
+          (totals.coupon ? esc(totals.coupon.code) : '') + '" autocomplete="off">' +
         '<button type="button" class="btn btn-outline" id="applyCoupon">' + tt('apply') + '</button>' +
       '</div>' +
-      (totals.coupon
-        ? '<p class="text-sm mb-4" style="color:var(--color-success)">' + tt('coupon') + ': ' + totals.coupon.description + '</p>'
-        : '') +
+      '<p class="text-xs text-muted mb-4">Kupon vacib deyil — yazmasanız da sifariş keçir. Endirimlər tezliklə aktiv olacaq.</p>' +
       checkoutCtaHTML() +
       '<a href="#" class="btn btn-outline w-full mt-2" id="cartWhatsApp">' + tt('wa_order') + '</a>' +
       sharePanelHTML(shareLink);
@@ -398,10 +396,15 @@
         const code = (document.getElementById('couponInput').value || '').trim();
         try {
           await NexoraCart.applyCoupon(code);
-          NexoraToast.success(tt('coupon_applied', 'Kupon tətbiq olundu'));
+          if (code) {
+            NexoraToast.info('Kupon qeyd olundu — hələlik endirim aktiv deyil. Sifarişi rəsmiləşdirə bilərsiniz.');
+          } else {
+            NexoraToast.info('Kupon təmizləndi');
+          }
           render();
         } catch (e) {
-          NexoraToast.error(e.message || 'Error');
+          // Never block cart on coupon
+          NexoraToast.info('Kupon istəyə bağlıdır — sifarişə davam edə bilərsiniz.');
         }
       });
     }

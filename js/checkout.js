@@ -235,7 +235,8 @@
 
       const payload = {
         paymentMethod: method === 'installment' ? 'installment' : method,
-        couponCode: (totals.coupon && (totals.coupon.code || totals.coupon)) || '',
+        // Coupons optional / inactive — never required for checkout
+        couponCode: '',
         referralCode: refCode,
         useReferralCredit: useCredit,
         customer: {

@@ -114,17 +114,20 @@ const NexoraCart = (function () {
   }
 
   async function applyCoupon(code) {
-    const data = await NexoraApp.fetchJSON('data/coupons.json');
-    const coupon = (data.coupons || []).find(function (c) {
-      return c.code.toUpperCase() === String(code || '').toUpperCase();
-    });
-    if (!coupon) throw new Error(tt('coupon_not_found', 'Kupon tapılmadı'));
-    const totals = await getTotals();
-    if (totals.subtotal < (coupon.minOrder || 0)) {
-      throw new Error(tt('coupon_min_order', 'Minimum sifariş') + ': ' + NexoraApp.formatPrice(coupon.minOrder));
+    // Coupons are visible in UI but disabled for now — optional, no discount
+    const raw = String(code || '').trim();
+    if (!raw) {
+      setCoupon(null);
+      return null;
     }
-    setCoupon(coupon);
-    return coupon;
+    setCoupon({
+      code: raw.toUpperCase(),
+      type: 'none',
+      value: 0,
+      description: 'Kupon saxlanıldı — hələlik endirim aktiv deyil',
+      disabled: true
+    });
+    return getCoupon();
   }
 
   async function getDetailedItems() {
@@ -151,16 +154,9 @@ const NexoraCart = (function () {
     const items = await getDetailedItems();
     const subtotal = items.reduce(function (s, i) { return s + i.price * i.qty; }, 0);
     const coupon = getCoupon();
-    let discount = 0;
-    let freeShipping = false;
-
-    if (coupon) {
-      if (coupon.type === 'percent') discount = subtotal * (coupon.value / 100);
-      else if (coupon.type === 'fixed') discount = coupon.value;
-      else if (coupon.type === 'shipping') freeShipping = true;
-    }
-
-    discount = Math.min(discount, subtotal);
+    // Coupon field is optional / inactive — do not apply discounts yet
+    const discount = 0;
+    const freeShipping = false;
     const taxable = Math.max(0, subtotal - discount);
     const tax = Math.round(taxable * TAX_RATE * 100) / 100;
     const shipping = (freeShipping || subtotal >= FREE_SHIPPING_MIN) ? 0 : (subtotal > 0 ? SHIPPING_FLAT : 0);

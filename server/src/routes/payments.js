@@ -141,12 +141,8 @@ router.post('/checkout', authRequired, async (req, res) => {
     });
   }
 
-  let coupon = null;
-  const code = String(body.couponCode || body.coupon || '').trim().toUpperCase();
-  if (code) {
-    coupon = db.prepare('SELECT * FROM coupons WHERE code = ? AND active = 1').get(code);
-    if (!coupon) return res.status(400).json({ error: 'Kupon etibarsızdır' });
-  }
+  // Coupons are UI-only for now — never required, never discount, never block checkout
+  const coupon = null;
 
   const customer = {
     name: (body.customer && body.customer.name) || (req.user && req.user.name) || '',
@@ -173,19 +169,9 @@ router.post('/checkout', authRequired, async (req, res) => {
       email: customer.email,
       subtotal: subtotalPreview
     });
-    if (v && v.ok) {
-      if (v.kind === 'coupon' && !coupon) {
-        coupon = {
-          code: v.coupon.code,
-          type: v.coupon.type,
-          value: v.coupon.value,
-          min_order: v.coupon.minOrder,
-          description: v.coupon.description
-        };
-      } else if (v.kind === 'personal') {
-        referralDiscount = Number(v.discount) || 0;
-        referralMeta = v;
-      }
+    if (v && v.ok && v.kind === 'personal') {
+      referralDiscount = Number(v.discount) || 0;
+      referralMeta = v;
     }
   }
 
