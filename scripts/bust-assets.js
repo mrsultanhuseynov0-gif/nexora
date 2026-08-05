@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const V = '20260805c';
+const V = '20260805d';
 
 function walk(d, acc) {
   acc = acc || [];

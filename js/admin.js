@@ -824,7 +824,7 @@
           '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:stretch">' +
             slotHtml(1, existing[0]) + slotHtml(2, existing[1]) + slotHtml(3, existing[2]) +
           '</div>' +
-          '<p class="text-xs text-muted mt-2 mb-0">1-ci şəkil əsasdır. 2 və 3 məhsul səhifəsində qalereyada çıxır.</p>' +
+          '<p class="text-xs text-muted mt-2 mb-0">1-ci şəkil əsasdır. 2 və 3 məhsul səhifəsində qalereyada və 360° fırlanmada çıxır.</p>' +
         '</div>' +
         '<div class="form-group"><label class="form-label">Xüsusiyyətlər</label>' + specsEditorHtml(p.specs) + '</div>' +
       '</form>';

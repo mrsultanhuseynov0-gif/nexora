@@ -1211,7 +1211,8 @@ body.room-preview-open { overflow: hidden; }
 
 .p360-turntable {
   width: min(72%, 340px);
-  aspect-ratio: 1;
+  max-height: 78%;
+  aspect-ratio: 3 / 4;
   transform-style: preserve-3d;
   will-change: transform;
 }
@@ -1289,16 +1290,29 @@ body.room-preview-open { overflow: hidden; }
   flex: 1;
   display: grid;
   place-items: center;
-  padding: 28px 20px 8px;
+  padding: 28px 20px 48px;
+  min-height: 0;
 }
 
 .p360-frame-img {
-  max-width: 86%;
-  max-height: 78%;
+  max-width: min(86%, 420px);
+  max-height: min(78%, 520px);
+  width: auto;
+  height: auto;
   object-fit: contain;
   border-radius: 14px;
   pointer-events: none;
   filter: drop-shadow(0 16px 28px rgba(0, 0, 0, 0.4));
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.p360-frame-img.is-swap {
+  animation: p360FrameIn 0.22s ease;
+}
+
+@keyframes p360FrameIn {
+  from { opacity: 0.45; transform: scale(0.985); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .p360-meter {
@@ -1324,17 +1338,23 @@ body.room-preview-open { overflow: hidden; }
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
   pointer-events: none;
   z-index: 2;
 }
 
 .p360-hint,
-.p360-deg {
+.p360-deg,
+.p360-frame-count {
   padding: 6px 10px;
   border-radius: 999px;
   background: rgba(0, 0, 0, 0.45);
   color: rgba(255, 255, 255, 0.9);
   font-size: 0.72rem;
+}
+
+.p360-frame-count {
+  margin-left: auto;
 }
 
 .p360-toolbar {
@@ -1367,8 +1387,12 @@ body.room-preview-open { overflow: hidden; }
     left: 10px;
     padding: 7px 10px;
   }
-  .p360-turntable { width: min(78%, 280px); }
+  .p360-turntable { width: min(82%, 260px); aspect-ratio: 3 / 4; }
   .p360-hud { bottom: 52px; }
+  .p360-frame-img {
+    max-width: min(92%, 320px);
+    max-height: min(72%, 420px);
+  }
 }
 
 /* ---------- Business Panel (B2B) ---------- */

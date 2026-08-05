@@ -1,5 +1,6 @@
 /**
- * NEXORA 360° Product Viewer — drag to spin (CSS 3D or frame sequence)
+ * NEXORA 360° Product Viewer — drag to spin (frame sequence or CSS 3D)
+ * Uses dedicated spin frames when present; otherwise gallery photos (phones & other products).
  */
 (function (global) {
   'use strict';
@@ -20,20 +21,61 @@
     return src;
   }
 
+  function uniqueSrcs(list) {
+    const out = [];
+    (list || []).forEach(function (src) {
+      const u = resolveUrl(src);
+      if (u && out.indexOf(u) === -1) out.push(u);
+    });
+    return out;
+  }
+
+  function gallerySrcs(product, galleryImages) {
+    const fromGallery = (galleryImages || []).map(function (img) {
+      if (!img) return '';
+      if (typeof img === 'string') return img;
+      return img.src || img.url || '';
+    });
+    const fromProduct = (product.images || []).map(function (img) {
+      if (!img) return '';
+      if (typeof img === 'string') return img;
+      return img.src || img.url || '';
+    });
+    const merged = uniqueSrcs(fromGallery.concat(fromProduct));
+    const main = resolveUrl(product.image || '');
+    if (main && merged.indexOf(main) === -1) merged.unshift(main);
+    return merged;
+  }
+
   function resolveFrames(product, galleryImages) {
     const raw = product.views360 || product.spin || product.spinFrames || null;
-    if (Array.isArray(raw) && raw.length >= 8) {
-      return raw.map(function (f) {
-        if (typeof f === 'string') return resolveUrl(f);
-        return resolveUrl(f.src || f.url || '');
-      }).filter(Boolean);
+    if (Array.isArray(raw) && raw.length >= 4) {
+      const dedicated = uniqueSrcs(raw.map(function (f) {
+        if (typeof f === 'string') return f;
+        return (f && (f.src || f.url)) || '';
+      }));
+      if (dedicated.length >= 4) return dedicated;
     }
+    // Admin-added phones / products: 2–3 gallery photos → smooth spin
+    const gallery = gallerySrcs(product, galleryImages);
+    if (gallery.length >= 2) return gallery;
     return null;
   }
 
   function primaryImage(product, galleryImages) {
+    const gallery = gallerySrcs(product, galleryImages);
+    if (gallery.length) return gallery[0];
     if (galleryImages && galleryImages[0] && galleryImages[0].src) return galleryImages[0].src;
     return resolveUrl(product.image || '');
+  }
+
+  function preload(urls) {
+    (urls || []).forEach(function (u) {
+      if (!u) return;
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = u;
+    });
   }
 
   function mount(host, product, galleryImages) {
@@ -44,12 +86,15 @@
     const imgSrc = primaryImage(product, galleryImages);
     if (!imgSrc && !frames) return null;
 
+    if (frames) preload(frames);
+    else if (imgSrc) preload([imgSrc]);
+
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'p360-badge';
     btn.setAttribute('data-p360-btn', '1');
     btn.setAttribute('aria-label', t('p360_title', '360° məhsul görünüşü'));
-    btn.innerHTML = '<span class="p360-badge-icon" aria-hidden="true">📹</span><span>360°</span>';
+    btn.innerHTML = '<span class="p360-badge-icon" aria-hidden="true">🔄</span><span>360°</span>';
     host.appendChild(btn);
 
     const state = {
@@ -64,7 +109,8 @@
       frameIndex: 0,
       frames: frames,
       mode: frames ? 'frames' : '3d',
-      shell: null
+      shell: null,
+      backupNodes: []
     };
 
     function stopRaf() {
@@ -78,14 +124,24 @@
       if (!state.shell) return;
       if (state.mode === 'frames') {
         const n = state.frames.length;
+        // Even sectors around the circle so 2–3 phone photos feel natural
         const idx = ((Math.round((-state.angle / 360) * n) % n) + n) % n;
         state.frameIndex = idx;
         const img = state.shell.querySelector('.p360-frame-img');
-        if (img && state.frames[idx] && img.src !== state.frames[idx]) {
-          img.src = state.frames[idx];
+        if (img && state.frames[idx]) {
+          const next = state.frames[idx];
+          if (img.getAttribute('src') !== next) {
+            img.classList.remove('is-swap');
+            // force reflow for fade
+            void img.offsetWidth;
+            img.setAttribute('src', next);
+            img.classList.add('is-swap');
+          }
         }
         const meter = state.shell.querySelector('.p360-meter-fill');
-        if (meter) meter.style.width = ((idx / Math.max(1, n - 1)) * 100) + '%';
+        if (meter) meter.style.width = (((idx + 1) / n) * 100) + '%';
+        const count = state.shell.querySelector('.p360-frame-count');
+        if (count) count.textContent = (idx + 1) + ' / ' + n;
       } else {
         const turn = state.shell.querySelector('.p360-turntable');
         if (turn) turn.style.transform = 'rotateY(' + state.angle + 'deg)';
@@ -107,7 +163,7 @@
       if (deg) deg.textContent = Math.round(((state.angle % 360) + 360) % 360) + '°';
     }
 
-    function tick(now) {
+    function tick() {
       state.raf = 0;
       if (!state.active) return;
       if (!state.dragging) {
@@ -115,7 +171,9 @@
           state.angle += state.velocity;
           state.velocity *= 0.94;
         } else if (state.auto) {
-          state.angle += 0.35;
+          // Slower auto-spin with few gallery frames so phones stay readable
+          const step = state.mode === 'frames' && state.frames && state.frames.length < 6 ? 0.22 : 0.35;
+          state.angle += step;
           state.velocity = 0;
         } else {
           state.velocity = 0;
@@ -135,16 +193,16 @@
       const shell = document.createElement('div');
       shell.className = 'p360-shell';
       shell.setAttribute('data-p360-shell', '1');
+      const alt = String(product.name || '').replace(/"/g, '&quot;');
 
       if (state.mode === 'frames') {
         shell.innerHTML =
           '<div class="p360-frame-wrap">' +
-            '<img class="p360-frame-img" src="' + state.frames[0] + '" alt="' +
-              String(product.name || '').replace(/"/g, '&quot;') + ' 360°" draggable="false">' +
+            '<img class="p360-frame-img is-swap" src="' + state.frames[0] + '" alt="' + alt +
+              ' 360°" draggable="false">' +
           '</div>' +
           '<div class="p360-meter" aria-hidden="true"><div class="p360-meter-fill"></div></div>';
       } else {
-        const alt = String(product.name || '').replace(/"/g, '&quot;');
         shell.innerHTML =
           '<div class="p360-scene">' +
             '<div class="p360-turntable">' +
@@ -164,10 +222,17 @@
           '</div>';
       }
 
+      const hint = state.mode === 'frames'
+        ? t('p360_hint', 'Sürükləyərək fırladın')
+        : t('p360_hint', 'Sürükləyərək fırladın');
+
       shell.innerHTML +=
         '<div class="p360-hud">' +
-          '<span class="p360-hint">' + t('p360_hint', 'Sürükləyərək fırladın') + '</span>' +
+          '<span class="p360-hint">' + hint + '</span>' +
           '<span class="p360-deg">0°</span>' +
+          (state.mode === 'frames'
+            ? '<span class="p360-frame-count">1 / ' + state.frames.length + '</span>'
+            : '') +
         '</div>' +
         '<div class="p360-toolbar">' +
           '<button type="button" class="btn btn-ghost btn-sm" data-p360-auto>' +
@@ -201,8 +266,10 @@
       const now = performance.now();
       const dx = pt.clientX - state.lastX;
       const dt = Math.max(8, now - state.lastT);
-      state.angle += dx * 0.55;
-      state.velocity = (dx * 0.55) * (16 / dt);
+      // With 2–3 photos, slightly higher sensitivity so one swipe changes angle enough
+      const sens = state.mode === 'frames' && state.frames && state.frames.length <= 3 ? 0.72 : 0.55;
+      state.angle += dx * sens;
+      state.velocity = (dx * sens) * (16 / dt);
       state.lastX = pt.clientX;
       state.lastT = now;
       applyVisual();
@@ -225,7 +292,6 @@
       host.setAttribute('data-zoom', 'off');
       host.style.cursor = 'grab';
 
-      // Park original gallery nodes (keep badge in place)
       state.backupNodes = [];
       Array.prototype.slice.call(host.childNodes).forEach(function (node) {
         if (node === btn) return;
