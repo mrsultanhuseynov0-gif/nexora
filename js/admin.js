@@ -649,7 +649,17 @@
     document.getElementById('adminContent').innerHTML =
       '<div class="admin-page-head">' +
         '<div><h1>Məhsullar</h1><p>' + pg.total + ' məhsul</p></div>' +
-        '<button type="button" class="btn btn-primary" id="addProduct">+ Yeni məhsul</button>' +
+        '<div class="flex gap-2 flex-wrap">' +
+          '<button type="button" class="btn btn-outline" id="exportCatalog">Backup yüklə</button>' +
+          '<label class="btn btn-outline" style="cursor:pointer;margin:0">Backup bərpa' +
+            '<input type="file" id="importCatalog" accept="application/json,.json" hidden>' +
+          '</label>' +
+          '<button type="button" class="btn btn-primary" id="addProduct">+ Yeni məhsul</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="admin-alert mb-3" style="padding:12px 14px;border-radius:12px;background:rgba(255,0,0,.06);border:1px solid rgba(255,0,0,.18);font-size:13px;line-height:1.45">' +
+        '<strong>Vacib:</strong> Render pulsuz planda server yenilənəndə məlumat silinə bilər. Hər dəfə məhsul əlavə/redaktədən sonra <em>Backup yüklə</em> edin. ' +
+        'Daimi saxlama üçün Render-də Disk əlavə edib <code>DATABASE_DIR</code> / <code>DATABASE_PATH</code> təyin edin.' +
       '</div>' +
       '<div class="admin-toolbar">' +
         '<input type="search" class="input" id="productSearch" placeholder="Axtar…" value="' + esc(state.products.search) + '">' +
@@ -664,6 +674,39 @@
       '</tr></thead><tbody>' + (rows || '<tr><td colspan="7" class="admin-empty">Məhsul tapılmadı</td></tr>') + '</tbody></table></div>' +
       paginationHtml(pg, 'product');
 
+    var exportBtn = document.getElementById('exportCatalog');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', async function () {
+        try {
+          var blob = await NexoraApi.downloadCatalogBackup();
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'nexora-catalog-backup.json';
+          a.click();
+          URL.revokeObjectURL(a.href);
+          NexoraToast.success('Backup yükləndi');
+        } catch (e) {
+          NexoraToast.error(e.message || 'Backup alınmadı');
+        }
+      });
+    }
+    var importInput = document.getElementById('importCatalog');
+    if (importInput) {
+      importInput.addEventListener('change', async function () {
+        var file = importInput.files && importInput.files[0];
+        importInput.value = '';
+        if (!file) return;
+        try {
+          var text = await file.text();
+          var data = JSON.parse(text);
+          var r = await NexoraApi.restoreCatalogBackup(data);
+          NexoraToast.success('Bərpa olundu: ' + (r.products || 0) + ' məhsul');
+          render();
+        } catch (e) {
+          NexoraToast.error(e.message || 'Backup bərpa olunmadı');
+        }
+      });
+    }
     document.getElementById('productSearch').addEventListener('input', NexoraApp.debounce(function (e) {
       state.products.search = e.target.value;
       state.products.page = 1;

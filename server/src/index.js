@@ -7,6 +7,7 @@ const compression = require('compression');
 const cfg = require('./config');
 const { db } = require('./db');
 const { seed, syncCatalogFromDisk, ensureCoreUsers } = require('./seed');
+const { restoreLiveCatalog } = require('./catalog-persist');
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
@@ -178,6 +179,15 @@ function ensureSeeded() {
     syncCatalogFromDisk();
   } catch (e) {
     console.warn('Catalog sync:', e && e.message ? e.message : e);
+  }
+  // Restore admin catalog after empty boot / redeploy (needs Persistent Disk on Render)
+  try {
+    const restored = restoreLiveCatalog();
+    if (restored && restored.restored) {
+      console.log('Restored live catalog:', restored.products, 'products');
+    }
+  } catch (e) {
+    console.warn('Catalog restore:', e && e.message ? e.message : e);
   }
   // Always restore admin/demo logins (catalog wipe must never leave admin broken)
   try {

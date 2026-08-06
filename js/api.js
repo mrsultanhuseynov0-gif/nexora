@@ -236,6 +236,26 @@
     deleteCoupon: function (code) {
       return request('/api/admin/coupons/' + encodeURIComponent(code), { method: 'DELETE' });
     },
+    downloadCatalogBackup: async function () {
+      var t = token();
+      var res = await fetch(url('/api/admin/catalog-backup'), {
+        headers: t ? { Authorization: 'Bearer ' + t } : {}
+      });
+      if (!res.ok) {
+        var err = await res.json().catch(function () { return {}; });
+        throw new Error(err.error || ('Backup xətası (' + res.status + ')'));
+      }
+      return res.blob();
+    },
+    restoreCatalogBackup: function (data) {
+      return request('/api/admin/catalog-backup/restore', {
+        method: 'POST',
+        body: JSON.stringify(data || {})
+      });
+    },
+    persistCatalogBackup: function () {
+      return request('/api/admin/catalog-backup/persist', { method: 'POST', body: '{}' });
+    },
     getPaymentSettings: function () {
       return request('/api/payments/admin/settings');
     },

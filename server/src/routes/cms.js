@@ -110,6 +110,10 @@ router.put('/:key', adminRequired, (req, res) => {
     tx();
   }
 
+  try {
+    require('../catalog-persist').persistLiveCatalog();
+  } catch (e) { /* ignore */ }
+
   return res.json({ ok: true, key, updatedAt: now });
 });
 

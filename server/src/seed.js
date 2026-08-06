@@ -66,15 +66,18 @@ function seed() {
   try {
     const tx = db.transaction(() => {
       // Child tables (orders, business_*, etc.) may already reference users.
+      const diskProducts = productsData.products || [];
       db.exec(`
-        DELETE FROM products;
         DELETE FROM users;
         DELETE FROM coupons;
         DELETE FROM categories;
       `);
-
-      for (const p of productsData.products || []) {
-        insertProduct.run(productToRow(p));
+      // Only replace products when the seed file actually contains a catalog
+      if (diskProducts.length) {
+        db.exec('DELETE FROM products;');
+        for (const p of diskProducts) {
+          insertProduct.run(productToRow(p));
+        }
       }
 
       for (const u of usersData.users || []) {
@@ -137,7 +140,7 @@ function seed() {
 
 /**
  * Sync products + categories from disk when catalog version changes.
- * Does NOT wipe users/orders — safe for production deploy after emptying products.json.
+ * Never wipes a live DB catalog with an empty products.json (admin data must survive deploys).
  */
 function syncCatalogFromDisk() {
   const productsData = readJson('products.json');
@@ -145,9 +148,36 @@ function syncCatalogFromDisk() {
   const fileVer = String(productsData.version || 0);
   const row = db.prepare("SELECT value FROM meta WHERE key = 'catalog_version'").get();
   const dbVer = row ? String(row.value) : '';
+  const diskProducts = productsData.products || [];
+  const dbCount = db.prepare('SELECT COUNT(*) AS n FROM products').get().n;
 
   if (dbVer === fileVer) {
-    return { synced: false, version: fileVer, products: db.prepare('SELECT COUNT(*) AS n FROM products').get().n };
+    return { synced: false, version: fileVer, products: dbCount };
+  }
+
+  // Critical: empty disk catalog must NOT delete admin-added products
+  if (!diskProducts.length) {
+    if (dbCount > 0) {
+      db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run('catalog_version', fileVer);
+      console.log('Catalog sync skipped — empty products.json, keeping', dbCount, 'DB products');
+      return { synced: false, skipped: 'empty-disk-keep-db', version: fileVer, products: dbCount };
+    }
+    // Both empty: only sync categories + version stamp
+    const insertCategory = db.prepare(
+      'INSERT OR REPLACE INTO categories (id, data_json) VALUES (@id, @data_json)'
+    );
+    const tx = db.transaction(function () {
+      const cats = categoriesData.categories || categoriesData;
+      if (Array.isArray(cats)) {
+        db.exec('DELETE FROM categories;');
+        for (const cat of cats) {
+          insertCategory.run({ id: cat.id || cat.slug || uid('c'), data_json: JSON.stringify(cat) });
+        }
+      }
+      db.prepare('INSERT OR REPLACE INTO meta (key, value) VALUES (?, ?)').run('catalog_version', fileVer);
+    });
+    tx();
+    return { synced: true, skipped: 'empty-products-categories-only', version: fileVer, products: 0 };
   }
 
   const insertProduct = db.prepare(`
@@ -170,7 +200,7 @@ function syncCatalogFromDisk() {
     const tx = db.transaction(() => {
       db.exec('DELETE FROM products; DELETE FROM categories;');
 
-      for (const p of productsData.products || []) {
+      for (const p of diskProducts) {
         insertProduct.run(productToRow(p));
       }
 
@@ -187,7 +217,6 @@ function syncCatalogFromDisk() {
         new Date().toISOString()
       );
 
-      // Keep CMS categories doc in sync (admin panel + storefront)
       try {
         db.prepare('INSERT OR REPLACE INTO cms_docs (key, data_json, updated_at) VALUES (?, ?, ?)').run(
           'categories',

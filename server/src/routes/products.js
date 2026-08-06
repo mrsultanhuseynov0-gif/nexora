@@ -3,6 +3,7 @@
 const express = require('express');
 const { db, rowToProduct, productToRow } = require('../db');
 const { adminRequired } = require('../middleware/auth');
+const { persistLiveCatalog } = require('../catalog-persist');
 
 const router = express.Router();
 
@@ -85,6 +86,7 @@ router.post('/', adminRequired, (req, res) => {
     )
   `).run(row);
 
+  persistLiveCatalog();
   return res.status(201).json({ product: rowToProduct(db.prepare('SELECT * FROM products WHERE id = ?').get(p.id)) });
 });
 
@@ -107,12 +109,14 @@ router.put('/:id', adminRequired, (req, res) => {
     WHERE id=@id
   `).run(row);
 
+  persistLiveCatalog();
   return res.json({ product: rowToProduct(db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id)) });
 });
 
 router.delete('/:id', adminRequired, (req, res) => {
   const info = db.prepare('DELETE FROM products WHERE id = ?').run(req.params.id);
   if (!info.changes) return res.status(404).json({ error: 'Məhsul tapılmadı' });
+  persistLiveCatalog();
   return res.json({ ok: true });
 });
 

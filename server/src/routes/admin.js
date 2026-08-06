@@ -1,10 +1,74 @@
 'use strict';
 
 const express = require('express');
-const { db, publicUser } = require('../db');
+const { db, publicUser, rowToProduct, productToRow } = require('../db');
 const { adminRequired } = require('../middleware/auth');
+const { persistLiveCatalog, livePath } = require('../catalog-persist');
 
 const router = express.Router();
+
+router.get('/catalog-backup', adminRequired, (_req, res) => {
+  const products = db.prepare('SELECT * FROM products').all().map(rowToProduct);
+  let cms = [];
+  try {
+    cms = db.prepare('SELECT key, data_json, updated_at FROM cms_docs').all();
+  } catch (e) { /* ignore */ }
+  const payload = {
+    version: Date.now(),
+    savedAt: new Date().toISOString(),
+    products: products,
+    cms: cms
+  };
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="nexora-catalog-backup.json"');
+  return res.send(JSON.stringify(payload, null, 2));
+});
+
+router.post('/catalog-backup/restore', adminRequired, (req, res) => {
+  const data = req.body || {};
+  const products = Array.isArray(data.products) ? data.products : [];
+  if (!products.length && !Array.isArray(data.cms)) {
+    return res.status(400).json({ error: 'Backup-də məhsul yoxdur' });
+  }
+  const insertProduct = db.prepare(`
+    INSERT OR REPLACE INTO products (
+      id, sku, name, brand, brand_id, category, subcategory, price, old_price, currency,
+      rating, reviews, badge, badge_type, in_stock, stock, is_new, tags_json, description,
+      specs_json, images_json, gradient, image, review_list_json, raw_json
+    ) VALUES (
+      @id, @sku, @name, @brand, @brand_id, @category, @subcategory, @price, @old_price, @currency,
+      @rating, @reviews, @badge, @badge_type, @in_stock, @stock, @is_new, @tags_json, @description,
+      @specs_json, @images_json, @gradient, @image, @review_list_json, @raw_json
+    )
+  `);
+  const tx = db.transaction(function () {
+    if (products.length) {
+      db.exec('DELETE FROM products;');
+      products.forEach(function (p) { insertProduct.run(productToRow(p)); });
+    }
+    if (Array.isArray(data.cms)) {
+      const upsert = db.prepare(
+        'INSERT OR REPLACE INTO cms_docs (key, data_json, updated_at) VALUES (?, ?, ?)'
+      );
+      data.cms.forEach(function (doc) {
+        if (!doc || !doc.key) return;
+        upsert.run(doc.key, doc.data_json || '{}', doc.updated_at || new Date().toISOString());
+      });
+    }
+  });
+  tx();
+  persistLiveCatalog();
+  return res.json({
+    ok: true,
+    products: db.prepare('SELECT COUNT(*) AS n FROM products').get().n,
+    livePath: livePath()
+  });
+});
+
+router.post('/catalog-backup/persist', adminRequired, (_req, res) => {
+  const r = persistLiveCatalog();
+  return res.json(r);
+});
 
 router.get('/users', adminRequired, (_req, res) => {
   const rows = db.prepare('SELECT * FROM users ORDER BY created_at DESC').all();
