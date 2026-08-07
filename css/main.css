@@ -2,20 +2,20 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
 
-@import 'reset.css?v=20260807e';
-@import 'variables.css?v=20260807e';
-@import 'typography.css?v=20260807e';
-@import 'utilities.css?v=20260807e';
-@import 'buttons.css?v=20260807e';
-@import 'cards.css?v=20260807e';
-@import 'forms.css?v=20260807e';
-@import 'inputs.css?v=20260807e';
-@import 'modals.css?v=20260807e';
-@import 'toasts.css?v=20260807e';
-@import 'icons.css?v=20260807e';
-@import 'layout.css?v=20260807e';
-@import 'mobile.css?v=20260807e';
-@import 'features.css?v=20260807e';
+@import 'reset.css?v=20260807f';
+@import 'variables.css?v=20260807f';
+@import 'typography.css?v=20260807f';
+@import 'utilities.css?v=20260807f';
+@import 'buttons.css?v=20260807f';
+@import 'cards.css?v=20260807f';
+@import 'forms.css?v=20260807f';
+@import 'inputs.css?v=20260807f';
+@import 'modals.css?v=20260807f';
+@import 'toasts.css?v=20260807f';
+@import 'icons.css?v=20260807f';
+@import 'layout.css?v=20260807f';
+@import 'mobile.css?v=20260807f';
+@import 'features.css?v=20260807f';
 
 /* Global Layout Helpers */
 .page-wrapper {

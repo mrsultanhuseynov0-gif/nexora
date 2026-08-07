@@ -53,6 +53,53 @@
     });
   }
 
+  /** Admin closed/deleted → wipe chat UI back to empty gate form */
+  function resetConversation(reason) {
+    stopPoll();
+    clearDraft();
+    state.started = false;
+    state.approved = false;
+    state.canSend = true;
+    state.threadId = '';
+    state.lastMsgId = '';
+    state.busy = false;
+
+    var nameEl = document.getElementById('lcName');
+    var phoneEl = document.getElementById('lcPhone');
+    var topicEl = document.getElementById('lcTopic');
+    var input = document.getElementById('lcInput');
+    var msgs = document.querySelector('#' + ROOT_ID + ' .lc-msgs');
+    var wait = document.getElementById('lcWait');
+    var btn = document.querySelector('#' + ROOT_ID + ' .lc-form button');
+
+    if (nameEl) nameEl.value = '';
+    if (phoneEl) phoneEl.value = '';
+    if (topicEl) topicEl.value = '';
+    if (input) {
+      input.value = '';
+      input.disabled = false;
+      input.placeholder = 'Mesaj yazın…';
+    }
+    if (btn) btn.disabled = false;
+    if (msgs) msgs.innerHTML = '';
+    if (wait) wait.classList.remove('is-show');
+
+    setStarted(false);
+    showGateError('');
+
+    if (reason && typeof NexoraToast !== 'undefined') {
+      NexoraToast.info(reason);
+    }
+  }
+
+  function shouldResetError(e) {
+    if (!e) return false;
+    if (e.status === 404 || e.status === 410) return true;
+    if (e.data && e.data.reset) return true;
+    var msg = String(e.message || '');
+    return /bağlan|silinib|tapılmadı|yenidən başla/i.test(msg);
+  }
+
   function normalizePhone(phone) {
     var digits = String(phone || '').replace(/\D/g, '');
     if (!digits) return '';
@@ -268,6 +315,10 @@
     if (!A || !A.chatPoll || !state.threadId || !state.started) return;
     try {
       var res = await A.chatPoll(state.threadId, state.visitorKey, state.lastMsgId);
+      if (res && res.thread && res.thread.status === 'closed') {
+        resetConversation('Söhbət bağlandı. Yenidən başlamaq üçün formu doldurun.');
+        return;
+      }
       if (res && res.thread) applyThreadFlags(res.thread);
       if (res && res.messages && res.messages.length) appendMessages(res.messages, false);
       if (res && res.thread && res.thread.approved) {
@@ -277,6 +328,14 @@
       if (e && e.status === 401) {
         stopPoll();
         destroyWidget();
+        return;
+      }
+      if (shouldResetError(e)) {
+        resetConversation(
+          e.status === 404
+            ? 'Söhbət silindi. Yenidən başlamaq üçün formu doldurun.'
+            : 'Söhbət bağlandı. Yenidən başlamaq üçün formu doldurun.'
+        );
       }
     }
   }
@@ -314,9 +373,17 @@
         applyThreadFlags({ approved: false, canSend: false });
       }
     } catch (e) {
-      if (typeof NexoraToast !== 'undefined') NexoraToast.error(e.message || 'Mesaj getmədi');
-      if (e && /təsdiq|1 mesaj/i.test(e.message || '')) {
-        applyThreadFlags({ approved: false, canSend: false });
+      if (shouldResetError(e)) {
+        resetConversation(
+          e.status === 404
+            ? 'Söhbət silindi. Yenidən başlamaq üçün formu doldurun.'
+            : 'Söhbət bağlandı. Yenidən başlamaq üçün formu doldurun.'
+        );
+      } else {
+        if (typeof NexoraToast !== 'undefined') NexoraToast.error(e.message || 'Mesaj getmədi');
+        if (e && /təsdiq|1 mesaj/i.test(e.message || '')) {
+          applyThreadFlags({ approved: false, canSend: false });
+        }
       }
     } finally {
       state.busy = false;
@@ -415,19 +482,29 @@
         root.classList.toggle('is-open', state.open);
         if (state.open) {
           if (state.started && state.threadId) {
+            // Resume only — do not auto-create a new thread after admin close/delete
             try {
-              var g = readGate();
-              var local2 = loadLocal();
-              await ensureSession(
-                g.name || local2.name,
-                g.phone || local2.phone,
-                g.topic || local2.topic
-              );
-              startPoll();
+              var A = api();
+              if (!A || !A.chatPoll) throw new Error('Chat API yoxdur');
+              var res = await A.chatPoll(state.threadId, state.visitorKey, '');
+              if (!res || !res.thread || res.thread.status === 'closed') {
+                resetConversation('Söhbət bağlandı. Yenidən başlamaq üçün formu doldurun.');
+              } else {
+                appendMessages(res.messages || [], true);
+                applyThreadFlags(res.thread);
+                startPoll();
+              }
             } catch (e) {
-              setStarted(false);
-              clearDraft();
-              showGateError(e.message || 'Yenidən formu doldurun');
+              if (shouldResetError(e) || (e && e.status === 404)) {
+                resetConversation(
+                  e && e.status === 404
+                    ? 'Söhbət silindi. Yenidən başlamaq üçün formu doldurun.'
+                    : 'Söhbət bağlandı. Yenidən başlamaq üçün formu doldurun.'
+                );
+              } else {
+                resetConversation('');
+                showGateError(e.message || 'Yenidən formu doldurun');
+              }
             }
           } else {
             stopPoll();

@@ -191,9 +191,11 @@ router.post('/messages', authRequired, (req, res) => {
     WHERE id = ? AND (visitor_key = ? OR user_id = ?)
   `).get(threadId, visitorKey, req.user.id);
 
-  if (!thread) return res.status(404).json({ error: 'Söhbət tapılmadı' });
+  if (!thread) {
+    return res.status(404).json({ error: 'Söhbət silinib', reset: true });
+  }
   if (thread.status === 'closed') {
-    return res.status(400).json({ error: 'Söhbət bağlanıb. Yenidən başlayın.' });
+    return res.status(410).json({ error: 'Söhbət bağlanıb. Yenidən başlayın.', reset: true });
   }
   if (!thread.name || !isValidPhone(thread.phone) || !thread.topic) {
     return res.status(400).json({ error: 'Əvvəlcə ad, telefon və mövzunu tamamlayın' });
@@ -244,7 +246,16 @@ router.get('/messages', authRequired, (req, res) => {
     SELECT * FROM chat_threads
     WHERE id = ? AND (visitor_key = ? OR user_id = ?)
   `).get(threadId, visitorKey, req.user.id);
-  if (!thread) return res.status(404).json({ error: 'Söhbət tapılmadı' });
+  if (!thread) {
+    return res.status(404).json({ error: 'Söhbət silinib', reset: true });
+  }
+  if (thread.status === 'closed') {
+    return res.status(410).json({
+      error: 'Söhbət admin tərəfindən bağlanıb',
+      reset: true,
+      thread: threadPublic(thread)
+    });
+  }
 
   const messages = getMessages(threadId, after || null);
   if (messages.length) {
@@ -348,9 +359,24 @@ router.patch('/admin/threads/:id', adminRequired, (req, res) => {
   }
 
   if (status === 'open' || status === 'closed') {
+    const tClose = now();
     db.prepare(`
       UPDATE chat_threads SET status = ?, updated_at = ? WHERE id = ?
-    `).run(status, now(), req.params.id);
+    `).run(status, tClose, req.params.id);
+    if (status === 'closed' && thread.status !== 'closed') {
+      db.prepare(`
+        INSERT INTO chat_messages (id, thread_id, sender, body, created_at)
+        VALUES (?, ?, 'system', ?, ?)
+      `).run(
+        uid('cm'),
+        thread.id,
+        'Söhbət admin tərəfindən bağlandı. Yenidən başlamaq üçün formu doldurun.',
+        tClose
+      );
+      db.prepare(`
+        UPDATE chat_threads SET last_message = ?, unread_visitor = unread_visitor + 1 WHERE id = ?
+      `).run('Söhbət admin tərəfindən bağlandı.', thread.id);
+    }
   } else if (!approve) {
     return res.status(400).json({ error: 'status open|closed və ya approved tələb olunur' });
   }
