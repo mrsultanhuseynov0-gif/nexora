@@ -24,13 +24,13 @@
   --color-bg-overlay: rgba(20, 24, 32, 0.45);
   --color-bg-glow: rgba(229, 9, 20, 0.08);
 
-  --color-text: #141820;
-  --color-text-muted: #5c667a;
+  --color-text: #0f1218;
+  --color-text-muted: #3d4658;
   --color-text-light: #ffffff;
   --color-text-inverse: #ffffff;
 
-  --color-border: #dce3ef;
-  --color-border-dark: #c5cede;
+  --color-border: #cfd7e6;
+  --color-border-dark: #aeb8cb;
 
   --color-success: #1b8a4a;
   --color-success-light: #e8f8ef;
