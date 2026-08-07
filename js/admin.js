@@ -2052,6 +2052,22 @@
           '<div class="form-row"><div class="form-group"><label class="form-label">WhatsApp</label><input class="input" id="sWa" value="' + esc(s.whatsapp || '') + '"></div>' +
           '<div class="form-group"><label class="form-label">Telegram</label><input class="input" id="sTg" value="' + esc(s.telegram || '') + '"></div></div>' +
         '</div></div>' +
+        '<div class="admin-card mb-4"><div class="admin-card-head"><h3>Live Chat</h3></div><div class="admin-card-body">' +
+          '<label class="flex items-center gap-2 mb-3"><input type="checkbox" id="lcEnabled"' +
+            (!(s.liveChat && s.liveChat.enabled === false) ? ' checked' : '') + '> Live chat aktiv</label>' +
+          '<label class="flex items-center gap-2 mb-3"><input type="checkbox" id="lcWaOn"' +
+            (!(s.liveChat && s.liveChat.whatsappEnabled === false) ? ' checked' : '') + '> WhatsApp düyməsi (sağ alt)</label>' +
+          '<div class="form-group"><label class="form-label">WhatsApp ilk mesaj</label>' +
+            '<input class="input" id="lcWaMsg" value="' + esc((s.liveChat && s.liveChat.whatsappMessage) || 'Salam! NEXORA-dan yazıram.') + '"></div>' +
+          '<div class="form-group"><label class="form-label">Tawk.to Property ID</label>' +
+            '<input class="input" id="lcTawk" placeholder="xxxxxxxxxxxxxxxx/yyyyyyyyyyyy" value="' +
+            esc((s.liveChat && s.liveChat.tawkPropertyId) || '') + '">' +
+            '<p class="text-xs text-muted mt-1 mb-0">tawk.to → Admin → Channels → Chat Widget → Direct Chat Link / Property ID (məs: <code>62f.../1ga...</code>)</p></div>' +
+          '<div class="form-group"><label class="form-label">Crisp Website ID (opsional)</label>' +
+            '<input class="input" id="lcCrisp" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value="' +
+            esc((s.liveChat && s.liveChat.crispWebsiteId) || '') + '">' +
+            '<p class="text-xs text-muted mt-1 mb-0">Tawk dolu olsa Crisp işləmir. Birini seçin.</p></div>' +
+        '</div></div>' +
         '<div class="admin-card mb-4"><div class="admin-card-head"><h3>Promo bar</h3></div><div class="admin-card-body">' +
           '<label class="flex items-center gap-2 mb-3"><input type="checkbox" id="sPromoOn"' + (s.promoBar && s.promoBar.enabled ? ' checked' : '') + '> Aktiv</label>' +
           '<div class="form-group"><label class="form-label">Mətn</label><input class="input" id="sPromoText" value="' + esc((s.promoBar && s.promoBar.text) || '') + '"></div>' +
@@ -2115,6 +2131,13 @@
         accentColor: document.getElementById('sAccent').value,
         whatsapp: document.getElementById('sWa').value.trim(),
         telegram: document.getElementById('sTg').value.trim(),
+        liveChat: {
+          enabled: document.getElementById('lcEnabled').checked,
+          whatsappEnabled: document.getElementById('lcWaOn').checked,
+          whatsappMessage: document.getElementById('lcWaMsg').value.trim() || 'Salam! NEXORA-dan yazıram.',
+          tawkPropertyId: document.getElementById('lcTawk').value.trim(),
+          crispWebsiteId: document.getElementById('lcCrisp').value.trim()
+        },
         promoBar: {
           enabled: document.getElementById('sPromoOn').checked,
           text: document.getElementById('sPromoText').value.trim(),

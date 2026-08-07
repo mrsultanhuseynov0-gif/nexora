@@ -135,6 +135,13 @@ const NexoraApp = (function () {
       accentColor: '#FF0000',
       whatsapp: '+994501234567',
       telegram: 'nexora_az',
+      liveChat: {
+        enabled: true,
+        whatsappEnabled: true,
+        whatsappMessage: 'Salam! NEXORA-dan yazıram.',
+        tawkPropertyId: '',
+        crispWebsiteId: ''
+      },
       promoBar: { enabled: true, text: '', link: 'pages/campaigns.html', linkText: '' },
       nav: [],
       footer: { desc: '', facebook: '', instagram: '', youtube: '' },

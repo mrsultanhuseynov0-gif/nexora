@@ -307,12 +307,20 @@ const NexoraSecurity = (function () {
     } catch (e) { /* ignore */ }
     meta.content = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://images.unsplash.com https://*.unsplash.com https://upload.wikimedia.org https://*.wikimedia.org https://res.cloudinary.com",
+      "script-src 'self' 'unsafe-inline' https://embed.tawk.to https://cdn.jsdelivr.net https://client.crisp.chat https://*.crisp.chat",
+      "style-src 'self' 'unsafe-inline' https://embed.tawk.to https://client.crisp.chat https://*.crisp.chat",
+      "img-src 'self' data: blob: https: https://images.unsplash.com https://*.unsplash.com https://upload.wikimedia.org https://*.wikimedia.org https://res.cloudinary.com https://embed.tawk.to https://*.tawk.to https://client.crisp.chat https://*.crisp.chat",
       "media-src 'self' blob: mediastream:",
-      "font-src 'self' data:",
-      'connect-src ' + connect.join(' '),
+      "font-src 'self' data: https://client.crisp.chat https://*.crisp.chat",
+      'connect-src ' + connect.concat([
+        'https://embed.tawk.to',
+        'https://*.tawk.to',
+        'wss://*.tawk.to',
+        'https://client.crisp.chat',
+        'https://*.crisp.chat',
+        'wss://*.crisp.chat'
+      ]).join(' '),
+      "frame-src 'self' https://embed.tawk.to https://*.tawk.to https://client.crisp.chat https://*.crisp.chat",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
