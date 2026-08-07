@@ -42,58 +42,58 @@
         <div class="container">
           <nav class="breadcrumb">
             <a href="../index.html" data-i18n="home">Ana səhifə</a><span class="breadcrumb-sep">/</span>
-            <a href="cart.html">Səbət</a><span class="breadcrumb-sep">/</span><span data-i18n="checkout_title">Checkout</span>
+            <a href="cart.html" data-i18n="cart">Səbət</a><span class="breadcrumb-sep">/</span><span data-i18n="checkout_title">Checkout</span>
           </nav>
-          <h1>Sifarişi rəsmiləşdir</h1>
-          <p class="section-subtitle">Demo ödəniş — real gateway yoxdur</p>
+          <h1 data-i18n="checkout">Sifarişi rəsmiləşdir</h1>
+          <p class="section-subtitle" data-i18n="pay">Demo ödəniş — real gateway yoxdur</p>
         </div>
       </div>
       <div class="container checkout-layout">
         <form id="checkoutForm">
           <div class="card mb-6">
-            <div class="card-header"><h2 class="card-title mb-0">Çatdırılma</h2></div>
+            <div class="card-header"><h2 class="card-title mb-0" data-i18n="shipping">Çatdırılma</h2></div>
             <div class="card-body">
               <div class="form-row">
-                <div class="form-group"><label class="form-label">Ad Soyad</label>
+                <div class="form-group"><label class="form-label" data-i18n="full_name">Ad Soyad</label>
                   <input class="input" id="shipName" required></div>
-                <div class="form-group"><label class="form-label">E-poçt</label>
+                <div class="form-group"><label class="form-label" data-i18n="email">E-poçt</label>
                   <input type="email" class="input" id="shipEmail" required></div>
               </div>
               <div class="form-row">
-                <div class="form-group"><label class="form-label">Telefon</label>
+                <div class="form-group"><label class="form-label" data-i18n="phone">Telefon</label>
                   <input class="input" id="shipPhone" required placeholder="+994 ..."></div>
-                <div class="form-group"><label class="form-label">Şəhər</label>
+                <div class="form-group"><label class="form-label" data-i18n="city">Şəhər</label>
                   <input class="input" id="shipCity" required value="Bakı"></div>
               </div>
               <div class="form-row">
-                <div class="form-group"><label class="form-label">Rayon</label>
+                <div class="form-group"><label class="form-label" data-i18n="district">Rayon</label>
                   <input class="input" id="shipDistrict"></div>
-                <div class="form-group"><label class="form-label">Poçt indeksi</label>
+                <div class="form-group"><label class="form-label" data-i18n="postal">Poçt indeksi</label>
                   <input class="input" id="shipPostal"></div>
               </div>
-              <div class="form-group"><label class="form-label">Ünvan</label>
+              <div class="form-group"><label class="form-label" data-i18n="address">Ünvan</label>
                 <textarea class="input" id="shipAddress" rows="2" required></textarea></div>
             </div>
           </div>
 
           <div class="card mb-6">
-            <div class="card-header"><h2 class="card-title mb-0">Faktura ünvanı</h2></div>
+            <div class="card-header"><h2 class="card-title mb-0" data-i18n="addresses">Faktura ünvanı</h2></div>
             <div class="card-body">
               <label class="form-check mb-4">
                 <input type="checkbox" class="form-check-input" id="sameAsShipping" checked>
-                <span class="form-check-label">Çatdırılma ünvanı ilə eyni</span>
+                <span class="form-check-label" data-i18n="shipping">Çatdırılma ünvanı ilə eyni</span>
               </label>
               <div id="billingFields" hidden>
-                <div class="form-group"><label class="form-label">Ad</label>
+                <div class="form-group"><label class="form-label" data-i18n="name">Ad</label>
                   <input class="input" id="billName"></div>
-                <div class="form-group"><label class="form-label">Ünvan</label>
+                <div class="form-group"><label class="form-label" data-i18n="address">Ünvan</label>
                   <input class="input" id="billAddress"></div>
               </div>
             </div>
           </div>
 
           <div class="card mb-6">
-            <div class="card-header"><h2 class="card-title mb-0">Ödəniş üsulu</h2></div>
+            <div class="card-header"><h2 class="card-title mb-0" data-i18n="payment_method">Ödəniş üsulu</h2></div>
             <div class="card-body">
               <label class="form-check mb-3">
                 <input type="radio" name="paymentMethod" value="card" class="form-check-input" checked>
@@ -136,7 +136,7 @@
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary btn-lg w-full">Sifarişi təsdiqlə</button>
+          <button type="submit" class="btn btn-primary btn-lg w-full" data-i18n="place_order">Sifarişi təsdiqlə</button>
         </form>
 
         <aside class="order-summary" id="checkoutSummary"></aside>
