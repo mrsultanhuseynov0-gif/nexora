@@ -106,7 +106,7 @@
 
 .card-product:hover {
   box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
+  transform: perspective(900px) rotateX(3deg) rotateY(-5deg) translateY(-8px);
 }
 
 .card-product-image {

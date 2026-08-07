@@ -1,21 +1,22 @@
 /* NEXORA Design System — Main Stylesheet */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap');
 
-@import 'reset.css?v=20260807h';
-@import 'variables.css?v=20260807h';
-@import 'typography.css?v=20260807h';
-@import 'utilities.css?v=20260807h';
-@import 'buttons.css?v=20260807h';
-@import 'cards.css?v=20260807h';
-@import 'forms.css?v=20260807h';
-@import 'inputs.css?v=20260807h';
-@import 'modals.css?v=20260807h';
-@import 'toasts.css?v=20260807h';
-@import 'icons.css?v=20260807h';
-@import 'layout.css?v=20260807h';
-@import 'mobile.css?v=20260807h';
-@import 'features.css?v=20260807h';
+@import 'reset.css?v=20260807i';
+@import 'variables.css?v=20260807i';
+@import 'typography.css?v=20260807i';
+@import 'utilities.css?v=20260807i';
+@import 'buttons.css?v=20260807i';
+@import 'cards.css?v=20260807i';
+@import 'forms.css?v=20260807i';
+@import 'inputs.css?v=20260807i';
+@import 'modals.css?v=20260807i';
+@import 'toasts.css?v=20260807i';
+@import 'icons.css?v=20260807i';
+@import 'layout.css?v=20260807i';
+@import 'mobile.css?v=20260807i';
+@import 'features.css?v=20260807i';
+@import 'theme.css?v=20260807i';
 
 /* Global Layout Helpers */
 .page-wrapper {

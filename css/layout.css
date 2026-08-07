@@ -394,8 +394,8 @@
 .hero {
   position: relative;
   overflow: hidden;
-  background: var(--color-black);
-  color: var(--color-white);
+  background: var(--color-bg-alt);
+  color: var(--color-text);
 }
 
 .hero-slides {
@@ -435,7 +435,7 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(105deg, rgba(17, 17, 17, 0.88) 0%, rgba(17, 17, 17, 0.55) 48%, rgba(17, 17, 17, 0.25) 100%);
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.55) 48%, rgba(255, 255, 255, 0.15) 100%);
 }
 
 .hero-content {
@@ -469,12 +469,12 @@
   font-weight: var(--font-weight-black);
   line-height: var(--line-height-tight);
   margin-bottom: var(--space-4);
-  color: var(--color-white);
+  color: var(--color-text);
 }
 
 .hero-desc {
   font-size: var(--font-size-md);
-  color: var(--color-grey);
+  color: var(--color-text-muted);
   margin-bottom: var(--space-6);
   max-width: 480px;
 }
