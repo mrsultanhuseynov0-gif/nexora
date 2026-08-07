@@ -30,7 +30,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Hesab | NEXORA</title>
-  <link rel="stylesheet" href="../css/main.css?v=20260807r">
+  <link rel="stylesheet" href="../css/main.css?v=20260807s">
   <link rel="manifest" href="../manifest.webmanifest">
   <meta name="theme-color" content="#FF0000">
 </head>
@@ -51,28 +51,28 @@
       <div class="container" id="accountAuth">
         <div class="auth-card">
           <div class="flex gap-2 mb-6">
-            <button type="button" class="btn btn-primary flex-1 is-active" data-auth-tab="login">Giriş</button>
-            <button type="button" class="btn btn-outline flex-1" data-auth-tab="register">Qeydiyyat</button>
+            <button type="button" class="btn btn-primary flex-1 is-active" data-auth-tab="login" data-i18n="login">Giriş</button>
+            <button type="button" class="btn btn-outline flex-1" data-auth-tab="register" data-i18n="register">Qeydiyyat</button>
           </div>
           <form id="loginForm">
-            <div class="form-group"><label class="form-label">E-poçt</label>
+            <div class="form-group"><label class="form-label" data-i18n="email">E-poçt</label>
               <input type="email" class="input" id="loginEmail" required autocomplete="username"></div>
-            <div class="form-group"><label class="form-label">Şifrə</label>
+            <div class="form-group"><label class="form-label" data-i18n="password">Şifrə</label>
               <input type="password" class="input" id="loginPassword" required minlength="8" autocomplete="current-password"></div>
-            <button type="submit" class="btn btn-primary w-full">Daxil ol</button>
+            <button type="submit" class="btn btn-primary w-full" data-i18n="login">Daxil ol</button>
           </form>
           <form id="registerForm" hidden>
-            <div class="form-group"><label class="form-label">Ad Soyad</label>
+            <div class="form-group"><label class="form-label" data-i18n="full_name">Ad Soyad</label>
               <input class="input" id="regName" required></div>
-            <div class="form-group"><label class="form-label">E-poçt</label>
+            <div class="form-group"><label class="form-label" data-i18n="email">E-poçt</label>
               <input type="email" class="input" id="regEmail" required></div>
-            <div class="form-group"><label class="form-label">Telefon</label>
+            <div class="form-group"><label class="form-label" data-i18n="phone">Telefon</label>
               <input class="input" id="regPhone"></div>
-            <div class="form-group"><label class="form-label">Dost kodu (istəyə bağlı)</label>
+            <div class="form-group"><label class="form-label" data-i18n="referral_code">Dost kodu (istəyə bağlı)</label>
               <input class="input" id="regReferral" placeholder="DOST…"></div>
-            <div class="form-group"><label class="form-label">Şifrə (min. 8, hərf + rəqəm)</label>
+            <div class="form-group"><label class="form-label" data-i18n="password_hint">Şifrə (min. 8, hərf + rəqəm)</label>
               <input type="password" class="input" id="regPassword" required minlength="8" autocomplete="new-password"></div>
-            <button type="submit" class="btn btn-primary w-full">Qeydiyyatdan keç</button>
+            <button type="submit" class="btn btn-primary w-full" data-i18n="register">Qeydiyyatdan keç</button>
           </form>
           <div id="accountOauth" class="auth-social-host"></div>
         </div>
@@ -80,12 +80,12 @@
 
       <div class="container account-layout" id="accountDash" hidden>
         <aside class="account-nav">
-          <button type="button" class="is-active" data-account-nav="overview">İcmal</button>
-          <button type="button" data-account-nav="profile">Profil</button>
-          <button type="button" data-account-nav="password">Şifrə</button>
-          <button type="button" data-account-nav="orders">Sifarişlər</button>
-          <button type="button" data-account-nav="referral">Dost kodu</button>
-          <button type="button" data-account-nav="addresses">Ünvanlar</button>
+          <button type="button" class="is-active" data-account-nav="overview" data-i18n="overview">İcmal</button>
+          <button type="button" data-account-nav="profile" data-i18n="profile">Profil</button>
+          <button type="button" data-account-nav="password" data-i18n="password">Şifrə</button>
+          <button type="button" data-account-nav="orders" data-i18n="orders">Sifarişlər</button>
+          <button type="button" data-account-nav="referral" data-i18n="referral_code">Dost kodu</button>
+          <button type="button" data-account-nav="addresses" data-i18n="addresses">Ünvanlar</button>
           <button type="button" data-account-nav="rewards">XP & Level</button>
           <button type="button" data-account-nav="digital-twin">Digital Twin</button>
           <button type="button" data-account-nav="warranty">Warranty Center</button>
@@ -238,25 +238,25 @@
     </main>
     <div id="site-footer"></div>
   </div>
-  <script src="../js/icons.js?v=20260807r"></script>
-  <script src="../js/components/modal.js?v=20260807r"></script>
-  <script src="../js/components/toast.js?v=20260807r"></script>
-  <script src="../js/api.js?v=20260807r"></script>
-  <script src="../js/connectivity.js?v=20260807r"></script>
-  <script src="../js/app.js?v=20260807r"></script>
-  <script src="../js/security.js?v=20260807r"></script>
-  <script src="../js/cart.js?v=20260807r"></script>
-  <script src="../js/wishlist.js?v=20260807r"></script>
-  <script src="../js/search.js?v=20260807r"></script>
-  <script src="../js/smart.js?v=20260807r"></script>
-  <script src="../js/order-timeline.js?v=20260807r"></script>
-  <script src="../js/digital-twin.js?v=20260807r"></script>
-  <script src="../js/account.js?v=20260807r"></script>
-  <script src="../js/oauth.js?v=20260807r"></script>
-  <script src="../js/i18n.js?v=20260807r"></script>
-  <script src="../js/shell.js?v=20260807r"></script>
-  <script src="../js/livechat.js?v=20260807r"></script>
-  <script src="../js/smart-ui.js?v=20260807r"></script>
-  <script src="../js/main.js?v=20260807r"></script>
+  <script src="../js/icons.js?v=20260807s"></script>
+  <script src="../js/components/modal.js?v=20260807s"></script>
+  <script src="../js/components/toast.js?v=20260807s"></script>
+  <script src="../js/api.js?v=20260807s"></script>
+  <script src="../js/connectivity.js?v=20260807s"></script>
+  <script src="../js/app.js?v=20260807s"></script>
+  <script src="../js/security.js?v=20260807s"></script>
+  <script src="../js/cart.js?v=20260807s"></script>
+  <script src="../js/wishlist.js?v=20260807s"></script>
+  <script src="../js/search.js?v=20260807s"></script>
+  <script src="../js/smart.js?v=20260807s"></script>
+  <script src="../js/order-timeline.js?v=20260807s"></script>
+  <script src="../js/digital-twin.js?v=20260807s"></script>
+  <script src="../js/account.js?v=20260807s"></script>
+  <script src="../js/oauth.js?v=20260807s"></script>
+  <script src="../js/i18n.js?v=20260807s"></script>
+  <script src="../js/shell.js?v=20260807s"></script>
+  <script src="../js/livechat.js?v=20260807s"></script>
+  <script src="../js/smart-ui.js?v=20260807s"></script>
+  <script src="../js/main.js?v=20260807s"></script>
 </body>
 </html>

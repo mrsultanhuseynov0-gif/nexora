@@ -303,6 +303,51 @@
 .header-currency-wrap {
   display: inline-flex;
   align-items: center;
+  gap: 8px;
+}
+
+.header-currency-wrap .lang-switch,
+.header-currency-wrap .currency-switch {
+  min-width: 72px;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* RTL (Arabic) */
+[dir="rtl"] body {
+  text-align: right;
+}
+
+[dir="rtl"] .header-top,
+[dir="rtl"] .site-nav-inner,
+[dir="rtl"] .header-actions,
+[dir="rtl"] .mobile-nav-tools,
+[dir="rtl"] .hero-actions,
+[dir="rtl"] .section-header,
+[dir="rtl"] .account-layout,
+[dir="rtl"] .card-product-price {
+  direction: rtl;
+}
+
+[dir="rtl"] .hero-content {
+  text-align: right;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+[dir="rtl"] .form-search-icon {
+  left: auto;
+  right: 12px;
+}
+
+[dir="rtl"] .form-search .input {
+  padding-left: 12px;
+  padding-right: 40px;
+}
+
+[dir="rtl"] .mobile-tabbar {
+  direction: rtl;
 }
 
 .product-grid--dense {

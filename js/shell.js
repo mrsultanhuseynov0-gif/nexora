@@ -58,12 +58,24 @@ const NexoraShell = (function () {
     });
   }
 
+  function langSwitcherHTML() {
+    const lang = typeof NexoraI18n !== 'undefined' ? NexoraI18n.getLang() : 'az';
+    return (
+      '<select class="input lang-switch" data-lang-switch aria-label="' + t('lang') + '" title="' + t('lang') + '">' +
+        '<option value="az"' + (lang === 'az' ? ' selected' : '') + '>AZ</option>' +
+        '<option value="ru"' + (lang === 'ru' ? ' selected' : '') + '>RU</option>' +
+        '<option value="en"' + (lang === 'en' ? ' selected' : '') + '>EN</option>' +
+        '<option value="ar"' + (lang === 'ar' ? ' selected' : '') + '>AR</option>' +
+      '</select>'
+    );
+  }
+
   function currencySwitcherHTML() {
     const cur = typeof NexoraApp !== 'undefined' && NexoraApp.getCurrency
       ? NexoraApp.getCurrency()
       : 'AZN';
     return (
-      '<select class="input currency-switch" data-currency-switch aria-label="Valyuta" title="Valyuta">' +
+      '<select class="input currency-switch" data-currency-switch aria-label="' + t('currency') + '" title="' + t('currency') + '">' +
         '<option value="AZN"' + (cur === 'AZN' ? ' selected' : '') + '>₼ AZN</option>' +
         '<option value="USD"' + (cur === 'USD' ? ' selected' : '') + '>$ USD</option>' +
         '<option value="EUR"' + (cur === 'EUR' ? ' selected' : '') + '>€ EUR</option>' +
@@ -102,7 +114,7 @@ const NexoraShell = (function () {
             '<div class="header-search-results" data-search-results></div>' +
           '</div>' +
           '<div class="header-actions">' +
-            '<span class="header-currency-wrap">' + currencySwitcherHTML() + '</span>' +
+            '<span class="header-currency-wrap">' + langSwitcherHTML() + currencySwitcherHTML() + '</span>' +
             '<button type="button" class="header-action" data-mobile-search-toggle aria-label="' + t('search_btn') + '">' +
               '<span class="icon icon-md" data-icon="search"></span>' +
             '</button>' +
@@ -122,7 +134,7 @@ const NexoraShell = (function () {
             '</button>' +
           '</div>' +
         '</div>' +
-        '<nav class="site-nav" aria-label="Əsas naviqasiya">' +
+        '<nav class="site-nav" aria-label="' + t('nav_main') + '">' +
           '<div class="container site-nav-inner">' +
             primary.map(function (n) {
               return '<a class="nav-link" href="' + n.href + '" data-nav="' + n.id + '">' + n.label + '</a>';
@@ -140,12 +152,13 @@ const NexoraShell = (function () {
         '<div class="mobile-nav-panel">' +
           '<div class="flex justify-between items-center mb-6">' +
             logoHTML(b + 'index.html') +
-            '<button type="button" class="icon-btn" data-nav-close aria-label="Bağla">' +
+            '<button type="button" class="icon-btn" data-nav-close aria-label="' + t('close') + '">' +
               '<span class="icon icon-md" data-icon="close"></span>' +
             '</button>' +
           '</div>' +
           '<p class="text-sm text-muted mb-4">' + ((site && site.tagline) || t('shop')) + '</p>' +
           '<div class="mobile-nav-tools mb-4">' +
+            langSwitcherHTML() +
             currencySwitcherHTML() +
             '<button type="button" class="btn btn-outline btn-sm" data-theme-toggle aria-label="' + t('theme') + '">' +
               '<span class="icon icon-sm" data-icon="moon"></span>' +
@@ -165,7 +178,7 @@ const NexoraShell = (function () {
   function tabbarHTML() {
     const b = NexoraApp.getBasePath();
     return (
-      '<nav class="mobile-tabbar" aria-label="Mobil naviqasiya">' +
+      '<nav class="mobile-tabbar" aria-label="' + t('nav_mobile') + '">' +
         '<a class="mobile-tab" href="' + b + 'index.html" data-tab="home">' +
           '<span class="icon icon-sm" data-icon="home"></span><span>' + shortLabel(t('home')) + '</span></a>' +
         '<a class="mobile-tab" href="' + b + 'pages/products.html" data-tab="shop">' +
@@ -387,6 +400,13 @@ const NexoraShell = (function () {
           other.value = sel.value;
         });
         location.reload();
+      });
+    });
+    document.querySelectorAll('[data-lang-switch]').forEach(function (sel) {
+      sel.addEventListener('change', function () {
+        if (typeof NexoraI18n !== 'undefined' && NexoraI18n.setLang) {
+          NexoraI18n.setLang(sel.value);
+        }
       });
     });
   }
