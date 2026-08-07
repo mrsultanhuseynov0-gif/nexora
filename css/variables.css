@@ -41,9 +41,9 @@
   --color-info: #2563eb;
   --color-info-light: #eff6ff;
 
-  /* Typography */
-  --font-primary: 'Manrope', 'Segoe UI', sans-serif;
-  --font-display: 'Syne', 'Manrope', sans-serif;
+  /* Typography — original stack */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
 
   --font-size-xs: 0.75rem;
