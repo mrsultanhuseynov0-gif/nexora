@@ -44,7 +44,21 @@
       '<div class="summary-row"><span>' + tt('vat') + '</span><span>' + NexoraApp.formatPrice(totals.tax) + '</span></div>' +
       '<div class="summary-row"><span>' + tt('shipping') + '</span><span>' +
         (totals.shipping === 0 ? tt('free') : NexoraApp.formatPrice(totals.shipping)) + '</span></div>' +
-      '<div class="summary-total"><span>' + tt('total') + '</span><span>' + NexoraApp.formatPrice(totals.total) + '</span></div>';
+      '<div class="summary-total"><span>' + tt('total') + '</span><span>' + NexoraApp.formatPrice(totals.total) + '</span></div>' +
+      '<a href="#" class="btn btn-outline w-full mt-3" id="checkoutWhatsApp">' + tt('wa_order') + '</a>';
+
+    var wa = document.getElementById('checkoutWhatsApp');
+    if (wa) {
+      wa.addEventListener('click', function (e) {
+        e.preventDefault();
+        var lines = totals.items.map(function (i) {
+          return i.qty + '× ' + (i.displayName || i.name);
+        }).join('\n');
+        var msg = tt('wa_hello') + ' Checkout:\n' + lines + '\n' +
+          tt('total') + ': ' + NexoraApp.formatPrice(totals.total);
+        window.open(NexoraApp.whatsappLink(msg), '_blank');
+      });
+    }
   }
 
   async function fillFromSession() {
@@ -310,6 +324,9 @@
             '<p class="text-muted mb-4">' + (data.payment.message || 'Nağd ödəniş çatdırılma zamanı.') + '</p>' +
             '<div class="flex gap-3 justify-center flex-wrap">' +
               '<a href="' + trackUrl + '" class="btn btn-primary">Sifarişi izlə</a>' +
+              '<a href="' + NexoraApp.whatsappLink(
+                'Salam! Sifariş #' + data.order.id + ' haqqında yazıram.'
+              ) + '" class="btn btn-outline" target="_blank" rel="noopener">WhatsApp</a>' +
               '<a href="products.html" class="btn btn-ghost">Alış-verişə davam</a>' +
             '</div></div>';
         if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();

@@ -8,11 +8,20 @@
   let slideTimer = null;
   let slides = [];
 
-  function renderHero(slideData) {
-    slides = slideData.slides || [];
+  function renderHero(slideData, siteHome) {
+    slides = (slideData.slides || []).slice();
     const root = document.getElementById('heroSlides');
     const dots = document.getElementById('heroDots');
     if (!root || !slides.length) return;
+
+    // Site settings can override first slide headline / primary CTA
+    const home = siteHome || {};
+    if (home.heroHeadline || home.heroCta) {
+      slides[0] = Object.assign({}, slides[0], {
+        title: home.heroHeadline || slides[0].title,
+        ctaText: home.heroCta || slides[0].ctaText
+      });
+    }
 
     root.innerHTML = slides.map(function (s, i) {
       return (
@@ -245,10 +254,13 @@
     document.body.classList.add('is-booting');
 
     // Hero first for fast paint, then parallel the rest
-    const hero = await safeLoad('hero', function () {
-      return NexoraApp.fetchJSON('data/hero-slides.json');
-    }, { slides: [] });
-    renderHero(hero);
+    const heroPack = await Promise.all([
+      safeLoad('hero', function () {
+        return NexoraApp.fetchJSON('data/hero-slides.json');
+      }, { slides: [] }),
+      safeLoad('site', function () { return NexoraApp.loadSiteSettings(); }, {})
+    ]);
+    renderHero(heroPack[0], (heroPack[1] && heroPack[1].home) || {});
     if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();
 
     const pack = await Promise.all([

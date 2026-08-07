@@ -1079,13 +1079,39 @@
             }
           } catch (e) { /* ignore */ }
         }
+        var phone = (o.customer && o.customer.phone) || o.phone || '';
+        var notifyMsg = encodeURIComponent(
+          'NEXORA sifariş #' + o.id + '\n' +
+          'Status: ' + orderDisplay(o.status) + '\n' +
+          'Cəm: ' + money(total) + '\n' +
+          'Müştəri: ' + (o.email || (o.customer && o.customer.email) || '')
+        );
+        var waDigits = String(phone || '').replace(/\D/g, '');
+        if (waDigits.indexOf('994') !== 0 && waDigits.length === 9) waDigits = '994' + waDigits;
+        if (waDigits.charAt(0) === '0') waDigits = '994' + waDigits.slice(1);
+        var waNotify = waDigits
+          ? ('https://wa.me/' + waDigits + '?text=' + notifyMsg)
+          : ('https://wa.me/?text=' + notifyMsg);
+        var tgUser = '';
+        try {
+          var siteCfg = await getCms('site');
+          tgUser = String((siteCfg && siteCfg.telegram) || '').replace(/^@/, '');
+        } catch (e) { tgUser = ''; }
+        var tgNotify = tgUser
+          ? ('https://t.me/' + encodeURIComponent(tgUser) + '?text=' + notifyMsg)
+          : ('https://t.me/share/url?url=' + encodeURIComponent('https://nexora.az') + '&text=' + notifyMsg);
+
         openDrawer('Sifariş ' + o.id,
           '<p><strong>Status:</strong> ' + esc(orderDisplay(o.status)) + '</p>' +
           '<p><strong>E-poçt:</strong> ' + esc(o.email || (o.customer && o.customer.email) || '') + '</p>' +
-          '<p><strong>Telefon:</strong> ' + esc((o.customer && o.customer.phone) || o.phone || '—') + '</p>' +
+          '<p><strong>Telefon:</strong> ' + esc(phone || '—') + '</p>' +
           '<p><strong>Ünvan:</strong> ' + esc((o.customer && o.customer.address) || o.address || '—') + '</p>' +
           '<h4 class="mt-4">Məhsullar</h4><ul class="text-sm">' + (items || '<li>—</li>') + '</ul>' +
-          '<p class="mt-3"><strong>Cəm:</strong> ' + money(total) + '</p>' + payHtml,
+          '<p class="mt-3"><strong>Cəm:</strong> ' + money(total) + '</p>' + payHtml +
+          '<div class="flex gap-2 flex-wrap mt-4">' +
+            '<a class="btn btn-outline btn-sm" href="' + esc(waNotify) + '" target="_blank" rel="noopener">WhatsApp bildiriş</a>' +
+            '<a class="btn btn-outline btn-sm" href="' + esc(tgNotify) + '" target="_blank" rel="noopener">Telegram bildiriş</a>' +
+          '</div>',
           (transferPay
             ? '<button type="button" class="btn btn-outline" id="confirmTransferBtn">Köçürməni təsdiqlə</button>'
             : '') +
@@ -2273,6 +2299,13 @@
           '<div class="form-group"><label class="form-label">Instagram</label><input class="input" id="sIg" value="' + esc((s.footer && s.footer.instagram) || '') + '"></div>' +
           '<div class="form-group"><label class="form-label">YouTube</label><input class="input" id="sYt" value="' + esc((s.footer && s.footer.youtube) || '') + '"></div></div>' +
         '</div></div>' +
+        '<div class="admin-card mb-4"><div class="admin-card-head"><h3>Ana səhifə hero</h3></div><div class="admin-card-body">' +
+          '<div class="form-group"><label class="form-label">Hero başlıq</label><input class="input" id="sHeroHeadline" value="' +
+            esc((s.home && s.home.heroHeadline) || '') + '" placeholder="Premium alış-veriş — NEXORA"></div>' +
+          '<div class="form-group"><label class="form-label">Hero CTA mətn</label><input class="input" id="sHeroCta" value="' +
+            esc((s.home && s.home.heroCta) || '') + '" placeholder="Kataloqa bax"></div>' +
+          '<p class="text-xs text-muted mb-0">Boş buraxsanız hero-slides.json-dakı default mətnlər istifadə olunur.</p>' +
+        '</div></div>' +
         '<div class="admin-card mb-4"><div class="admin-card-head"><h3>Səhifə mətnləri</h3></div><div class="admin-card-body">' +
           '<div class="form-group"><label class="form-label">Haqqımızda — başlıq</label><input class="input" id="sAboutTitle" value="' + esc((s.pages && s.pages.about && s.pages.about.title) || '') + '"></div>' +
           '<div class="form-group"><label class="form-label">Haqqımızda — mətn</label><textarea class="input" id="sAboutBody" rows="4">' + esc((s.pages && s.pages.about && s.pages.about.body) || '') + '</textarea></div>' +
@@ -2351,7 +2384,10 @@
             body: document.getElementById('sFaqBody').value
           }
         },
-        home: s.home || {}
+        home: {
+          heroHeadline: document.getElementById('sHeroHeadline').value.trim(),
+          heroCta: document.getElementById('sHeroCta').value.trim()
+        }
       };
       await saveCms('site', data);
       NexoraToast.success('Sayt parametrləri saxlandı');
