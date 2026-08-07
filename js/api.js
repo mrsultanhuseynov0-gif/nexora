@@ -138,10 +138,21 @@
     return !!(h && h.ok);
   }
 
+  function clientDevice() {
+    try {
+      var ua = navigator.userAgent || '';
+      if (/iPad|Tablet|Android(?!.*Mobile)/i.test(ua)) return 'tablet';
+      if (/Mobi|iPhone|iPod|Android.*Mobile|Windows Phone|BlackBerry/i.test(ua)) return 'phone';
+      return 'computer';
+    } catch (e) {
+      return 'unknown';
+    }
+  }
+
   async function login(email, password) {
     var data = await request('/api/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email: email, password: password })
+      body: JSON.stringify({ email: email, password: password, device: clientDevice() })
     });
     setToken(data.token);
     return data;
@@ -150,6 +161,7 @@
   async function oauthLogin(provider, payload) {
     var body = payload || {};
     if (typeof payload === 'string') body = { idToken: payload };
+    body.device = body.device || clientDevice();
     var data = await request('/api/auth/oauth/' + encodeURIComponent(provider), {
       method: 'POST',
       body: JSON.stringify(body)
@@ -175,14 +187,16 @@
     login: login,
     oauthLogin: oauthLogin,
     register: function (body) {
+      var payload = Object.assign({}, body || {}, { device: (body && body.device) || clientDevice() });
       return request('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify(body || {})
+        body: JSON.stringify(payload)
       }).then(function (data) {
         if (data && data.token) setToken(data.token);
         return data;
       });
     },
+    clientDevice: clientDevice,
     me: me,
     getProducts: function (qs) {
       var q = qs ? ('?' + new URLSearchParams(qs).toString()) : '';

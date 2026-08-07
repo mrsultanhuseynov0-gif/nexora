@@ -27,7 +27,8 @@ const uploadRoutes = require('./routes/uploads');
 const app = express();
 const ROOT = path.join(__dirname, '..', '..');
 
-if (cfg.trustProxy) app.set('trust proxy', 1);
+// Render / reverse proxies: trust X-Forwarded-* so req.ip is the real client
+if (cfg.trustProxy) app.set('trust proxy', true);
 
 /* ---------- Security + performance headers ---------- */
 app.use(function securityHeaders(req, res, next) {

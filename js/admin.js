@@ -1234,17 +1234,32 @@
       });
     }
     var selfId = state.currentUser && state.currentUser.id;
+    function deviceAz(d) {
+      d = String(d || '').toLowerCase();
+      if (d === 'phone' || d === 'mobile') return 'Telefon';
+      if (d === 'tablet') return 'Planşet';
+      if (d === 'computer' || d === 'desktop') return 'Kompüter';
+      return d ? d : '—';
+    }
     var rows = users.map(function (u) {
       var ip = u.registerIp || u.register_ip || u.lastIp || u.last_ip || '—';
       var lastIp = u.lastIp || u.last_ip || '';
-      var ipCell = esc(ip);
-      if (lastIp && lastIp !== ip && ip !== '—') ipCell += '<div class="text-xs text-muted">Son: ' + esc(lastIp) + '</div>';
+      var device = u.registerDevice || u.register_device || u.lastDevice || u.last_device || '';
+      var lastDevice = u.lastDevice || u.last_device || '';
+      var ipCell = '<div><code>' + esc(ip) + '</code></div>' +
+        '<div class="text-xs" style="margin-top:4px;font-weight:700;color:#0b0e14">' + esc(deviceAz(device)) + '</div>';
+      if (lastIp && lastIp !== ip && ip !== '—') {
+        ipCell += '<div class="text-xs text-muted" style="margin-top:4px">Son IP: ' + esc(lastIp) +
+          (lastDevice ? ' · ' + esc(deviceAz(lastDevice)) : '') + '</div>';
+      } else if (lastDevice && lastDevice !== device) {
+        ipCell += '<div class="text-xs text-muted" style="margin-top:4px">Son: ' + esc(deviceAz(lastDevice)) + '</div>';
+      }
       return '<tr><td>' + esc(u.name) + '</td><td>' + esc(u.email) + '</td>' +
         '<td><select class="input" data-user-role="' + esc(u.id) + '" data-prev="' + esc(u.role) + '">' +
           '<option value="customer"' + (u.role === 'customer' ? ' selected' : '') + '>customer</option>' +
           '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>admin</option></select></td>' +
         '<td>' + esc(u.phone || '—') + '</td>' +
-        '<td class="text-sm"><code>' + ipCell + '</code></td>' +
+        '<td class="text-sm">' + ipCell + '</td>' +
         '<td class="text-xs text-muted">' + esc((u.createdAt || u.created_at || '').slice(0, 19).replace('T', ' ') || '—') + '</td>' +
         '<td>' + (u.id === selfId ? '—' : '<button type="button" class="btn btn-ghost btn-sm" data-del-user="' + esc(u.id) + '">Sil</button>') + '</td></tr>';
     }).join('');
@@ -1252,7 +1267,7 @@
       '<div class="admin-page-head"><div><h1>İstifadəçilər</h1><p>' + users.length + ' hesab</p></div></div>' +
       '<div class="admin-toolbar"><input type="search" class="input" id="userSearch" placeholder="Ad və ya e-poçt…" value="' + esc(state.users.search) + '"></div>' +
       '<div class="admin-table-wrap"><table class="admin-table"><thead><tr>' +
-        '<th>Ad</th><th>E-poçt</th><th>Rol</th><th>Telefon</th><th>IP</th><th>Qeydiyyat</th><th></th></tr></thead><tbody>' +
+        '<th>Ad</th><th>E-poçt</th><th>Rol</th><th>Telefon</th><th>IP / Cihaz</th><th>Qeydiyyat</th><th></th></tr></thead><tbody>' +
         (rows || '<tr><td colspan="7" class="admin-empty">İstifadəçi yoxdur</td></tr>') + '</tbody></table></div>';
     document.getElementById('userSearch').addEventListener('input', NexoraApp.debounce(function (e) {
       state.users.search = e.target.value;

@@ -148,6 +148,8 @@ db.exec(`
   if (!cols.includes('register_ip')) db.exec("ALTER TABLE users ADD COLUMN register_ip TEXT DEFAULT ''");
   if (!cols.includes('last_ip')) db.exec("ALTER TABLE users ADD COLUMN last_ip TEXT DEFAULT ''");
   if (!cols.includes('last_seen_at')) db.exec("ALTER TABLE users ADD COLUMN last_seen_at TEXT DEFAULT ''");
+  if (!cols.includes('register_device')) db.exec("ALTER TABLE users ADD COLUMN register_device TEXT DEFAULT ''");
+  if (!cols.includes('last_device')) db.exec("ALTER TABLE users ADD COLUMN last_device TEXT DEFAULT ''");
   try {
     db.exec('CREATE INDEX IF NOT EXISTS idx_users_oauth ON users(oauth_provider, oauth_sub)');
   } catch (e) { /* ignore */ }
@@ -238,7 +240,9 @@ function publicUser(row) {
     createdAt: row.created_at,
     registerIp: row.register_ip || '',
     lastIp: row.last_ip || '',
-    lastSeenAt: row.last_seen_at || ''
+    lastSeenAt: row.last_seen_at || '',
+    registerDevice: row.register_device || '',
+    lastDevice: row.last_device || ''
   };
 }
 

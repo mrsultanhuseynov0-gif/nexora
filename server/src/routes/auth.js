@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const { db, publicUser } = require('../db');
 const { signToken, authRequired } = require('../middleware/auth');
 const { publicOauthConfig, verifyProvider, upsertOauthUser } = require('../oauth');
+const { clientMeta } = require('../client-meta');
 
 const router = express.Router();
 
@@ -12,20 +13,14 @@ function uid(prefix) {
   return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
-function clientIp(req) {
-  const xf = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
-  if (xf) return xf.slice(0, 64);
-  const real = String(req.headers['x-real-ip'] || '').trim();
-  if (real) return real.slice(0, 64);
-  return String((req.socket && req.socket.remoteAddress) || '').slice(0, 64);
-}
-
-function touchUserIp(userId, ip) {
-  if (!userId || !ip) return;
+function touchUserMeta(userId, meta) {
+  if (!userId || !meta) return;
   try {
     db.prepare(`
-      UPDATE users SET last_ip = ?, last_seen_at = ? WHERE id = ?
-    `).run(ip, new Date().toISOString(), userId);
+      UPDATE users
+      SET last_ip = ?, last_device = ?, last_seen_at = ?
+      WHERE id = ?
+    `).run(meta.ip || '', meta.device || '', new Date().toISOString(), userId);
   } catch (e) { /* ignore */ }
 }
 
@@ -40,7 +35,8 @@ router.post('/oauth/:provider', async (req, res) => {
   }
   try {
     const profile = await verifyProvider(provider, req.body || {});
-    const user = upsertOauthUser(profile, clientIp(req));
+    const meta = clientMeta(req, req.body);
+    const user = upsertOauthUser(profile, meta);
     const token = signToken(user);
     return res.json({ token, user, provider: provider });
   } catch (e) {
@@ -72,14 +68,17 @@ router.post('/register', (req, res) => {
 
   const id = uid('u');
   const createdAt = new Date().toISOString();
-  const ip = clientIp(req);
+  const meta = clientMeta(req, req.body);
   db.prepare(`
     INSERT INTO users (
       id, email, password_hash, name, phone, role, addresses_json, created_at,
-      register_ip, last_ip, last_seen_at
+      register_ip, last_ip, last_seen_at, register_device, last_device
     )
-    VALUES (?, ?, ?, ?, ?, 'customer', '[]', ?, ?, ?, ?)
-  `).run(id, email, bcrypt.hashSync(password, 10), name, phone, createdAt, ip, ip, createdAt);
+    VALUES (?, ?, ?, ?, ?, 'customer', '[]', ?, ?, ?, ?, ?, ?)
+  `).run(
+    id, email, bcrypt.hashSync(password, 10), name, phone, createdAt,
+    meta.ip, meta.ip, createdAt, meta.device, meta.device
+  );
 
   try {
     const { ensureUserCode, attachReferralToUser } = require('../referrals');
@@ -102,7 +101,7 @@ router.post('/login', (req, res) => {
     return res.status(401).json({ error: 'Email və ya şifrə yanlışdır' });
   }
 
-  touchUserIp(row.id, clientIp(req));
+  touchUserMeta(row.id, clientMeta(req, req.body));
   const user = publicUser(db.prepare('SELECT * FROM users WHERE id = ?').get(row.id));
   const token = signToken(user);
   return res.json({ token, user });

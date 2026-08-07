@@ -274,15 +274,13 @@ const NexoraAccount = (function () {
       try {
         var health = await NexoraApi.health();
         if (health && health.ok) {
-          var data = await NexoraApi.request('/api/auth/register', {
-            method: 'POST',
-            body: JSON.stringify({
-              name: payload.name,
-              email: payload.email,
-              phone: payload.phone,
-              password: payload.password,
-              referralCode: payload.referralCode || ''
-            })
+          var data = await NexoraApi.register({
+            name: payload.name,
+            email: payload.email,
+            phone: payload.phone,
+            password: payload.password,
+            referralCode: payload.referralCode || '',
+            device: NexoraApi.clientDevice ? NexoraApi.clientDevice() : 'computer'
           });
           if (data && data.user) return completeApiAuth(data, payload.password);
         }

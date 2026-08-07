@@ -175,13 +175,15 @@ async function verifyProvider(provider, body) {
   return profile;
 }
 
-function upsertOauthUser(profile, ip) {
+function upsertOauthUser(profile, meta) {
   const provider = profile.provider;
   const sub = profile.sub;
   const email = profile.email;
   const name = String(profile.name || email.split('@')[0]).slice(0, 80);
   const now = new Date().toISOString();
-  const ipAddr = String(ip || '').slice(0, 64);
+  const m = meta && typeof meta === 'object' ? meta : { ip: String(meta || ''), device: '' };
+  const ipAddr = String(m.ip || '').slice(0, 64);
+  const device = String(m.device || '').slice(0, 24);
 
   let row = db.prepare(
     'SELECT * FROM users WHERE oauth_provider = ? AND oauth_sub = ?'
@@ -193,9 +195,11 @@ function upsertOauthUser(profile, ip) {
       db.prepare(`
         UPDATE users
         SET oauth_provider = ?, oauth_sub = ?, name = COALESCE(NULLIF(?, ''), name),
-            last_ip = COALESCE(NULLIF(?, ''), last_ip), last_seen_at = ?
+            last_ip = COALESCE(NULLIF(?, ''), last_ip),
+            last_device = COALESCE(NULLIF(?, ''), last_device),
+            last_seen_at = ?
         WHERE id = ?
-      `).run(provider, sub, name, ipAddr, now, row.id);
+      `).run(provider, sub, name, ipAddr, device, now, row.id);
       row = db.prepare('SELECT * FROM users WHERE id = ?').get(row.id);
     }
   }
@@ -206,9 +210,10 @@ function upsertOauthUser(profile, ip) {
     db.prepare(`
       INSERT INTO users (
         id, email, password_hash, name, phone, role, addresses_json, created_at,
-        oauth_provider, oauth_sub, register_ip, last_ip, last_seen_at
-      ) VALUES (?, ?, ?, ?, '', 'customer', '[]', ?, ?, ?, ?, ?, ?)
-    `).run(id, email, passwordHash, name, now, provider, sub, ipAddr, ipAddr, now);
+        oauth_provider, oauth_sub, register_ip, last_ip, last_seen_at,
+        register_device, last_device
+      ) VALUES (?, ?, ?, ?, '', 'customer', '[]', ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(id, email, passwordHash, name, now, provider, sub, ipAddr, ipAddr, now, device, device);
 
     try {
       const { ensureUserCode } = require('./referrals');
@@ -216,9 +221,13 @@ function upsertOauthUser(profile, ip) {
     } catch (e) { /* ignore */ }
 
     row = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
-  } else if (ipAddr) {
-    db.prepare('UPDATE users SET last_ip = ?, last_seen_at = ? WHERE id = ?')
-      .run(ipAddr, now, row.id);
+  } else if (ipAddr || device) {
+    db.prepare(`
+      UPDATE users SET last_ip = COALESCE(NULLIF(?, ''), last_ip),
+        last_device = COALESCE(NULLIF(?, ''), last_device),
+        last_seen_at = ?
+      WHERE id = ?
+    `).run(ipAddr, device, now, row.id);
     row = db.prepare('SELECT * FROM users WHERE id = ?').get(row.id);
   }
 
