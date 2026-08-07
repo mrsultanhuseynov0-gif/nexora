@@ -257,14 +257,19 @@ body {
     display: none;
   }
 
-  /* Hero — phone first composition */
+  /* Hero — phone: full-bleed image, no black strip */
   .hero-slides {
-    min-height: min(58vh, 420px);
+    height: min(58vh, 440px);
+    min-height: 360px;
   }
 
   .hero-slide {
-    padding: 28px 0 72px;
+    padding: 0;
     align-items: flex-end;
+  }
+
+  .hero-slide-inner {
+    padding: 24px 0 56px;
   }
 
   .hero-title {
@@ -304,10 +309,6 @@ body {
 
   .hero-arrow {
     display: none !important;
-  }
-
-  .hero-slide {
-    padding-bottom: 64px;
   }
 
   .home-ticker {

@@ -51,16 +51,18 @@ body {
 
 /* Hero: dark readable panel on left — text always clear */
 .hero {
-  background: #111318;
+  background: #0b0e14;
   color: #fff;
-  perspective: none;
+  perspective: 1400px;
 }
 
 .hero-slides {
-  min-height: min(68vh, 520px);
+  height: clamp(420px, 62vh, 560px);
+  min-height: 420px;
   cursor: grab;
   touch-action: pan-y;
   user-select: none;
+  transform-style: preserve-3d;
 }
 
 .hero-slides:active {
@@ -68,20 +70,20 @@ body {
 }
 
 .hero-slide.is-active .hero-bg-img {
-  animation: nxHeroDrift 14s ease-in-out infinite alternate;
+  animation: nxHeroDrift 16s ease-in-out infinite alternate;
 }
 
 .hero-slide.is-active .hero-content {
-  animation: heroFadeIn 0.7s cubic-bezier(.22, 1, .36, 1);
+  animation: heroFadeIn 0.75s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-overlay {
   background: linear-gradient(
     105deg,
-    rgba(10, 12, 16, 0.88) 0%,
-    rgba(10, 12, 16, 0.62) 42%,
-    rgba(10, 12, 16, 0.22) 72%,
-    rgba(10, 12, 16, 0.08) 100%
+    rgba(8, 10, 14, 0.82) 0%,
+    rgba(8, 10, 14, 0.55) 45%,
+    rgba(8, 10, 14, 0.2) 75%,
+    rgba(8, 10, 14, 0.08) 100%
   );
 }
 
@@ -184,14 +186,24 @@ a.card-product-name {
   color: var(--color-primary) !important;
 }
 
-/* Endless ad rail */
+/* Endless ad rail — smoother 3D-ish motion */
 .home-ad-rail {
   overflow: hidden;
   width: 100%;
-  background: linear-gradient(90deg, #c40812 0%, #e50914 40%, #ff3b45 70%, #e50914 100%);
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: linear-gradient(90deg, #b30710 0%, #e50914 35%, #ff3140 65%, #e50914 100%);
+  border: none;
   user-select: none;
+  position: relative;
+  mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+}
+
+.home-ad-rail::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.12), transparent 40%, rgba(0,0,0,.12));
+  pointer-events: none;
 }
 
 .home-ad-track {
@@ -199,9 +211,14 @@ a.card-product-name {
   align-items: center;
   gap: 0;
   width: max-content;
-  padding: 12px 0;
-  animation: homeAdScroll 55s linear infinite;
+  padding: 14px 0;
+  animation: homeAdScroll 38s linear infinite;
   will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.home-ad-rail:hover .home-ad-track {
+  animation-play-state: paused;
 }
 
 .home-ad-item {
@@ -214,6 +231,8 @@ a.card-product-name {
   color: #fff !important;
   white-space: nowrap;
   border-right: 1px solid rgba(255, 255, 255, 0.22);
+  transition: transform 0.35s cubic-bezier(.22, 1, .36, 1), filter 0.35s ease;
+  transform: translateZ(0);
 }
 
 .home-ad-badge {
@@ -238,20 +257,25 @@ a.card-product-name {
   letter-spacing: 0.01em;
 }
 
+.home-ad-item:hover {
+  transform: translate3d(0, -3px, 0) scale(1.04);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.25));
+}
+
 .home-ad-item:hover .home-ad-text {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 @keyframes homeAdScroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
 }
 
 @media (max-width: 640px) {
   .home-ad-track {
     padding: 10px 0;
-    animation-duration: 42s;
+    animation-duration: 32s;
   }
 
   .home-ad-item {

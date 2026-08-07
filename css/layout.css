@@ -426,17 +426,20 @@
   color: var(--color-primary);
 }
 
-/* Hero slider */
+/* Hero slider — fixed frame, image always fills (no black gap) */
 .hero {
   position: relative;
   overflow: hidden;
-  background: var(--color-bg-alt);
-  color: var(--color-text);
+  background: #0b0e14;
+  color: #fff;
 }
 
 .hero-slides {
   position: relative;
+  height: clamp(420px, 62vh, 560px);
   min-height: 420px;
+  overflow: hidden;
+  perspective: 1400px;
 }
 
 .hero-slide {
@@ -446,15 +449,69 @@
   align-items: center;
   opacity: 0;
   visibility: hidden;
-  transition: opacity var(--transition-slower), visibility var(--transition-slower);
-  padding: var(--space-12) 0;
+  pointer-events: none;
   overflow: hidden;
+  padding: 0;
+  background-color: #0b0e14;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  transform: translate3d(28%, 0, -160px) rotateY(-16deg) scale(0.94);
+  transform-origin: center center;
+  transition:
+    opacity 0.7s cubic-bezier(.22, 1, .36, 1),
+    transform 0.7s cubic-bezier(.22, 1, .36, 1),
+    visibility 0.7s;
+  z-index: 0;
 }
 
 .hero-slide.is-active {
-  position: relative;
+  position: absolute;
+  inset: 0;
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0) rotateY(0deg) scale(1);
+  z-index: 2;
+}
+
+.hero-slide.is-from-right {
+  animation: heroEnterRight 0.7s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.hero-slide.is-from-left {
+  animation: heroEnterLeft 0.7s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.hero-slide.is-leave-left {
+  opacity: 0;
+  visibility: visible;
+  transform: translate3d(-28%, 0, -160px) rotateY(16deg) scale(0.94);
+  z-index: 1;
+}
+
+.hero-slide.is-leave-right {
+  opacity: 0;
+  visibility: visible;
+  transform: translate3d(28%, 0, -160px) rotateY(-16deg) scale(0.94);
+  z-index: 1;
+}
+
+@keyframes heroEnterRight {
+  from { opacity: 0; transform: translate3d(28%, 0, -160px) rotateY(-16deg) scale(0.94); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) rotateY(0) scale(1); }
+}
+
+@keyframes heroEnterLeft {
+  from { opacity: 0; transform: translate3d(-28%, 0, -160px) rotateY(16deg) scale(0.94); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) rotateY(0) scale(1); }
+}
+
+.hero-slide-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: clamp(32px, 6vh, 64px) 0 72px;
 }
 
 .hero-bg-img {
@@ -462,10 +519,14 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
+  object-fit: cover !important;
+  object-position: center center !important;
   z-index: 0;
-  transform: scale(1.02);
+  padding: 0 !important;
+  margin: 0;
+  border: 0;
+  display: block;
+  pointer-events: none;
 }
 
 .hero-overlay {
@@ -710,7 +771,6 @@
 
 .gallery-main-img,
 .cat-card-img,
-.hero-bg-img,
 .campaign-banner-img,
 .brand-tile--media img {
   width: 100%;

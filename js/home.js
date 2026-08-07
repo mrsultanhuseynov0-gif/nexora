@@ -24,11 +24,15 @@
     }
 
     root.innerHTML = slides.map(function (s, i) {
+      var img = s.image || '';
+      var bgStyle = 'background-color:#0b0e14;' +
+        (s.gradient ? 'background-image:' + s.gradient + (img ? ',url(\'' + img + '\')' : '') + ';' : (img ? 'background-image:url(\'' + img + '\');' : '')) +
+        'background-size:cover;background-position:center;background-repeat:no-repeat;';
       return (
-        '<div class="hero-slide' + (i === 0 ? ' is-active' : '') + '" style="background:' + s.gradient + '" data-slide="' + i + '">' +
-          (s.image ? '<img class="hero-bg-img" src="' + s.image + '" alt="" aria-hidden="true">' : '') +
+        '<div class="hero-slide' + (i === 0 ? ' is-active' : '') + '" style="' + bgStyle + '" data-slide="' + i + '">' +
+          (img ? '<img class="hero-bg-img" src="' + img + '" alt="" decoding="async" fetchpriority="' + (i === 0 ? 'high' : 'low') + '" aria-hidden="true">' : '') +
           '<div class="hero-overlay"></div>' +
-          '<div class="container">' +
+          '<div class="container hero-slide-inner">' +
             '<div class="hero-content">' +
               (s.badge ? '<span class="badge badge-primary hero-badge">' + s.badge + '</span>' : '') +
               '<p class="hero-subtitle">' + s.subtitle + '</p>' +
@@ -113,13 +117,41 @@
 
   function goTo(index) {
     if (!slides.length) return;
-    slideIndex = (index + slides.length) % slides.length;
-    document.querySelectorAll('.hero-slide').forEach(function (el, i) {
-      el.classList.toggle('is-active', i === slideIndex);
-    });
+    var next = (index + slides.length) % slides.length;
+    if (next === slideIndex) return;
+    var els = document.querySelectorAll('.hero-slide');
+    var prev = slideIndex;
+    var forward = ((next - prev + slides.length) % slides.length) <= slides.length / 2;
+
+    if (els[prev]) {
+      els[prev].classList.remove('is-active', 'is-from-right', 'is-from-left');
+      els[prev].classList.add(forward ? 'is-leave-left' : 'is-leave-right');
+    }
+
+    slideIndex = next;
+    if (els[next]) {
+      els[next].classList.remove('is-leave-left', 'is-leave-right');
+      els[next].classList.add('is-active', forward ? 'is-from-right' : 'is-from-left');
+      // Restart enter animation
+      void els[next].offsetWidth;
+      els[next].classList.add('is-active');
+    }
+
     document.querySelectorAll('[data-hero-dot]').forEach(function (el, i) {
       el.classList.toggle('is-active', i === slideIndex);
     });
+
+    setTimeout(function () {
+      document.querySelectorAll('.hero-slide').forEach(function (el, i) {
+        if (i !== slideIndex) {
+          el.classList.remove('is-leave-left', 'is-leave-right', 'is-from-right', 'is-from-left', 'is-active');
+        } else {
+          el.classList.remove('is-from-right', 'is-from-left', 'is-leave-left', 'is-leave-right');
+          el.classList.add('is-active');
+        }
+      });
+    }, 720);
+
     startAuto();
   }
 
@@ -129,7 +161,7 @@
     slideTimer = setInterval(function () {
       if (document.visibilityState === 'hidden') return;
       goTo(slideIndex + 1);
-    }, 5000);
+    }, 5500);
   }
 
   document.addEventListener('visibilitychange', function () {
