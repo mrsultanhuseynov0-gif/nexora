@@ -295,15 +295,19 @@ body {
   }
 
   .hero-nav {
-    left: 12px;
-    right: 12px;
-    bottom: 10px;
-    justify-content: space-between;
+    left: 50%;
+    right: auto;
+    bottom: 12px;
+    transform: translateX(-50%);
+    justify-content: center;
   }
 
   .hero-arrow {
-    width: 40px;
-    height: 40px;
+    display: none !important;
+  }
+
+  .hero-slide {
+    padding-bottom: 64px;
   }
 
   .home-ticker {

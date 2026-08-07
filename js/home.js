@@ -35,8 +35,8 @@
               '<h1 class="hero-title">' + s.title + '</h1>' +
               '<p class="hero-desc">' + s.description + '</p>' +
               '<div class="hero-actions">' +
-                '<a href="' + NexoraApp.url(s.ctaLink) + '" class="btn btn-primary btn-lg">' + s.ctaText + '</a>' +
-                '<a href="' + NexoraApp.url(s.secondaryCtaLink) + '" class="btn btn-outline btn-lg" style="color:#fff;border-color:rgba(255,255,255,.4)">' +
+                '<a href="' + NexoraApp.url(s.ctaLink) + '" class="btn btn-primary btn-lg hero-btn-primary">' + s.ctaText + '</a>' +
+                '<a href="' + NexoraApp.url(s.secondaryCtaLink) + '" class="btn btn-lg hero-btn-secondary">' +
                   s.secondaryCtaText + '</a>' +
               '</div>' +
             '</div>' +
@@ -56,14 +56,59 @@
         goTo(parseInt(btn.getAttribute('data-hero-dot'), 10));
       };
     });
-    document.querySelectorAll('[data-hero-prev]').forEach(function (btn) {
-      btn.onclick = function () { goTo(slideIndex - 1); };
-    });
-    document.querySelectorAll('[data-hero-next]').forEach(function (btn) {
-      btn.onclick = function () { goTo(slideIndex + 1); };
+
+    bindHeroSwipe(root);
+    startAuto();
+  }
+
+  function bindHeroSwipe(root) {
+    if (!root || root.getAttribute('data-swipe-bound') === '1') return;
+    root.setAttribute('data-swipe-bound', '1');
+    var startX = 0;
+    var startY = 0;
+    var tracking = false;
+
+    function onStart(x, y) {
+      startX = x;
+      startY = y;
+      tracking = true;
+    }
+
+    function onEnd(x, y) {
+      if (!tracking) return;
+      tracking = false;
+      var dx = x - startX;
+      var dy = y - startY;
+      if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
+      if (dx < 0) goTo(slideIndex + 1);
+      else goTo(slideIndex - 1);
+    }
+
+    root.addEventListener('touchstart', function (e) {
+      if (!e.touches || !e.touches[0]) return;
+      onStart(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+
+    root.addEventListener('touchend', function (e) {
+      var t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+      onEnd(t.clientX, t.clientY);
+    }, { passive: true });
+
+    root.addEventListener('mousedown', function (e) {
+      if (e.button !== 0) return;
+      if (e.target && e.target.closest && e.target.closest('a, button')) return;
+      onStart(e.clientX, e.clientY);
     });
 
-    startAuto();
+    root.addEventListener('mouseup', function (e) {
+      onEnd(e.clientX, e.clientY);
+    });
+
+    root.addEventListener('mouseleave', function () { tracking = false; });
+
+    // Avoid accidental drag-select / image drag
+    root.addEventListener('dragstart', function (e) { e.preventDefault(); });
   }
 
   function goTo(index) {

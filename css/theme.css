@@ -51,18 +51,20 @@ body {
 
 /* Hero: dark readable panel on left — text always clear */
 .hero {
-  background: #0f1218;
+  background: #111318;
   color: #fff;
-  perspective: 1400px;
+  perspective: none;
 }
 
 .hero-slides {
-  min-height: min(72vh, 560px);
-  transform-style: preserve-3d;
+  min-height: min(68vh, 520px);
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
 }
 
-.hero-slide {
-  transform-style: preserve-3d;
+.hero-slides:active {
+  cursor: grabbing;
 }
 
 .hero-slide.is-active .hero-bg-img {
@@ -70,17 +72,16 @@ body {
 }
 
 .hero-slide.is-active .hero-content {
-  transform: translateZ(24px);
   animation: heroFadeIn 0.7s cubic-bezier(.22, 1, .36, 1);
 }
 
 .hero-overlay {
   background: linear-gradient(
     105deg,
-    rgba(15, 18, 24, 0.92) 0%,
-    rgba(15, 18, 24, 0.72) 38%,
-    rgba(15, 18, 24, 0.28) 68%,
-    rgba(15, 18, 24, 0.08) 100%
+    rgba(10, 12, 16, 0.88) 0%,
+    rgba(10, 12, 16, 0.62) 42%,
+    rgba(10, 12, 16, 0.22) 72%,
+    rgba(10, 12, 16, 0.08) 100%
   );
 }
 
@@ -105,39 +106,34 @@ body {
   color: #fff !important;
 }
 
-.hero-arrow {
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  background: rgba(15, 18, 24, 0.55);
-  color: #fff;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.hero-arrow:hover {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
-  transform: translateY(-2px) scale(1.05);
-}
-
-.hero-dot { background: rgba(255, 255, 255, 0.4); }
-.hero-dot.is-active { background: #e50914; }
-
-/* Hero outline buttons on dark panel */
-.hero .btn-outline,
-.hero-actions .btn-outline {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.75);
-  color: #fff;
+.hero-nav {
+  left: 50%;
+  right: auto;
+  bottom: 18px;
+  transform: translateX(-50%);
+  justify-content: center;
+  gap: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: none;
 }
 
-.hero .btn-outline:hover:not(:disabled),
-.hero-actions .btn-outline:hover:not(:disabled) {
-  background: #fff;
-  color: #0f1218;
-  border-color: #fff;
+.hero-arrow {
+  display: none !important;
+}
+
+.hero-dot {
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.45);
+  box-shadow: none;
+}
+
+.hero-dot.is-active {
+  background: #e50914;
+  transform: scale(1.25);
 }
 
 @keyframes nxHeroDrift {
@@ -449,6 +445,30 @@ a.card-product-name {
     0 1px 0 #fff inset,
     0 7px 0 rgba(229, 9, 20, 0.35),
     0 14px 26px rgba(229, 9, 20, 0.16);
+}
+
+/* Hero CTAs — must win over global 3D outline buttons */
+.hero .hero-btn-primary,
+.hero-actions .hero-btn-primary {
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(229, 9, 20, 0.35);
+}
+
+.hero .hero-btn-secondary,
+.hero-actions .hero-btn-secondary {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.85) !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  text-shadow: none;
+}
+
+.hero .hero-btn-secondary:hover,
+.hero-actions .hero-btn-secondary:hover {
+  background: #ffffff !important;
+  color: #0f1218 !important;
+  border-color: #ffffff !important;
+  transform: translateY(-2px);
 }
 
 .btn-outline:active:not(:disabled) {
