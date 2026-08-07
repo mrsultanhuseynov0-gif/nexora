@@ -298,6 +298,7 @@ const NexoraAccount = (function () {
               referralCredit: data.user.referralCredit,
               createdAt: data.user.createdAt
             });
+            try { document.dispatchEvent(new CustomEvent('nexora:auth-changed', { detail: { loggedIn: true } })); } catch (ev) { /* ignore */ }
             return data.user;
           }
         }
@@ -367,6 +368,7 @@ const NexoraAccount = (function () {
               referralCredit: api.user.referralCredit,
               createdAt: api.user.createdAt
             });
+            try { document.dispatchEvent(new CustomEvent('nexora:auth-changed', { detail: { loggedIn: true } })); } catch (ev) { /* ignore */ }
             return api.user;
           }
         }
@@ -431,6 +433,7 @@ const NexoraAccount = (function () {
 
     S.clearFails(mail);
     await setSession(current);
+    try { document.dispatchEvent(new CustomEvent('nexora:auth-changed', { detail: { loggedIn: true } })); } catch (ev) { /* ignore */ }
     return publicUser(current);
   }
 
@@ -439,6 +442,7 @@ const NexoraAccount = (function () {
     if (typeof NexoraApi !== 'undefined' && NexoraApi.clearToken) {
       NexoraApi.clearToken();
     }
+    try { document.dispatchEvent(new CustomEvent('nexora:auth-changed', { detail: { loggedIn: false } })); } catch (ev) { /* ignore */ }
   }
 
   function isLoggedIn() {

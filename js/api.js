@@ -291,6 +291,17 @@
         body: JSON.stringify({ status: status })
       });
     },
+    chatAdminApprove: function (id) {
+      return request('/api/chat/admin/threads/' + encodeURIComponent(id), {
+        method: 'PATCH',
+        body: JSON.stringify({ approved: true })
+      });
+    },
+    chatAdminDelete: function (id) {
+      return request('/api/chat/admin/threads/' + encodeURIComponent(id), {
+        method: 'DELETE'
+      });
+    },
     getPaymentSettings: function () {
       return request('/api/payments/admin/settings');
     },

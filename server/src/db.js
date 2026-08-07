@@ -105,9 +105,12 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS chat_threads (
     id TEXT PRIMARY KEY,
     visitor_key TEXT NOT NULL,
+    user_id TEXT DEFAULT '',
     name TEXT DEFAULT '',
     email TEXT DEFAULT '',
     phone TEXT DEFAULT '',
+    topic TEXT DEFAULT '',
+    approved INTEGER NOT NULL DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'open',
     unread_admin INTEGER NOT NULL DEFAULT 0,
     unread_visitor INTEGER NOT NULL DEFAULT 0,
@@ -130,6 +133,13 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_chat_messages_thread ON chat_messages(thread_id, created_at);
 `);
+
+(function ensureChatThreadColumns() {
+  const cols = db.prepare('PRAGMA table_info(chat_threads)').all().map((c) => c.name);
+  if (!cols.includes('user_id')) db.exec("ALTER TABLE chat_threads ADD COLUMN user_id TEXT DEFAULT ''");
+  if (!cols.includes('topic')) db.exec("ALTER TABLE chat_threads ADD COLUMN topic TEXT DEFAULT ''");
+  if (!cols.includes('approved')) db.exec('ALTER TABLE chat_threads ADD COLUMN approved INTEGER NOT NULL DEFAULT 0');
+})();
 
 function rowToProduct(row) {
   if (!row) return null;

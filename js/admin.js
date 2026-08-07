@@ -2054,9 +2054,10 @@
     var listHtml = threads.map(function (t) {
       var active = t.id === chatState.threadId ? ' is-active' : '';
       var unread = t.unreadAdmin ? (' <span class="admin-pill is-warn">' + t.unreadAdmin + '</span>') : '';
+      var pend = !t.approved ? ' <span class="admin-pill is-warn">gözləyir</span>' : '';
       return '<button type="button" class="admin-chat-thread' + active + '" data-chat-thread="' + esc(t.id) + '">' +
-        '<strong>' + esc(t.name || t.phone || 'Qonaq') + unread + '</strong>' +
-        '<span>' + esc(t.lastMessage || '—') + '</span></button>';
+        '<strong>' + esc(t.name || t.phone || 'İstifadəçi') + unread + pend + '</strong>' +
+        '<span>' + esc(t.topic ? ('Mövzu: ' + t.topic) : (t.lastMessage || '—')) + '</span></button>';
     }).join('') || '<p class="text-muted p-3">Hələ mesaj yoxdur.</p>';
 
     document.getElementById('adminContent').innerHTML =
@@ -2095,11 +2096,18 @@
       var main = document.getElementById('adminChatMain');
       main.innerHTML =
         '<div class="p-3" style="border-bottom:1px solid #eee;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap">' +
-          '<div><strong>' + esc(t.name || 'Qonaq') + '</strong>' +
-            '<div class="text-xs text-muted">' + esc([t.phone, t.email].filter(Boolean).join(' · ') || t.id) + '</div></div>' +
+          '<div><strong>' + esc(t.name || 'İstifadəçi') +
+            (t.approved ? '' : ' <span class="admin-pill is-warn">təsdiq gözləyir</span>') + '</strong>' +
+            '<div class="text-xs text-muted">' + esc([t.phone, t.email].filter(Boolean).join(' · ') || t.id) + '</div>' +
+            (t.topic ? '<div class="text-xs" style="margin-top:4px"><strong>Mövzu:</strong> ' + esc(t.topic) + '</div>' : '') +
+          '</div>' +
           '<div class="flex gap-2">' +
+            (!t.approved
+              ? '<button type="button" class="btn btn-primary btn-sm" id="chatApprove">Təsdiqlə</button>'
+              : '') +
             '<button type="button" class="btn btn-outline btn-sm" id="chatToggleStatus">' +
               (t.status === 'closed' ? 'Yenidən aç' : 'Bağla') + '</button>' +
+            '<button type="button" class="btn btn-outline btn-sm" id="chatDelete" style="color:#c00;border-color:#f0b0b0">Sil</button>' +
           '</div>' +
         '</div>' +
         '<div class="admin-chat-msgs" id="adminChatMsgs"></div>' +
@@ -2142,11 +2150,38 @@
         }
       });
 
+      var approveBtn = document.getElementById('chatApprove');
+      if (approveBtn) {
+        approveBtn.addEventListener('click', async function () {
+          try {
+            await NexoraApi.chatAdminApprove(id);
+            NexoraToast.success('Söhbət təsdiqləndi');
+            renderLiveChat();
+          } catch (err) {
+            NexoraToast.error(err.message || 'Təsdiq alınmadı');
+          }
+        });
+      }
+
       document.getElementById('chatToggleStatus').addEventListener('click', async function () {
         var next = t.status === 'closed' ? 'open' : 'closed';
         await NexoraApi.chatAdminSetStatus(id, next);
         NexoraToast.success(next === 'closed' ? 'Söhbət bağlandı' : 'Söhbət açıldı');
         renderLiveChat();
+      });
+
+      document.getElementById('chatDelete').addEventListener('click', async function () {
+        var label = t.name || t.phone || 'bu söhbəti';
+        if (!confirm('«' + label + '» söhbətini silmək istəyirsiniz? Mesajlar da silinəcək.')) return;
+        try {
+          await NexoraApi.chatAdminDelete(id);
+          chatState.threadId = '';
+          chatState.lastId = '';
+          NexoraToast.success('Söhbət silindi');
+          renderLiveChat();
+        } catch (err) {
+          NexoraToast.error(err.message || 'Silinmədi');
+        }
       });
 
       document.querySelectorAll('[data-chat-thread]').forEach(function (btn) {
