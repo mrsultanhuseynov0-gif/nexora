@@ -6,7 +6,7 @@
 
   var VIEWS = [
     'dashboard', 'analytics', 'products', 'inventory', 'orders', 'coupons', 'users', 'business',
-    'categories', 'brands', 'campaigns', 'hero', 'faq', 'site', 'payments', 'referrals'
+    'categories', 'brands', 'campaigns', 'hero', 'faq', 'site', 'payments', 'referrals', 'livechat'
   ];
 
   var PAGE_TITLES = {
@@ -25,7 +25,8 @@
     faq: { title: 'FAQ', sub: 'Tez-tez verilən suallar' },
     site: { title: 'Sayt ayarları', sub: 'Logo, nav, footer, əlaqə' },
     payments: { title: 'Ödəniş', sub: 'Kart, köçürmə, merchant ayarları' },
-    referrals: { title: 'Dost kodu', sub: 'Referral proqramı və bonuslar' }
+    referrals: { title: 'Dost kodu', sub: 'Referral proqramı və bonuslar' },
+    livechat: { title: 'Live Chat', sub: 'Müştəri mesajları və cavablar' }
   };
 
   var CMS_FILES = {
@@ -45,6 +46,8 @@
     'Çatdırıldı': 'delivered', 'Ləğv': 'cancelled',
     'Gözləmədə': 'pending', 'Ödənildi': 'paid'
   };
+
+  var chatState = { threadId: '', poll: null, lastId: '' };
 
   var state = {
     view: 'dashboard',
@@ -2036,6 +2039,151 @@
     });
   }
 
+  async function renderLiveChat() {
+    if (!state.apiLive || typeof NexoraApi === 'undefined' || !NexoraApi.chatAdminThreads) {
+      document.getElementById('adminContent').innerHTML =
+        '<div class="admin-page-head"><div><h1>Live Chat</h1><p>API lazımdır</p></div></div>' +
+        '<p class="text-muted">Chat üçün server API aktiv olmalıdır.</p>';
+      return;
+    }
+
+    var data = await NexoraApi.chatAdminThreads();
+    var threads = data.threads || [];
+    if (!chatState.threadId && threads.length) chatState.threadId = threads[0].id;
+
+    var listHtml = threads.map(function (t) {
+      var active = t.id === chatState.threadId ? ' is-active' : '';
+      var unread = t.unreadAdmin ? (' <span class="admin-pill is-warn">' + t.unreadAdmin + '</span>') : '';
+      return '<button type="button" class="admin-chat-thread' + active + '" data-chat-thread="' + esc(t.id) + '">' +
+        '<strong>' + esc(t.name || t.phone || 'Qonaq') + unread + '</strong>' +
+        '<span>' + esc(t.lastMessage || '—') + '</span></button>';
+    }).join('') || '<p class="text-muted p-3">Hələ mesaj yoxdur.</p>';
+
+    document.getElementById('adminContent').innerHTML =
+      '<div class="admin-page-head"><div><h1>Live Chat</h1><p>' +
+        (data.unread ? (data.unread + ' oxunmamış') : 'Müştəri yazışmaları') +
+      '</p></div>' +
+        '<button type="button" class="btn btn-outline" id="chatRefresh">Yenilə</button></div>' +
+      '<div class="admin-chat-layout">' +
+        '<div class="admin-chat-list">' + listHtml + '</div>' +
+        '<div class="admin-chat-main" id="adminChatMain"><p class="text-muted">Söhbət seçin</p></div>' +
+      '</div>' +
+      '<style>' +
+        '.admin-chat-layout{display:grid;grid-template-columns:280px 1fr;gap:12px;min-height:520px}' +
+        '.admin-chat-list{border:1px solid var(--color-border,#e5e5e5);border-radius:12px;overflow:auto;background:var(--color-bg,#fff)}' +
+        '.admin-chat-thread{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #eee;background:transparent;padding:12px;cursor:pointer}' +
+        '.admin-chat-thread strong{display:flex;justify-content:space-between;gap:8px;font-size:13px}' +
+        '.admin-chat-thread span{display:block;color:#777;font-size:12px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+        '.admin-chat-thread.is-active{background:rgba(255,0,0,.06)}' +
+        '.admin-chat-main{border:1px solid var(--color-border,#e5e5e5);border-radius:12px;display:flex;flex-direction:column;min-height:520px;background:var(--color-bg,#fff)}' +
+        '.admin-chat-msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#f7f7f8}' +
+        '.admin-chat-bubble{max-width:80%;padding:9px 12px;border-radius:12px;font-size:13px;line-height:1.4;white-space:pre-wrap}' +
+        '.admin-chat-bubble.is-visitor{align-self:flex-start;background:#fff;border:1px solid #e8e8ea}' +
+        '.admin-chat-bubble.is-admin{align-self:flex-end;background:#FF0000;color:#fff}' +
+        '.admin-chat-bubble.is-system{align-self:center;color:#888;background:transparent}' +
+        '.admin-chat-compose{display:flex;gap:8px;padding:12px;border-top:1px solid #eee}' +
+        '.admin-chat-compose input{flex:1}' +
+        '@media(max-width:900px){.admin-chat-layout{grid-template-columns:1fr}}' +
+      '</style>';
+
+    async function openThread(id) {
+      chatState.threadId = id;
+      chatState.lastId = '';
+      var detail = await NexoraApi.chatAdminThread(id);
+      var t = detail.thread || {};
+      var msgs = detail.messages || [];
+      var main = document.getElementById('adminChatMain');
+      main.innerHTML =
+        '<div class="p-3" style="border-bottom:1px solid #eee;display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap">' +
+          '<div><strong>' + esc(t.name || 'Qonaq') + '</strong>' +
+            '<div class="text-xs text-muted">' + esc([t.phone, t.email].filter(Boolean).join(' · ') || t.id) + '</div></div>' +
+          '<div class="flex gap-2">' +
+            '<button type="button" class="btn btn-outline btn-sm" id="chatToggleStatus">' +
+              (t.status === 'closed' ? 'Yenidən aç' : 'Bağla') + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="admin-chat-msgs" id="adminChatMsgs"></div>' +
+        '<form class="admin-chat-compose" id="adminChatForm">' +
+          '<input class="input" id="adminChatInput" placeholder="Cavab yazın…" maxlength="2000" ' +
+            (t.status === 'closed' ? 'disabled' : '') + '>' +
+          '<button class="btn btn-primary" type="submit"' + (t.status === 'closed' ? ' disabled' : '') + '>Göndər</button>' +
+        '</form>';
+
+      var box = document.getElementById('adminChatMsgs');
+      msgs.forEach(function (m) {
+        var div = document.createElement('div');
+        div.className = 'admin-chat-bubble is-' + (m.sender || 'system');
+        div.id = 'acm-' + m.id;
+        div.textContent = m.body || '';
+        box.appendChild(div);
+        chatState.lastId = m.id;
+      });
+      box.scrollTop = box.scrollHeight;
+
+      document.getElementById('adminChatForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var input = document.getElementById('adminChatInput');
+        var text = input.value.trim();
+        if (!text) return;
+        input.value = '';
+        try {
+          var r = await NexoraApi.chatAdminReply(id, text);
+          if (r && r.message) {
+            var div = document.createElement('div');
+            div.className = 'admin-chat-bubble is-admin';
+            div.id = 'acm-' + r.message.id;
+            div.textContent = r.message.body;
+            box.appendChild(div);
+            chatState.lastId = r.message.id;
+            box.scrollTop = box.scrollHeight;
+          }
+        } catch (err) {
+          NexoraToast.error(err.message || 'Göndərilmədi');
+        }
+      });
+
+      document.getElementById('chatToggleStatus').addEventListener('click', async function () {
+        var next = t.status === 'closed' ? 'open' : 'closed';
+        await NexoraApi.chatAdminSetStatus(id, next);
+        NexoraToast.success(next === 'closed' ? 'Söhbət bağlandı' : 'Söhbət açıldı');
+        renderLiveChat();
+      });
+
+      document.querySelectorAll('[data-chat-thread]').forEach(function (btn) {
+        btn.classList.toggle('is-active', btn.getAttribute('data-chat-thread') === id);
+      });
+    }
+
+    document.querySelectorAll('[data-chat-thread]').forEach(function (btn) {
+      btn.addEventListener('click', function () { openThread(btn.getAttribute('data-chat-thread')); });
+    });
+    document.getElementById('chatRefresh').addEventListener('click', function () { renderLiveChat(); });
+
+    if (chatState.threadId) {
+      try { await openThread(chatState.threadId); } catch (e) { /* ignore */ }
+    }
+
+    if (chatState.poll) clearInterval(chatState.poll);
+    chatState.poll = setInterval(async function () {
+      if (state.view !== 'livechat' || !chatState.threadId) return;
+      try {
+        var detail = await NexoraApi.chatAdminThread(chatState.threadId, chatState.lastId);
+        var box = document.getElementById('adminChatMsgs');
+        if (!box || !detail.messages) return;
+        detail.messages.forEach(function (m) {
+          if (document.getElementById('acm-' + m.id)) return;
+          var div = document.createElement('div');
+          div.className = 'admin-chat-bubble is-' + (m.sender || 'system');
+          div.id = 'acm-' + m.id;
+          div.textContent = m.body || '';
+          box.appendChild(div);
+          chatState.lastId = m.id;
+        });
+        box.scrollTop = box.scrollHeight;
+      } catch (e) { /* ignore */ }
+    }, 4000);
+  }
+
   async function renderSite() {
     var s = await getCms('site');
     var nav = (s.nav || []).slice();
@@ -2219,7 +2367,8 @@
       site: renderSite,
       payments: renderPayments,
       referrals: renderReferrals,
-      business: renderBusiness
+      business: renderBusiness,
+      livechat: renderLiveChat
     };
     await (map[state.view] || renderDashboard)();
     if (typeof NexoraIcons !== 'undefined') NexoraIcons.init();

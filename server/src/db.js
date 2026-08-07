@@ -101,6 +101,34 @@ db.exec(`
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS chat_threads (
+    id TEXT PRIMARY KEY,
+    visitor_key TEXT NOT NULL,
+    name TEXT DEFAULT '',
+    email TEXT DEFAULT '',
+    phone TEXT DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'open',
+    unread_admin INTEGER NOT NULL DEFAULT 0,
+    unread_visitor INTEGER NOT NULL DEFAULT 0,
+    last_message TEXT DEFAULT '',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_chat_threads_updated ON chat_threads(updated_at);
+  CREATE INDEX IF NOT EXISTS idx_chat_threads_visitor ON chat_threads(visitor_key);
+
+  CREATE TABLE IF NOT EXISTS chat_messages (
+    id TEXT PRIMARY KEY,
+    thread_id TEXT NOT NULL,
+    sender TEXT NOT NULL CHECK(sender IN ('visitor','admin','system')),
+    body TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY(thread_id) REFERENCES chat_threads(id)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_chat_messages_thread ON chat_messages(thread_id, created_at);
 `);
 
 function rowToProduct(row) {

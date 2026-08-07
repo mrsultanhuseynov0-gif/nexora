@@ -256,6 +256,41 @@
     persistCatalogBackup: function () {
       return request('/api/admin/catalog-backup/persist', { method: 'POST', body: '{}' });
     },
+    chatSession: function (body) {
+      return request('/api/chat/session', { method: 'POST', body: JSON.stringify(body || {}) });
+    },
+    chatSend: function (threadId, visitorKey, body) {
+      return request('/api/chat/messages', {
+        method: 'POST',
+        body: JSON.stringify({ threadId: threadId, visitorKey: visitorKey, body: body })
+      });
+    },
+    chatPoll: function (threadId, visitorKey, after) {
+      var q = '?threadId=' + encodeURIComponent(threadId) +
+        '&visitorKey=' + encodeURIComponent(visitorKey) +
+        (after ? '&after=' + encodeURIComponent(after) : '');
+      return request('/api/chat/messages' + q);
+    },
+    chatAdminThreads: function (status) {
+      var q = status ? ('?status=' + encodeURIComponent(status)) : '';
+      return request('/api/chat/admin/threads' + q);
+    },
+    chatAdminThread: function (id, after) {
+      var q = after ? ('?after=' + encodeURIComponent(after)) : '';
+      return request('/api/chat/admin/threads/' + encodeURIComponent(id) + q);
+    },
+    chatAdminReply: function (id, body) {
+      return request('/api/chat/admin/threads/' + encodeURIComponent(id) + '/messages', {
+        method: 'POST',
+        body: JSON.stringify({ body: body })
+      });
+    },
+    chatAdminSetStatus: function (id, status) {
+      return request('/api/chat/admin/threads/' + encodeURIComponent(id), {
+        method: 'PATCH',
+        body: JSON.stringify({ status: status })
+      });
+    },
     getPaymentSettings: function () {
       return request('/api/payments/admin/settings');
     },

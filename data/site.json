@@ -10,6 +10,7 @@
     "enabled": true,
     "whatsappEnabled": true,
     "whatsappMessage": "Salam! NEXORA-dan yazıram.",
+    "builtin": true,
     "tawkPropertyId": "",
     "crispWebsiteId": ""
   },
