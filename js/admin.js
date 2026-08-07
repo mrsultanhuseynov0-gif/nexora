@@ -1235,19 +1235,25 @@
     }
     var selfId = state.currentUser && state.currentUser.id;
     var rows = users.map(function (u) {
+      var ip = u.registerIp || u.register_ip || u.lastIp || u.last_ip || '—';
+      var lastIp = u.lastIp || u.last_ip || '';
+      var ipCell = esc(ip);
+      if (lastIp && lastIp !== ip && ip !== '—') ipCell += '<div class="text-xs text-muted">Son: ' + esc(lastIp) + '</div>';
       return '<tr><td>' + esc(u.name) + '</td><td>' + esc(u.email) + '</td>' +
         '<td><select class="input" data-user-role="' + esc(u.id) + '" data-prev="' + esc(u.role) + '">' +
           '<option value="customer"' + (u.role === 'customer' ? ' selected' : '') + '>customer</option>' +
           '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>admin</option></select></td>' +
         '<td>' + esc(u.phone || '—') + '</td>' +
+        '<td class="text-sm"><code>' + ipCell + '</code></td>' +
+        '<td class="text-xs text-muted">' + esc((u.createdAt || u.created_at || '').slice(0, 19).replace('T', ' ') || '—') + '</td>' +
         '<td>' + (u.id === selfId ? '—' : '<button type="button" class="btn btn-ghost btn-sm" data-del-user="' + esc(u.id) + '">Sil</button>') + '</td></tr>';
     }).join('');
     document.getElementById('adminContent').innerHTML =
       '<div class="admin-page-head"><div><h1>İstifadəçilər</h1><p>' + users.length + ' hesab</p></div></div>' +
       '<div class="admin-toolbar"><input type="search" class="input" id="userSearch" placeholder="Ad və ya e-poçt…" value="' + esc(state.users.search) + '"></div>' +
       '<div class="admin-table-wrap"><table class="admin-table"><thead><tr>' +
-        '<th>Ad</th><th>E-poçt</th><th>Rol</th><th>Telefon</th><th></th></tr></thead><tbody>' +
-        (rows || '<tr><td colspan="5" class="admin-empty">İstifadəçi yoxdur</td></tr>') + '</tbody></table></div>';
+        '<th>Ad</th><th>E-poçt</th><th>Rol</th><th>Telefon</th><th>IP</th><th>Qeydiyyat</th><th></th></tr></thead><tbody>' +
+        (rows || '<tr><td colspan="7" class="admin-empty">İstifadəçi yoxdur</td></tr>') + '</tbody></table></div>';
     document.getElementById('userSearch').addEventListener('input', NexoraApp.debounce(function (e) {
       state.users.search = e.target.value;
       render();

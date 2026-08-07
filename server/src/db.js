@@ -141,6 +141,18 @@ db.exec(`
   if (!cols.includes('approved')) db.exec('ALTER TABLE chat_threads ADD COLUMN approved INTEGER NOT NULL DEFAULT 0');
 })();
 
+(function ensureUserOauthColumns() {
+  const cols = db.prepare('PRAGMA table_info(users)').all().map((c) => c.name);
+  if (!cols.includes('oauth_provider')) db.exec("ALTER TABLE users ADD COLUMN oauth_provider TEXT DEFAULT ''");
+  if (!cols.includes('oauth_sub')) db.exec("ALTER TABLE users ADD COLUMN oauth_sub TEXT DEFAULT ''");
+  if (!cols.includes('register_ip')) db.exec("ALTER TABLE users ADD COLUMN register_ip TEXT DEFAULT ''");
+  if (!cols.includes('last_ip')) db.exec("ALTER TABLE users ADD COLUMN last_ip TEXT DEFAULT ''");
+  if (!cols.includes('last_seen_at')) db.exec("ALTER TABLE users ADD COLUMN last_seen_at TEXT DEFAULT ''");
+  try {
+    db.exec('CREATE INDEX IF NOT EXISTS idx_users_oauth ON users(oauth_provider, oauth_sub)');
+  } catch (e) { /* ignore */ }
+})();
+
 function rowToProduct(row) {
   if (!row) return null;
   if (row.raw_json) {
@@ -223,7 +235,10 @@ function publicUser(row) {
     referralCode: referralCode,
     referredBy: row.referred_by || null,
     referralCredit: Number(row.referral_credit) || 0,
-    createdAt: row.created_at
+    createdAt: row.created_at,
+    registerIp: row.register_ip || '',
+    lastIp: row.last_ip || '',
+    lastSeenAt: row.last_seen_at || ''
   };
 }
 

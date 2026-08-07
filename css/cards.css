@@ -106,25 +106,28 @@
 
 .card-product:hover {
   box-shadow: var(--shadow-lg);
-  transform: perspective(1000px) rotateX(6deg) rotateY(-8deg) translateY(-12px) scale(1.03);
+  transform: translateY(-4px);
 }
 
 .card-product-image {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
-  background-color: var(--color-bg-alt);
+  background-color: #eef1f6;
 }
 
 .card-product-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
+  padding: 10%;
+  box-sizing: border-box;
   transition: transform var(--transition-slow);
 }
 
 .card-product:hover .card-product-image img {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 .card-product-badge {

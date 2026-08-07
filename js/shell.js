@@ -10,14 +10,21 @@ const NexoraShell = (function () {
     return typeof NexoraI18n !== 'undefined' ? NexoraI18n.t(key) : key;
   }
 
+  function logoMarkUrl() {
+    const custom = site && site.logoImage;
+    if (custom) return NexoraApp.resolveMediaUrl(custom);
+    return NexoraApp.url('assets/icons/nexora-logo.svg');
+  }
+
   function logoHTML(href) {
     const name = (site && (site.logoText || site.brandName)) || 'NEXORA';
-    if (site && site.logoImage) {
-      return '<a href="' + href + '" class="site-logo site-logo-img"><img src="' +
-        NexoraApp.resolveMediaUrl(site.logoImage) + '" alt="' + name.replace(/"/g, '&quot;') +
-        '" style="height:28px;width:auto;display:block"></a>';
-    }
-    return '<a href="' + href + '" class="site-logo">' + name + '</a>';
+    const mark = logoMarkUrl();
+    return (
+      '<a href="' + href + '" class="site-logo site-logo--brand" aria-label="' + name.replace(/"/g, '&quot;') + '">' +
+        '<img class="site-logo-mark" src="' + mark + '" alt="" width="36" height="36" decoding="async">' +
+        '<span class="site-logo-text">' + name + '</span>' +
+      '</a>'
+    );
   }
 
   function navItems() {
@@ -51,13 +58,15 @@ const NexoraShell = (function () {
     });
   }
 
-  function langSwitcherHTML() {
-    const lang = typeof NexoraI18n !== 'undefined' ? NexoraI18n.getLang() : 'az';
+  function currencySwitcherHTML() {
+    const cur = typeof NexoraApp !== 'undefined' && NexoraApp.getCurrency
+      ? NexoraApp.getCurrency()
+      : 'AZN';
     return (
-      '<select class="input lang-switch" data-lang-switch aria-label="' + t('lang') + '" style="width:auto;min-width:64px;padding:4px 8px;font-size:12px">' +
-        '<option value="az"' + (lang === 'az' ? ' selected' : '') + '>AZ</option>' +
-        '<option value="ru"' + (lang === 'ru' ? ' selected' : '') + '>RU</option>' +
-        '<option value="en"' + (lang === 'en' ? ' selected' : '') + '>EN</option>' +
+      '<select class="input currency-switch" data-currency-switch aria-label="Valyuta" title="Valyuta">' +
+        '<option value="AZN"' + (cur === 'AZN' ? ' selected' : '') + '>₼ AZN</option>' +
+        '<option value="USD"' + (cur === 'USD' ? ' selected' : '') + '>$ USD</option>' +
+        '<option value="EUR"' + (cur === 'EUR' ? ' selected' : '') + '>€ EUR</option>' +
       '</select>'
     );
   }
@@ -93,7 +102,7 @@ const NexoraShell = (function () {
             '<div class="header-search-results" data-search-results></div>' +
           '</div>' +
           '<div class="header-actions">' +
-            '<span class="header-desktop-only">' + langSwitcherHTML() + '</span>' +
+            '<span class="header-currency-wrap">' + currencySwitcherHTML() + '</span>' +
             '<button type="button" class="header-action" data-mobile-search-toggle aria-label="' + t('search_btn') + '">' +
               '<span class="icon icon-md" data-icon="search"></span>' +
             '</button>' +
@@ -130,14 +139,14 @@ const NexoraShell = (function () {
         '<div class="mobile-nav-backdrop" data-nav-close></div>' +
         '<div class="mobile-nav-panel">' +
           '<div class="flex justify-between items-center mb-6">' +
-            '<span class="site-logo">' + ((site && site.logoText) || 'NEXORA') + '</span>' +
+            logoHTML(b + 'index.html') +
             '<button type="button" class="icon-btn" data-nav-close aria-label="Bağla">' +
               '<span class="icon icon-md" data-icon="close"></span>' +
             '</button>' +
           '</div>' +
           '<p class="text-sm text-muted mb-4">' + ((site && site.tagline) || t('shop')) + '</p>' +
           '<div class="mobile-nav-tools mb-4">' +
-            langSwitcherHTML() +
+            currencySwitcherHTML() +
             '<button type="button" class="btn btn-outline btn-sm" data-theme-toggle aria-label="' + t('theme') + '">' +
               '<span class="icon icon-sm" data-icon="moon"></span>' +
             '</button>' +
@@ -369,14 +378,15 @@ const NexoraShell = (function () {
         }
       });
     });
-    document.querySelectorAll('[data-lang-switch]').forEach(function (sel) {
+    document.querySelectorAll('[data-currency-switch]').forEach(function (sel) {
       sel.addEventListener('change', function () {
-        if (typeof NexoraI18n !== 'undefined') {
-          NexoraI18n.setLang(sel.value);
-          mount().then(function () {
-            NexoraI18n.apply(document);
-          });
+        if (typeof NexoraApp !== 'undefined' && NexoraApp.setCurrency) {
+          NexoraApp.setCurrency(sel.value);
         }
+        document.querySelectorAll('[data-currency-switch]').forEach(function (other) {
+          other.value = sel.value;
+        });
+        location.reload();
       });
     });
   }

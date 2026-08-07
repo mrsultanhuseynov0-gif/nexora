@@ -147,6 +147,17 @@
     return data;
   }
 
+  async function oauthLogin(provider, payload) {
+    var body = payload || {};
+    if (typeof payload === 'string') body = { idToken: payload };
+    var data = await request('/api/auth/oauth/' + encodeURIComponent(provider), {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+    if (data && data.token) setToken(data.token);
+    return data;
+  }
+
   async function me() {
     return request('/api/auth/me');
   }
@@ -162,6 +173,7 @@
     health: health,
     ensureApi: ensureApi,
     login: login,
+    oauthLogin: oauthLogin,
     register: function (body) {
       return request('/api/auth/register', {
         method: 'POST',

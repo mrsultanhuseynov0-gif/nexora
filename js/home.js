@@ -80,8 +80,16 @@
 
   function startAuto() {
     clearInterval(slideTimer);
-    slideTimer = setInterval(function () { goTo(slideIndex + 1); }, 6000);
+    if (!slides.length) return;
+    slideTimer = setInterval(function () {
+      if (document.visibilityState === 'hidden') return;
+      goTo(slideIndex + 1);
+    }, 5000);
   }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && slides.length) startAuto();
+  });
 
   function renderCategories(categories) {
     const el = document.getElementById('homeCategories');
@@ -131,6 +139,48 @@
       }).join('');
       ticker.innerHTML = html + html;
     }
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /** Endless promo/ad strip — no dismiss control */
+  function renderAdRail(campaignData) {
+    const track = document.getElementById('homeAdTrack');
+    if (!track) return;
+
+    const ads = [];
+    const camps = (campaignData && campaignData.campaigns) || [];
+    camps.forEach(function (c) {
+      ads.push({
+        label: (c.subtitle ? c.subtitle + ' · ' : '') + c.title,
+        hint: c.discount ? ('−' + c.discount + '%') : 'Kampaniya',
+        href: NexoraApp.url(c.link || 'pages/campaigns.html')
+      });
+    });
+
+    const extras = [
+      { label: 'Pulsuz çatdırılma — 100 ₼-dən yuxarı', hint: 'NEXORA', href: NexoraApp.pageUrl('campaigns.html') },
+      { label: 'Yeni kolleksiya artıq kataloqda', hint: 'Yeni', href: NexoraApp.pageUrl('products.html?filter=new') },
+      { label: 'AI Məsləhətçi ilə doğru seçim et', hint: 'AI', href: NexoraApp.pageUrl('consultant.html') },
+      { label: '14 gün problemsiz qaytarma', hint: 'Zəmanət', href: NexoraApp.pageUrl('faq.html') }
+    ];
+    extras.forEach(function (a) { ads.push(a); });
+
+    if (!ads.length) return;
+
+    function itemHtml(a) {
+      return '<a class="home-ad-item" href="' + escHtml(a.href) + '">' +
+        '<span class="home-ad-badge">' + escHtml(a.hint) + '</span>' +
+        '<span class="home-ad-text">' + escHtml(a.label) + '</span>' +
+        '</a>';
+    }
+
+    // Duplicate for seamless infinite scroll
+    const row = ads.map(itemHtml).join('') + ads.map(itemHtml).join('');
+    track.innerHTML = row + row;
   }
 
   function renderCampaign(data) {
@@ -296,6 +346,7 @@
         }
       });
     }
+    renderAdRail(campaigns);
     renderCampaign(campaigns);
     renderFeatures((campaigns && campaigns.features) || []);
     renderBrands(brands);

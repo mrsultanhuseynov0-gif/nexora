@@ -284,23 +284,7 @@ const NexoraAccount = (function () {
               referralCode: payload.referralCode || ''
             })
           });
-          if (data && data.token) NexoraApi.setToken(data.token);
-          if (data && data.user) {
-            await upsertLocalUserFromApi(data.user, payload.password);
-            await setSession({
-              id: data.user.id,
-              email: data.user.email,
-              name: data.user.name,
-              phone: data.user.phone || '',
-              role: data.user.role,
-              addresses: data.user.addresses || [],
-              referralCode: data.user.referralCode,
-              referralCredit: data.user.referralCredit,
-              createdAt: data.user.createdAt
-            });
-            try { document.dispatchEvent(new CustomEvent('nexora:auth-changed', { detail: { loggedIn: true } })); } catch (ev) { /* ignore */ }
-            return data.user;
-          }
+          if (data && data.user) return completeApiAuth(data, payload.password);
         }
       } catch (e) {
         if (e && e.message) throw e;
@@ -347,6 +331,35 @@ const NexoraAccount = (function () {
     };
   }
 
+  async function completeApiAuth(api, passwordHint) {
+    if (!api || !api.user) throw new Error('Giriş uğursuz oldu');
+    if (api.token && typeof NexoraApi !== 'undefined') NexoraApi.setToken(api.token);
+    await upsertLocalUserFromApi(api.user, passwordHint);
+    await setSession({
+      id: api.user.id,
+      email: api.user.email,
+      name: api.user.name,
+      phone: api.user.phone || '',
+      role: api.user.role,
+      addresses: api.user.addresses || [],
+      referralCode: api.user.referralCode,
+      referralCredit: api.user.referralCredit,
+      createdAt: api.user.createdAt
+    });
+    try { document.dispatchEvent(new CustomEvent('nexora:auth-changed', { detail: { loggedIn: true } })); } catch (ev) { /* ignore */ }
+    return api.user;
+  }
+
+  async function loginWithOAuth(provider) {
+    if (typeof NexoraOAuth === 'undefined' || !NexoraOAuth.signIn) {
+      throw new Error('Sosial giriş yüklənməyib');
+    }
+    var health = typeof NexoraApi !== 'undefined' ? await NexoraApi.health() : null;
+    if (!health || !health.ok) throw new Error('Serverə qoşulmaq mümkün olmadı — sosial giriş üçün API lazımdır');
+    var data = await NexoraOAuth.signIn(provider);
+    return completeApiAuth(data);
+  }
+
   async function login(email, password) {
     // Prefer API when available (needed for referral credit / JWT checkout)
     if (typeof NexoraApi !== 'undefined') {
@@ -354,23 +367,7 @@ const NexoraAccount = (function () {
         var health = await NexoraApi.health();
         if (health && health.ok) {
           var api = await NexoraApi.login(email, password);
-          if (api && api.token) NexoraApi.setToken(api.token);
-          if (api && api.user) {
-            await upsertLocalUserFromApi(api.user, password);
-            await setSession({
-              id: api.user.id,
-              email: api.user.email,
-              name: api.user.name,
-              phone: api.user.phone || '',
-              role: api.user.role,
-              addresses: api.user.addresses || [],
-              referralCode: api.user.referralCode,
-              referralCredit: api.user.referralCredit,
-              createdAt: api.user.createdAt
-            });
-            try { document.dispatchEvent(new CustomEvent('nexora:auth-changed', { detail: { loggedIn: true } })); } catch (ev) { /* ignore */ }
-            return api.user;
-          }
+          if (api && api.user) return completeApiAuth(api, password);
         }
       } catch (e) {
         if (e && e.message && /yanlış|401|Unauthorized/i.test(e.message)) throw e;
@@ -439,10 +436,16 @@ const NexoraAccount = (function () {
 
   function logout() {
     localStorage.removeItem(SESSION_KEY);
+    try { localStorage.removeItem('nexora-pending-logout'); } catch (e) { /* ignore */ }
     if (typeof NexoraApi !== 'undefined' && NexoraApi.clearToken) {
       NexoraApi.clearToken();
     }
     try { document.dispatchEvent(new CustomEvent('nexora:auth-changed', { detail: { loggedIn: false } })); } catch (ev) { /* ignore */ }
+  }
+
+  async function touchSession() {
+    const s = await getSession();
+    if (s) await setSession(s);
   }
 
   function isLoggedIn() {
@@ -482,6 +485,36 @@ const NexoraAccount = (function () {
     return url;
   }
 
+  function oauthScriptUrl() {
+    try {
+      if (typeof NexoraApp !== 'undefined' && NexoraApp.getBasePath) {
+        return NexoraApp.getBasePath() + 'js/oauth.js?v=20260807n';
+      }
+    } catch (e) { /* ignore */ }
+    var path = (typeof location !== 'undefined' && location.pathname) || '';
+    return (path.indexOf('/pages/') !== -1 ? '../' : '') + 'js/oauth.js?v=20260807n';
+  }
+
+  function ensureOauthLoaded() {
+    if (typeof NexoraOAuth !== 'undefined') return Promise.resolve();
+    return new Promise(function (resolve, reject) {
+      var src = oauthScriptUrl();
+      var existing = document.querySelector('script[src="' + src + '"],script[src*="js/oauth.js"]');
+      if (existing) {
+        existing.addEventListener('load', function () { resolve(); }, { once: true });
+        existing.addEventListener('error', function () { reject(new Error('OAuth yüklənmədi')); }, { once: true });
+        if (typeof NexoraOAuth !== 'undefined') resolve();
+        return;
+      }
+      var s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('OAuth yüklənmədi')); };
+      document.head.appendChild(s);
+    });
+  }
+
   /** Friendly gate: side/bottom sheet instead of abrupt redirect */
   function showAuthGate(opts) {
     opts = opts || {};
@@ -507,6 +540,7 @@ const NexoraAccount = (function () {
             '<a class="btn btn-primary w-full" data-auth-gate-register>Qeydiyyatdan keç</a>' +
             '<a class="btn btn-outline w-full" data-auth-gate-login>Giriş et</a>' +
           '</div>' +
+          '<div class="auth-gate-social" data-auth-gate-social></div>' +
           '<p class="auth-gate-hint">Qonaqlar məhsullara baxa bilər — alış üçün hesab lazımdır.</p>' +
         '</div>';
       document.body.appendChild(el);
@@ -526,6 +560,30 @@ const NexoraAccount = (function () {
     log.textContent = ttAuth('login', 'Giriş et');
     reg.href = promptLogin({ tab: 'register', next: next, redirect: false });
     log.href = promptLogin({ tab: 'login', next: next, redirect: false });
+
+    const socialHost = el.querySelector('[data-auth-gate-social]');
+    if (socialHost) {
+      ensureOauthLoaded().then(function () {
+        if (!NexoraOAuth || !NexoraOAuth.mountButtons) return;
+        NexoraOAuth.mountButtons(socialHost, async function () {
+          el.setAttribute('hidden', '');
+          document.body.classList.remove('auth-gate-open');
+          try {
+            if (typeof NexoraToast !== 'undefined') NexoraToast.success('Xoş gəldiniz!');
+            if (next) {
+              if (next.charAt(0) === '/' || next.indexOf('://') === -1) {
+                location.href = next.charAt(0) === '/' ? next : new URL(next, location.href).href;
+                return;
+              }
+            }
+            if (typeof NexoraApp !== 'undefined' && NexoraApp.initAuthUI) NexoraApp.initAuthUI();
+          } catch (e) { /* ignore */ }
+        }, function (err) {
+          if (typeof NexoraToast !== 'undefined') NexoraToast.error((err && err.message) || 'Giriş uğursuz oldu');
+        });
+      }).catch(function () { /* social optional */ });
+    }
+
     el.removeAttribute('hidden');
     document.body.classList.add('auth-gate-open');
     return el;
@@ -717,7 +775,10 @@ const NexoraAccount = (function () {
     requireUser: requireUser,
     register: register,
     login: login,
+    loginWithOAuth: loginWithOAuth,
+    completeApiAuth: completeApiAuth,
     logout: logout,
+    touchSession: touchSession,
     updateProfile: updateProfile,
     changePassword: changePassword,
     getCurrentUser: getCurrentUser,
@@ -1671,6 +1732,18 @@ const NexoraAccount = (function () {
       });
     });
 
+    var oauthHost = document.getElementById('accountOauth');
+    if (oauthHost && typeof NexoraOAuth !== 'undefined' && NexoraOAuth.mountButtons) {
+      NexoraOAuth.mountButtons(oauthHost, async function () {
+        NexoraToast.success('Xoş gəldiniz!');
+        if (consumeAuthNextRedirect()) return;
+        await renderAuth();
+        NexoraApp.initAuthUI();
+      }, function (err) {
+        NexoraToast.error((err && err.message) || 'Giriş uğursuz oldu');
+      });
+    }
+
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       try {
@@ -1807,5 +1880,91 @@ const NexoraAccount = (function () {
         if (btn) btn.click();
       }
     } catch (e) { /* ignore */ }
+  });
+})();
+
+/* Session guard: tab-close logout + 5 minute idle / hidden (in-site nav safe) */
+(function () {
+  'use strict';
+  var IDLE_MS = 5 * 60 * 1000;
+  var PENDING_KEY = 'nexora-pending-logout';
+  var NAV_KEY = 'nexora-same-tab-nav';
+  var idleTimer = null;
+  var hiddenTimer = null;
+
+  function loggedIn() {
+    return typeof NexoraAccount !== 'undefined' && NexoraAccount.isLoggedIn && NexoraAccount.isLoggedIn();
+  }
+
+  function doLogout(kind) {
+    if (!loggedIn()) return;
+    try { NexoraAccount.logout(); } catch (e) { /* ignore */ }
+    try {
+      if (typeof NexoraToast !== 'undefined') {
+        NexoraToast.info(kind === 'leave'
+          ? 'Saytdan çıxdığınız üçün hesabdan çıxış edildi'
+          : '5 dəqiqəlik sessiya bitdi — yenidən daxil olun');
+      }
+    } catch (e2) { /* ignore */ }
+    try {
+      if (typeof NexoraApp !== 'undefined' && NexoraApp.initAuthUI) NexoraApp.initAuthUI();
+    } catch (e3) { /* ignore */ }
+  }
+
+  function bumpIdle() {
+    clearTimeout(idleTimer);
+    if (!loggedIn()) return;
+    if (typeof NexoraAccount.touchSession === 'function') {
+      NexoraAccount.touchSession().catch(function () { /* ignore */ });
+    }
+    idleTimer = setTimeout(function () { doLogout('idle'); }, IDLE_MS);
+  }
+
+  window.addEventListener('beforeunload', function () {
+    try { sessionStorage.setItem(NAV_KEY, '1'); } catch (e) { /* ignore */ }
+  });
+  window.addEventListener('pagehide', function () {
+    try { localStorage.setItem(PENDING_KEY, '1'); } catch (e) { /* ignore */ }
+  });
+  window.addEventListener('pageshow', function () {
+    try {
+      sessionStorage.removeItem(NAV_KEY);
+      localStorage.removeItem(PENDING_KEY);
+    } catch (e) { /* ignore */ }
+    bumpIdle();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    try {
+      var sameTab = sessionStorage.getItem(NAV_KEY);
+      var pending = localStorage.getItem(PENDING_KEY);
+      if (sameTab) {
+        sessionStorage.removeItem(NAV_KEY);
+        localStorage.removeItem(PENDING_KEY);
+      } else if (pending && loggedIn()) {
+        // Tab/window was closed — sessionStorage gone, pending flag remains
+        localStorage.removeItem(PENDING_KEY);
+        doLogout('leave');
+        return;
+      } else {
+        localStorage.removeItem(PENDING_KEY);
+      }
+    } catch (e) { /* ignore */ }
+
+    ['click', 'keydown', 'mousemove', 'scroll', 'touchstart'].forEach(function (ev) {
+      document.addEventListener(ev, bumpIdle, { passive: true });
+    });
+    document.addEventListener('visibilitychange', function () {
+      clearTimeout(hiddenTimer);
+      if (document.visibilityState === 'hidden') {
+        if (!loggedIn()) return;
+        hiddenTimer = setTimeout(function () {
+          if (document.visibilityState === 'hidden') doLogout('idle');
+        }, IDLE_MS);
+      } else {
+        bumpIdle();
+      }
+    });
+    bumpIdle();
   });
 })();

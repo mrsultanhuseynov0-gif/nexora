@@ -26,5 +26,10 @@ module.exports = {
   // Optional future: Supabase / Postgres connection string (not used by SQLite runtime yet)
   databaseUrl: process.env.DATABASE_URL || process.env.SUPABASE_DB_URL || '',
   cloudinaryCloud: process.env.CLOUDINARY_CLOUD_NAME || '',
-  trustProxy: process.env.TRUST_PROXY !== '0'
+  trustProxy: process.env.TRUST_PROXY !== '0',
+  // Social login (public client IDs — secrets not required for ID-token verify)
+  googleClientId: String(process.env.GOOGLE_CLIENT_ID || '').trim(),
+  appleClientId: String(process.env.APPLE_CLIENT_ID || '').trim(),
+  appleRedirectUri: String(process.env.APPLE_REDIRECT_URI || '').trim(),
+  microsoftClientId: String(process.env.MICROSOFT_CLIENT_ID || '').trim()
 };

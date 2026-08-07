@@ -4,12 +4,50 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { db, publicUser } = require('../db');
 const { signToken, authRequired } = require('../middleware/auth');
+const { publicOauthConfig, verifyProvider, upsertOauthUser } = require('../oauth');
 
 const router = express.Router();
 
 function uid(prefix) {
   return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
+
+function clientIp(req) {
+  const xf = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  if (xf) return xf.slice(0, 64);
+  const real = String(req.headers['x-real-ip'] || '').trim();
+  if (real) return real.slice(0, 64);
+  return String((req.socket && req.socket.remoteAddress) || '').slice(0, 64);
+}
+
+function touchUserIp(userId, ip) {
+  if (!userId || !ip) return;
+  try {
+    db.prepare(`
+      UPDATE users SET last_ip = ?, last_seen_at = ? WHERE id = ?
+    `).run(ip, new Date().toISOString(), userId);
+  } catch (e) { /* ignore */ }
+}
+
+router.get('/oauth/config', (_req, res) => {
+  return res.json(publicOauthConfig());
+});
+
+router.post('/oauth/:provider', async (req, res) => {
+  const provider = String(req.params.provider || '').toLowerCase();
+  if (!['google', 'apple', 'microsoft'].includes(provider)) {
+    return res.status(400).json({ error: 'Provayder dəstəklənmir' });
+  }
+  try {
+    const profile = await verifyProvider(provider, req.body || {});
+    const user = upsertOauthUser(profile, clientIp(req));
+    const token = signToken(user);
+    return res.json({ token, user, provider: provider });
+  } catch (e) {
+    const status = e && e.status ? e.status : 401;
+    return res.status(status).json({ error: (e && e.message) || 'OAuth giriş uğursuz oldu' });
+  }
+});
 
 router.post('/register', (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
@@ -34,10 +72,14 @@ router.post('/register', (req, res) => {
 
   const id = uid('u');
   const createdAt = new Date().toISOString();
+  const ip = clientIp(req);
   db.prepare(`
-    INSERT INTO users (id, email, password_hash, name, phone, role, addresses_json, created_at)
-    VALUES (?, ?, ?, ?, ?, 'customer', '[]', ?)
-  `).run(id, email, bcrypt.hashSync(password, 10), name, phone, createdAt);
+    INSERT INTO users (
+      id, email, password_hash, name, phone, role, addresses_json, created_at,
+      register_ip, last_ip, last_seen_at
+    )
+    VALUES (?, ?, ?, ?, ?, 'customer', '[]', ?, ?, ?, ?)
+  `).run(id, email, bcrypt.hashSync(password, 10), name, phone, createdAt, ip, ip, createdAt);
 
   try {
     const { ensureUserCode, attachReferralToUser } = require('../referrals');
@@ -60,7 +102,8 @@ router.post('/login', (req, res) => {
     return res.status(401).json({ error: 'Email və ya şifrə yanlışdır' });
   }
 
-  const user = publicUser(row);
+  touchUserIp(row.id, clientIp(req));
+  const user = publicUser(db.prepare('SELECT * FROM users WHERE id = ?').get(row.id));
   const token = signToken(user);
   return res.json({ token, user });
 });

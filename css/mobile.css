@@ -74,10 +74,22 @@ body {
   }
 
   .site-logo {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     letter-spacing: 0.06em;
     flex: 1;
     min-width: 0;
+  }
+
+  .site-logo-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .header-currency-wrap .currency-switch {
+    min-width: 72px;
+    padding: 5px 6px;
+    font-size: 11px;
   }
 
   .header-actions {
@@ -102,10 +114,11 @@ body {
     flex-wrap: wrap;
   }
 
-  .mobile-nav-tools .lang-switch {
+  .mobile-nav-tools .lang-switch,
+  .mobile-nav-tools .currency-switch {
     min-height: 40px;
     font-size: 14px !important;
-    min-width: 72px !important;
+    min-width: 96px !important;
   }
 
   /* Search always in header row on mobile — polish field */
@@ -393,7 +406,10 @@ body {
     width: 100% !important;
     height: 100% !important;
     max-width: 100% !important;
-    object-fit: cover !important;
+    object-fit: contain !important;
+    object-position: center;
+    padding: 8%;
+    box-sizing: border-box;
     display: block;
   }
 

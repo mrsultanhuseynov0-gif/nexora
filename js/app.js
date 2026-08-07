@@ -221,11 +221,42 @@ const NexoraApp = (function () {
     return product.inStock !== false;
   }
 
+  const CURRENCY_KEY = 'nexora-currency';
+  const RATES_FROM_AZN = { AZN: 1, USD: 1 / 1.7, EUR: 1 / 1.85 };
+  const CURRENCY_SYMBOLS = { AZN: '₼', USD: '$', EUR: '€' };
+
+  function getCurrency() {
+    try {
+      const c = localStorage.getItem(CURRENCY_KEY) || 'AZN';
+      if (RATES_FROM_AZN[c]) return c;
+    } catch (e) { /* ignore */ }
+    return 'AZN';
+  }
+
+  function setCurrency(code) {
+    let c = String(code || 'AZN').toUpperCase();
+    if (!RATES_FROM_AZN[c]) c = 'AZN';
+    try { localStorage.setItem(CURRENCY_KEY, c); } catch (e) { /* ignore */ }
+    return c;
+  }
+
   function formatPrice(amount, currency) {
+    // Catalog amounts are AZN; display currency from navbar switcher
+    const display = getCurrency();
+    const n = (Number(amount) || 0) * (RATES_FROM_AZN[display] || 1);
+    const sym = CURRENCY_SYMBOLS[display] || '₼';
+    if (display === 'USD' || display === 'EUR') {
+      return sym + n.toLocaleString(display === 'EUR' ? 'de-DE' : 'en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
     let cur = currency || '₼';
     if (!cur || cur === 'AZN' || cur === 'azn' || cur.charCodeAt(0) === 0xFFFD) cur = '₼';
-    const n = Number(amount) || 0;
-    return n.toLocaleString('az-AZ', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ' + cur;
+    if (display === 'AZN') {
+      return n.toLocaleString('az-AZ', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ' + cur;
+    }
+    return n.toLocaleString('az-AZ', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ' + sym;
   }
 
   function discountPercent(price, oldPrice) {
@@ -447,6 +478,8 @@ const NexoraApp = (function () {
     telegramLink,
     isInStock,
     formatPrice,
+    getCurrency,
+    setCurrency,
     discountPercent,
     starsHTML,
     resolveMediaUrl,
