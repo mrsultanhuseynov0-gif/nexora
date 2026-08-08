@@ -12,11 +12,12 @@ const NexoraSecurity = (function () {
   const APP_ID = 'nexora-v1';
   const ITERATIONS = 120000;
   const HASH_BYTES = 32;
-  const SESSION_TTL_MS = 5 * 60 * 1000; // 5 minutes — idle / leave-site guard
+  const SESSION_TTL_MS = 30 * 60 * 1000; // 30 minutes — avoid surprise logouts
   const MAX_FAILS = 5;
   const LOCK_MS = 15 * 60 * 1000; // 15 minutes
   const LOCK_KEY = 'nexora-auth-lock';
   const SECRET_KEY = 'nexora-sec-material';
+  let _hmacKeyPromise = null;
 
   /* ---------- utils ---------- */
 
@@ -75,25 +76,34 @@ const NexoraSecurity = (function () {
   /* ---------- secret / HMAC ---------- */
 
   async function getSecretKey() {
-    let material = localStorage.getItem(SECRET_KEY);
-    if (!material || material.length < 32) {
-      material = toHex(randomBytes(32)) + ':' + APP_ID;
-      try { localStorage.setItem(SECRET_KEY, material); } catch (e) { /* private mode */ }
+    if (_hmacKeyPromise) return _hmacKeyPromise;
+    _hmacKeyPromise = (async function () {
+      let material = localStorage.getItem(SECRET_KEY);
+      if (!material || material.length < 32) {
+        material = toHex(randomBytes(32)) + ':' + APP_ID;
+        try { localStorage.setItem(SECRET_KEY, material); } catch (e) { /* private mode */ }
+      }
+      const enc = new TextEncoder();
+      const base = await crypto.subtle.importKey(
+        'raw',
+        enc.encode(material + '|' + APP_ID),
+        { name: 'PBKDF2' },
+        false,
+        ['deriveBits']
+      );
+      const bits = await crypto.subtle.deriveBits(
+        { name: 'PBKDF2', salt: enc.encode('nexora-hmac-salt-v1'), iterations: 50000, hash: 'SHA-256' },
+        base,
+        256
+      );
+      return crypto.subtle.importKey('raw', bits, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
+    })();
+    try {
+      return await _hmacKeyPromise;
+    } catch (e) {
+      _hmacKeyPromise = null;
+      throw e;
     }
-    const enc = new TextEncoder();
-    const base = await crypto.subtle.importKey(
-      'raw',
-      enc.encode(material + '|' + APP_ID),
-      { name: 'PBKDF2' },
-      false,
-      ['deriveBits']
-    );
-    const bits = await crypto.subtle.deriveBits(
-      { name: 'PBKDF2', salt: enc.encode('nexora-hmac-salt-v1'), iterations: 50000, hash: 'SHA-256' },
-      base,
-      256
-    );
-    return crypto.subtle.importKey('raw', bits, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
   }
 
   async function hmacHex(message) {

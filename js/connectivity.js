@@ -1,17 +1,22 @@
 /**
- * NEXORA Connectivity — hard offline lock
- * No internet → site does not open. Full-screen "Internet Xətası".
+ * NEXORA Connectivity — soft online guard
+ * True offline → full-screen lock.
+ * Server wake / 502 → banner only (site stays usable).
  * Must load early (before app shell).
  */
 (function () {
   'use strict';
 
   var OFFLINE_ID = 'nexoraOfflineGate';
+  var BANNER_ID = 'nexoraServerBanner';
   var LOADER_ID = 'nexoraPageLoader';
   var healthTimer = null;
   var loadCount = 0;
   var offlineLocked = false;
   var lastReason = 'offline';
+  var lastReloadAt = 0;
+  var probeInFlight = false;
+  var firstProbeDone = false;
 
   function pathInfo() {
     var path = (location.pathname || '').replace(/\\/g, '/');
@@ -21,39 +26,6 @@
     var isHome = !file || file === 'index.html';
     var homeHref = inPages ? '../index.html' : 'index.html';
     return { path: path, file: file, inPages: inPages, isAdmin: isAdmin, isHome: isHome, homeHref: homeHref };
-  }
-
-  function redirectRefreshToHome() {
-    var info = pathInfo();
-    if (info.isAdmin || info.isHome) return;
-    var isReload = false;
-    try {
-      var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-      if (nav && nav.type === 'reload') isReload = true;
-      else if (performance.navigation && performance.navigation.type === 1) isReload = true;
-    } catch (e) { /* ignore */ }
-    if (!isReload) return;
-    try { sessionStorage.setItem('nexora-show-loader', '1'); } catch (e2) { /* ignore */ }
-    location.replace(info.homeHref);
-  }
-
-  function bindExitToHome() {
-    var info = pathInfo();
-    if (info.isAdmin) return;
-    var hiddenAt = 0;
-    document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'hidden') {
-        hiddenAt = Date.now();
-        return;
-      }
-      if (!hiddenAt) return;
-      var awayMs = Date.now() - hiddenAt;
-      hiddenAt = 0;
-      if (awayMs > 20000 && !pathInfo().isHome) {
-        try { sessionStorage.setItem('nexora-show-loader', '1'); } catch (e) { /* ignore */ }
-        location.replace(pathInfo().homeHref);
-      }
-    });
   }
 
   function ensureOfflineStyles() {
@@ -78,6 +50,16 @@
       '#' + OFFLINE_ID + ' button{min-height:50px;padding:0 18px;border:0;border-radius:12px;' +
         'background:#FF0000;color:#fff;font-weight:700;width:100%;cursor:pointer;font-size:1rem}' +
       '#' + OFFLINE_ID + ' button:active{transform:scale(.98)}' +
+      '#' + BANNER_ID + '{' +
+        'position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:2147483000;' +
+        'display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;' +
+        'background:#1a1a1a;color:#fff;border:1px solid rgba(255,255,255,.12);' +
+        'font:600 13px/1.35 system-ui,-apple-system,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.25)' +
+      '}' +
+      '#' + BANNER_ID + '[hidden]{display:none!important}' +
+      '#' + BANNER_ID + ' button{margin-left:auto;border:0;border-radius:8px;padding:8px 12px;' +
+        'background:#FF0000;color:#fff;font-weight:700;cursor:pointer;white-space:nowrap}' +
+      'body.has-mobile-tabbar #' + BANNER_ID + '{bottom:calc(72px + env(safe-area-inset-bottom,0px))}' +
       '#' + LOADER_ID + '{' +
         'position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;' +
         'gap:12px;background:rgba(255,255,255,.94);backdrop-filter:blur(6px)' +
@@ -120,27 +102,45 @@
     window.removeEventListener('scroll', blockOfflineEvent, true);
   }
 
-  function purgeOfflineCaches() {
-    try {
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function (regs) {
-          regs.forEach(function (r) { r.unregister(); });
-        });
-      }
-      if (window.caches && caches.keys) {
-        caches.keys().then(function (keys) {
-          keys.forEach(function (k) { caches.delete(k); });
-        });
-      }
-    } catch (e) { /* ignore */ }
+  function showServerBanner() {
+    ensureOfflineStyles();
+    var el = document.getElementById(BANNER_ID);
+    if (!el) {
+      el = document.createElement('div');
+      el.id = BANNER_ID;
+      el.setAttribute('role', 'status');
+      el.innerHTML =
+        '<span>Server oyanır / müvəqqəti əlçatmazdır. Səhifə açıq qalır…</span>' +
+        '<button type="button" data-server-retry>Yenidən yoxla</button>';
+      (document.body || document.documentElement).appendChild(el);
+      el.addEventListener('click', function (e) {
+        if (e.target && e.target.getAttribute('data-server-retry') !== null) {
+          probeAndSync(true);
+        }
+      });
+    }
+    el.hidden = false;
+  }
+
+  function hideServerBanner() {
+    var el = document.getElementById(BANNER_ID);
+    if (el) el.hidden = true;
   }
 
   function showOffline(reason) {
     lastReason = reason || 'offline';
+    // Only hard-lock when the browser itself reports offline.
+    // Server wake / timeout / 502 must not blank the whole storefront.
+    if (lastReason !== 'offline' && navigator.onLine) {
+      showServerBanner();
+      startHealthWatch(true);
+      return;
+    }
+
     ensureOfflineStyles();
-    purgeOfflineCaches();
     lockInteraction();
     hideLoader(true);
+    hideServerBanner();
 
     var el = document.getElementById(OFFLINE_ID);
     if (!el) {
@@ -160,17 +160,14 @@
       (document.body || document.documentElement).appendChild(el);
       el.addEventListener('click', function (e) {
         if (e.target && e.target.getAttribute('data-offline-retry') !== null) {
-          // Always refresh the page (like a normal retry)
-          try { location.reload(); } catch (err) { location.href = location.href; }
+          probeAndSync(true);
         }
       });
     }
 
     var msg = el.querySelector('[data-offline-msg]');
     if (msg) {
-      msg.textContent = lastReason === 'server'
-        ? 'Serverə qoşulmaq olmadı. Bir az sonra yenidən yoxlayın.'
-        : 'İnternet bağlantısı yoxdur. İnterneti yandırın və yenidən yoxlayın.';
+      msg.textContent = 'İnternet bağlantısı yoxdur. İnterneti yandırın və yenidən yoxlayın.';
     }
 
     el.hidden = false;
@@ -188,6 +185,7 @@
     if (el) el.hidden = true;
     document.documentElement.classList.remove('nexora-offline');
     unlockInteraction();
+    hideServerBanner();
     startHealthWatch(false);
   }
 
@@ -221,7 +219,7 @@
     if (el) el.hidden = true;
   }
 
-  function apiBasePrefix() {
+  function relativeApiPrefix() {
     try {
       var p = (location.pathname || '').replace(/\\/g, '/');
       if (p.indexOf('/pages/admin') !== -1) return '../../';
@@ -230,33 +228,98 @@
     return '';
   }
 
+  function configuredApiBase() {
+    try {
+      if (typeof window.NEXORA_API_BASE === 'string' && window.NEXORA_API_BASE) {
+        return String(window.NEXORA_API_BASE).replace(/\/+$/, '');
+      }
+      var meta = document.querySelector('meta[name="nexora-api-base"]');
+      if (meta && meta.getAttribute('content')) {
+        return String(meta.getAttribute('content')).replace(/\/+$/, '');
+      }
+      var stored = localStorage.getItem('nexora-api-base');
+      if (stored) return String(stored).replace(/\/+$/, '');
+      if (typeof NexoraConfig !== 'undefined' && NexoraConfig.apiBase) {
+        return String(NexoraConfig.apiBase).replace(/\/+$/, '');
+      }
+    } catch (e) { /* ignore */ }
+    return '';
+  }
+
+  function healthUrls() {
+    var urls = [];
+    var base = configuredApiBase();
+    if (base) urls.push(base + '/api/health');
+    urls.push(relativeApiPrefix() + 'api/health');
+    // de-dupe
+    var seen = Object.create(null);
+    return urls.filter(function (u) {
+      if (seen[u]) return false;
+      seen[u] = 1;
+      return true;
+    });
+  }
+
+  function safeReload() {
+    var now = Date.now();
+    if (now - lastReloadAt < 30000) {
+      hideOffline();
+      return;
+    }
+    lastReloadAt = now;
+    try { location.reload(); } catch (err) { location.href = location.href; }
+  }
+
   async function probeAndSync(fromRetry) {
+    if (probeInFlight) return false;
     if (!navigator.onLine) {
       showOffline('offline');
       return false;
     }
+
+    probeInFlight = true;
+    var timeoutMs = firstProbeDone ? 12000 : 25000;
     try {
-      var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      var t = ctrl ? setTimeout(function () { ctrl.abort(); }, 4000) : null;
-      var res = await fetch(apiBasePrefix() + 'api/health?_=' + Date.now(), {
-        cache: 'no-store',
-        signal: ctrl ? ctrl.signal : undefined
-      });
-      if (t) clearTimeout(t);
-      if (!res.ok) throw new Error('health');
-      hideOffline();
-      if (fromRetry) {
-        hideLoader(true);
-        location.reload();
+      var urls = healthUrls();
+      var lastErr = null;
+      for (var i = 0; i < urls.length; i++) {
+        var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        var t = ctrl ? setTimeout(function () { ctrl.abort(); }, timeoutMs) : null;
+        try {
+          var res = await fetch(urls[i] + (urls[i].indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now(), {
+            cache: 'no-store',
+            signal: ctrl ? ctrl.signal : undefined
+          });
+          if (t) clearTimeout(t);
+          if (!res.ok) {
+            lastErr = new Error('health-' + res.status);
+            continue;
+          }
+          firstProbeDone = true;
+          hideOffline();
+          if (fromRetry) {
+            hideLoader(true);
+            // Soft recovery: avoid reload loops; only reload if still gated
+            if (document.documentElement.classList.contains('nexora-offline')) safeReload();
+          }
+          return true;
+        } catch (e) {
+          if (t) clearTimeout(t);
+          lastErr = e;
+        }
       }
-      return true;
+      throw lastErr || new Error('health');
     } catch (e) {
-      // Network / DNS / airplane mode → Internet Xətası
-      // Server down while "online" still blocks the site (monolith needs API)
-      var netFail = !navigator.onLine ||
-        (e && (e.name === 'TypeError' || e.name === 'AbortError' || /fetch|network|failed/i.test(String(e.message || e))));
-      showOffline(netFail ? 'offline' : 'server');
+      // Hard lock only when browser is offline. Otherwise soft banner.
+      if (!navigator.onLine) {
+        showOffline('offline');
+      } else {
+        showOffline('server');
+      }
       return false;
+    } finally {
+      probeInFlight = false;
+      firstProbeDone = true;
     }
   }
 
@@ -265,7 +328,7 @@
     healthTimer = setInterval(function () {
       if (!navigator.onLine) showOffline('offline');
       else probeAndSync(false);
-    }, fast ? 4000 : 20000);
+    }, fast ? 8000 : 30000);
   }
 
   function bindGuards() {
@@ -296,7 +359,7 @@
     }, true);
 
     document.addEventListener('click', function (e) {
-      if (offlineLocked || !navigator.onLine) {
+      if (!navigator.onLine) {
         e.preventDefault();
         showOffline('offline');
       }
@@ -304,21 +367,19 @@
   }
 
   function boot() {
-    // Instant lock before any UI if already offline (phone airplane / Wi‑Fi off)
     ensureOfflineStyles();
     if (!navigator.onLine) {
       document.documentElement.classList.add('nexora-offline');
       showOffline('offline');
     }
 
-    redirectRefreshToHome();
-    bindExitToHome();
+    // NOTE: no refresh→home / tab-away→home redirects — those felt like page crashes.
 
     try {
       if (sessionStorage.getItem('nexora-show-loader') === '1') {
         sessionStorage.removeItem('nexora-show-loader');
         if (navigator.onLine) {
-          showLoader('Ana səhifə açılır…');
+          showLoader('Yüklənir…');
           setTimeout(function () { hideLoader(true); }, 180);
         }
       }
@@ -327,12 +388,14 @@
     if (!navigator.onLine) {
       showOffline('offline');
     } else {
-      // Verify real connectivity ASAP (not only navigator.onLine)
       probeAndSync(false);
     }
 
     window.addEventListener('offline', function () { showOffline('offline'); });
-    window.addEventListener('online', function () { probeAndSync(true); });
+    window.addEventListener('online', function () {
+      // Recover without forced reload loops
+      probeAndSync(false);
+    });
     startHealthWatch(false);
 
     if (document.readyState === 'loading') {
@@ -357,7 +420,6 @@
     });
   }
 
-  // Sync paint as early as this file runs
   if (!navigator.onLine) {
     try {
       document.documentElement.classList.add('nexora-offline');

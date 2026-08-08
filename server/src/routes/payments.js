@@ -102,203 +102,209 @@ router.get('/admin/by-order/:orderId', adminRequired, (req, res) => {
  * Create order + payment session in one step (preferred checkout path)
  */
 router.post('/checkout', authRequired, async (req, res) => {
-  const settings = getPaymentSettings();
-  if (settings.enabled === false) {
-    return res.status(503).json({ error: 'Ödəniş müvəqqəti deaktivdir' });
-  }
-
-  const body = req.body || {};
-  const method = String(body.paymentMethod || 'card');
-  if (method === 'card' && settings.methods && settings.methods.card === false) {
-    return res.status(400).json({ error: 'Kart ödənişi deaktivdir' });
-  }
-  if (method === 'cash' && settings.methods && settings.methods.cash === false) {
-    return res.status(400).json({ error: 'Nağd ödəniş deaktivdir' });
-  }
-  if (method === 'transfer' && settings.methods && settings.methods.transfer === false) {
-    return res.status(400).json({ error: 'Köçürmə deaktivdir' });
-  }
-
-  const rawItems = Array.isArray(body.items) ? body.items : [];
-  if (!rawItems.length) return res.status(400).json({ error: 'Səbət boşdur' });
-
-  const items = [];
-  for (const line of rawItems) {
-    const row = db.prepare('SELECT * FROM products WHERE id = ?').get(line.productId || line.id);
-    if (!row) return res.status(400).json({ error: 'Məhsul tapılmadı: ' + (line.productId || line.id) });
-    const product = rowToProduct(row);
-    const qty = Math.max(1, parseInt(line.qty, 10) || 1);
-    if (!product.inStock || product.stock < qty) {
-      return res.status(400).json({ error: product.name + ' stokda yoxdur' });
-    }
-    items.push({
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      qty,
-      image: product.image,
-      variant: line.variant || null
-    });
-  }
-
-  // Coupons are UI-only for now — never required, never discount, never block checkout
-  const coupon = null;
-
-  const customer = {
-    name: (body.customer && body.customer.name) || (req.user && req.user.name) || '',
-    email: (body.customer && body.customer.email) || (req.user && req.user.email) || '',
-    phone: (body.customer && body.customer.phone) || (req.user && req.user.phone) || '',
-    address: (body.customer && body.customer.address) || '',
-    city: (body.customer && body.customer.city) || 'Bakı',
-    district: (body.customer && body.customer.district) || '',
-    postalCode: (body.customer && body.customer.postalCode) || ''
-  };
-
-  if (!customer.email || !customer.name || !customer.phone) {
-    return res.status(400).json({ error: 'Ad, email və telefon tələb olunur' });
-  }
-
-  const subtotalPreview = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const referralCode = String(body.referralCode || body.friendCode || '').trim();
-  let referralDiscount = 0;
-  let referralMeta = null;
-  // Friend code is optional — invalid/empty codes never block checkout
-  if (referralCode) {
-    const v = validateReferralCode(referralCode, {
-      userId: req.user && req.user.id,
-      email: customer.email,
-      subtotal: subtotalPreview
-    });
-    if (v && v.ok && v.kind === 'personal') {
-      referralDiscount = Number(v.discount) || 0;
-      referralMeta = v;
-    }
-  }
-
-  let creditWanted = 0;
-  const refSettings = getReferralSettings();
-  if (refSettings.applyCreditAtCheckout !== false && req.user && body.useReferralCredit) {
-    const row = db.prepare('SELECT referral_credit FROM users WHERE id = ?').get(req.user.id);
-    creditWanted = Math.min(Number(row && row.referral_credit) || 0, Number(body.useReferralCredit) || 0);
-  }
-
-  const totals = calcTotals(items, coupon, referralDiscount, creditWanted);
-  if (totals.referralDiscount) totals.referralCode = referralMeta ? referralMeta.code : referralCode;
-
-  const orderId = uid('ord');
-  const now = new Date().toISOString();
-  const initialStatus = method === 'card' ? 'pending' : (method === 'cash' ? 'pending' : 'pending');
-
-  const tx = db.transaction(() => {
-    for (const item of items) {
-      const info = db.prepare(`
-        UPDATE products SET stock = stock - ?, in_stock = CASE WHEN stock - ? <= 0 THEN 0 ELSE 1 END
-        WHERE id = ? AND stock >= ?
-      `).run(item.qty, item.qty, item.productId, item.qty);
-      if (!info.changes) throw new Error('STOCK:' + item.productId);
-      const row = db.prepare('SELECT * FROM products WHERE id = ?').get(item.productId);
-      const p = rowToProduct(row);
-      p.stock = row.stock;
-      p.inStock = !!row.in_stock;
-      db.prepare('UPDATE products SET raw_json = ? WHERE id = ?').run(JSON.stringify(p), item.productId);
+  try {
+    const settings = getPaymentSettings();
+    if (settings.enabled === false) {
+      return res.status(503).json({ error: 'Ödəniş müvəqqəti deaktivdir' });
     }
 
-    if (totals.credit > 0 && req.user) {
-      const used = consumeCredit(req.user.id, totals.credit);
-      totals.credit = used;
-      // recompute total if credit changed
-      const taxable = Math.max(totals.subtotal - totals.discount - used, 0);
-      totals.tax = Math.round(taxable * 0.18 * 100) / 100;
-      totals.total = Math.round((taxable + totals.tax + totals.shipping) * 100) / 100;
+    const body = req.body || {};
+    const method = String(body.paymentMethod || 'card');
+    if (method === 'card' && settings.methods && settings.methods.card === false) {
+      return res.status(400).json({ error: 'Kart ödənişi deaktivdir' });
+    }
+    if (method === 'cash' && settings.methods && settings.methods.cash === false) {
+      return res.status(400).json({ error: 'Nağd ödəniş deaktivdir' });
+    }
+    if (method === 'transfer' && settings.methods && settings.methods.transfer === false) {
+      return res.status(400).json({ error: 'Köçürmə deaktivdir' });
     }
 
-    db.prepare(`
-      INSERT INTO orders (id, user_id, status, customer_json, items_json, totals_json, coupon_code, notes, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      orderId,
-      req.user ? req.user.id : null,
-      initialStatus,
-      JSON.stringify(customer),
-      JSON.stringify(items),
-      JSON.stringify(totals),
-      coupon ? coupon.code : (referralMeta ? referralMeta.code : null),
-      String(body.notes || ''),
-      now,
-      now
-    );
+    const rawItems = Array.isArray(body.items) ? body.items : [];
+    if (!rawItems.length) return res.status(400).json({ error: 'Səbət boşdur' });
 
-    if (referralMeta) {
-      recordCheckoutReferral({
-        orderId,
-        code: referralMeta.code,
-        buyerUserId: req.user ? req.user.id : null,
-        buyerEmail: customer.email,
-        discountAmount: totals.referralDiscount || referralDiscount
+    const items = [];
+    for (const line of rawItems) {
+      const row = db.prepare('SELECT * FROM products WHERE id = ?').get(line.productId || line.id);
+      if (!row) return res.status(400).json({ error: 'Məhsul tapılmadı: ' + (line.productId || line.id) });
+      const product = rowToProduct(row);
+      const qty = Math.max(1, parseInt(line.qty, 10) || 1);
+      if (!product.inStock || product.stock < qty) {
+        return res.status(400).json({ error: product.name + ' stokda yoxdur' });
+      }
+      items.push({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        qty,
+        image: product.image,
+        variant: line.variant || null
       });
     }
-  });
 
-  try {
-    tx();
-  } catch (e) {
-    if (String(e.message).startsWith('STOCK:')) {
-      return res.status(400).json({ error: 'Stok kifayət etmir' });
+    // Coupons are UI-only for now — never required, never discount, never block checkout
+    const coupon = null;
+
+    const customer = {
+      name: (body.customer && body.customer.name) || (req.user && req.user.name) || '',
+      email: (body.customer && body.customer.email) || (req.user && req.user.email) || '',
+      phone: (body.customer && body.customer.phone) || (req.user && req.user.phone) || '',
+      address: (body.customer && body.customer.address) || '',
+      city: (body.customer && body.customer.city) || 'Bakı',
+      district: (body.customer && body.customer.district) || '',
+      postalCode: (body.customer && body.customer.postalCode) || ''
+    };
+
+    if (!customer.email || !customer.name || !customer.phone) {
+      return res.status(400).json({ error: 'Ad, email və telefon tələb olunur' });
     }
-    throw e;
-  }
 
-  const payment = createPayment({
-    orderId,
-    amount: totals.total,
-    method: method === 'installment' ? 'card' : method,
-    customer,
-    meta: {
-      installment: method === 'installment',
-      referralCode: referralMeta ? referralMeta.code : null
-    }
-  });
-
-  const baseUrl = String(req.protocol + '://' + req.get('host'));
-  let next = {
-    orderId,
-    paymentId: payment.id,
-    amount: payment.amount,
-    currency: payment.currency,
-    method: payment.method,
-    status: payment.status,
-    payUrl: baseUrl + '/pages/payment.html?paymentId=' + encodeURIComponent(payment.id)
-  };
-
-  if (method === 'card' || method === 'installment') {
-    if (settings.mode === 'live' && settings.provider === 'goldenpay') {
-      try {
-        const gp = await createGoldenPaySession(payment, settings, baseUrl);
-        next = Object.assign(next, gp, { payUrl: gp.redirectUrl });
-      } catch (e) {
-        if (e.code === 'GATEWAY_NOT_CONFIGURED') {
-          return res.status(400).json({ error: e.message, code: e.code });
-        }
-        throw e;
+    const subtotalPreview = items.reduce((s, i) => s + i.price * i.qty, 0);
+    const referralCode = String(body.referralCode || body.friendCode || '').trim();
+    let referralDiscount = 0;
+    let referralMeta = null;
+    // Friend code is optional — invalid/empty codes never block checkout
+    if (referralCode) {
+      const v = validateReferralCode(referralCode, {
+        userId: req.user && req.user.id,
+        email: customer.email,
+        subtotal: subtotalPreview
+      });
+      if (v && v.ok && v.kind === 'personal') {
+        referralDiscount = Number(v.discount) || 0;
+        referralMeta = v;
       }
     }
-  }
 
-  if (method === 'transfer') {
-    next.bank = settings.bank;
-    next.message = 'Köçürmə rekvizitləri ödəniş səhifəsində göstərilir. Ödənişdən sonra admin təsdiqləyəcək.';
-  }
-  if (method === 'cash') {
-    next.message = 'Nağd ödəniş çatdırılma zamanı alınacaq.';
-    next.payUrl = null;
-  }
+    let creditWanted = 0;
+    const refSettings = getReferralSettings();
+    if (refSettings.applyCreditAtCheckout !== false && req.user && body.useReferralCredit) {
+      const row = db.prepare('SELECT referral_credit FROM users WHERE id = ?').get(req.user.id);
+      creditWanted = Math.min(Number(row && row.referral_credit) || 0, Number(body.useReferralCredit) || 0);
+    }
 
-  return res.status(201).json({
-    ok: true,
-    order: { id: orderId, status: initialStatus, totals, customer, items },
-    payment: next,
-    config: publicSettings()
-  });
+    const totals = calcTotals(items, coupon, referralDiscount, creditWanted);
+    if (totals.referralDiscount) totals.referralCode = referralMeta ? referralMeta.code : referralCode;
+
+    const orderId = uid('ord');
+    const now = new Date().toISOString();
+    const initialStatus = method === 'card' ? 'pending' : (method === 'cash' ? 'pending' : 'pending');
+
+    const tx = db.transaction(() => {
+      for (const item of items) {
+        const info = db.prepare(`
+          UPDATE products SET stock = stock - ?, in_stock = CASE WHEN stock - ? <= 0 THEN 0 ELSE 1 END
+          WHERE id = ? AND stock >= ?
+        `).run(item.qty, item.qty, item.productId, item.qty);
+        if (!info.changes) throw new Error('STOCK:' + item.productId);
+        const row = db.prepare('SELECT * FROM products WHERE id = ?').get(item.productId);
+        const p = rowToProduct(row);
+        p.stock = row.stock;
+        p.inStock = !!row.in_stock;
+        db.prepare('UPDATE products SET raw_json = ? WHERE id = ?').run(JSON.stringify(p), item.productId);
+      }
+
+      if (totals.credit > 0 && req.user) {
+        const used = consumeCredit(req.user.id, totals.credit);
+        totals.credit = used;
+        // recompute total if credit changed
+        const taxable = Math.max(totals.subtotal - totals.discount - used, 0);
+        totals.tax = Math.round(taxable * 0.18 * 100) / 100;
+        totals.total = Math.round((taxable + totals.tax + totals.shipping) * 100) / 100;
+      }
+
+      db.prepare(`
+        INSERT INTO orders (id, user_id, status, customer_json, items_json, totals_json, coupon_code, notes, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        orderId,
+        req.user ? req.user.id : null,
+        initialStatus,
+        JSON.stringify(customer),
+        JSON.stringify(items),
+        JSON.stringify(totals),
+        coupon ? coupon.code : (referralMeta ? referralMeta.code : null),
+        String(body.notes || ''),
+        now,
+        now
+      );
+
+      if (referralMeta) {
+        recordCheckoutReferral({
+          orderId,
+          code: referralMeta.code,
+          buyerUserId: req.user ? req.user.id : null,
+          buyerEmail: customer.email,
+          discountAmount: totals.referralDiscount || referralDiscount
+        });
+      }
+    });
+
+    try {
+      tx();
+    } catch (e) {
+      if (String(e.message).startsWith('STOCK:')) {
+        return res.status(400).json({ error: 'Stok kifayət etmir' });
+      }
+      throw e;
+    }
+
+    const payment = createPayment({
+      orderId,
+      amount: totals.total,
+      method: method === 'installment' ? 'card' : method,
+      customer,
+      meta: {
+        installment: method === 'installment',
+        referralCode: referralMeta ? referralMeta.code : null
+      }
+    });
+
+    const baseUrl = String(req.protocol + '://' + req.get('host'));
+    let next = {
+      orderId,
+      paymentId: payment.id,
+      amount: payment.amount,
+      currency: payment.currency,
+      method: payment.method,
+      status: payment.status,
+      payUrl: baseUrl + '/pages/payment.html?paymentId=' + encodeURIComponent(payment.id)
+    };
+
+    if (method === 'card' || method === 'installment') {
+      if (settings.mode === 'live' && settings.provider === 'goldenpay') {
+        try {
+          const gp = await createGoldenPaySession(payment, settings, baseUrl);
+          next = Object.assign(next, gp, { payUrl: gp.redirectUrl });
+        } catch (e) {
+          if (e.code === 'GATEWAY_NOT_CONFIGURED') {
+            return res.status(400).json({ error: e.message, code: e.code });
+          }
+          throw e;
+        }
+      }
+    }
+
+    if (method === 'transfer') {
+      next.bank = settings.bank;
+      next.message = 'Köçürmə rekvizitləri ödəniş səhifəsində göstərilir. Ödənişdən sonra admin təsdiqləyəcək.';
+    }
+    if (method === 'cash') {
+      next.message = 'Nağd ödəniş çatdırılma zamanı alınacaq.';
+      next.payUrl = null;
+    }
+
+    return res.status(201).json({
+      ok: true,
+      order: { id: orderId, status: initialStatus, totals, customer, items },
+      payment: next,
+      config: publicSettings()
+    });
+  } catch (e) {
+    console.error('checkout error:', e && e.stack ? e.stack : e);
+    if (res.headersSent) return;
+    return res.status(500).json({ error: 'Server xətası' });
+  }
 });
 
 router.get('/:id', (req, res) => {

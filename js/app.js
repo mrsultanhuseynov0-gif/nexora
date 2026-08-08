@@ -37,7 +37,9 @@ const NexoraApp = (function () {
   }
 
   function storageSet(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) { /* private mode / quota */ }
   }
 
   function mergeProductOverrides(seed, catalogVer) {

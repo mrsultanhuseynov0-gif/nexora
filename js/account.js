@@ -1881,27 +1881,24 @@ const NexoraAccount = (function () {
   });
 })();
 
-/* Session guard: tab-close logout + 5 minute idle / hidden (in-site nav safe) */
+/* Session guard: idle timeout only (no leave-site logout — phones misfire pagehide) */
 (function () {
   'use strict';
-  var IDLE_MS = 5 * 60 * 1000;
-  var PENDING_KEY = 'nexora-pending-logout';
-  var NAV_KEY = 'nexora-same-tab-nav';
+  var IDLE_MS = 30 * 60 * 1000;
+  var TOUCH_EVERY_MS = 60 * 1000;
   var idleTimer = null;
-  var hiddenTimer = null;
+  var lastTouchAt = 0;
 
   function loggedIn() {
     return typeof NexoraAccount !== 'undefined' && NexoraAccount.isLoggedIn && NexoraAccount.isLoggedIn();
   }
 
-  function doLogout(kind) {
+  function doLogout() {
     if (!loggedIn()) return;
     try { NexoraAccount.logout(); } catch (e) { /* ignore */ }
     try {
       if (typeof NexoraToast !== 'undefined') {
-        NexoraToast.info(kind === 'leave'
-          ? 'Saytdan çıxdığınız üçün hesabdan çıxış edildi'
-          : '5 dəqiqəlik sessiya bitdi — yenidən daxil olun');
+        NexoraToast.info('Sessiya bitdi — yenidən daxil olun');
       }
     } catch (e2) { /* ignore */ }
     try {
@@ -1912,56 +1909,32 @@ const NexoraAccount = (function () {
   function bumpIdle() {
     clearTimeout(idleTimer);
     if (!loggedIn()) return;
-    if (typeof NexoraAccount.touchSession === 'function') {
+    var now = Date.now();
+    if (typeof NexoraAccount.touchSession === 'function' && (now - lastTouchAt) >= TOUCH_EVERY_MS) {
+      lastTouchAt = now;
       NexoraAccount.touchSession().catch(function () { /* ignore */ });
     }
-    idleTimer = setTimeout(function () { doLogout('idle'); }, IDLE_MS);
+    idleTimer = setTimeout(function () { doLogout(); }, IDLE_MS);
   }
 
-  window.addEventListener('beforeunload', function () {
-    try { sessionStorage.setItem(NAV_KEY, '1'); } catch (e) { /* ignore */ }
-  });
-  window.addEventListener('pagehide', function () {
-    try { localStorage.setItem(PENDING_KEY, '1'); } catch (e) { /* ignore */ }
-  });
-  window.addEventListener('pageshow', function () {
-    try {
-      sessionStorage.removeItem(NAV_KEY);
-      localStorage.removeItem(PENDING_KEY);
-    } catch (e) { /* ignore */ }
-    bumpIdle();
-  });
-
   document.addEventListener('DOMContentLoaded', function () {
-    try {
-      var sameTab = sessionStorage.getItem(NAV_KEY);
-      var pending = localStorage.getItem(PENDING_KEY);
-      if (sameTab) {
-        sessionStorage.removeItem(NAV_KEY);
-        localStorage.removeItem(PENDING_KEY);
-      } else if (pending && loggedIn()) {
-        // Tab/window was closed — sessionStorage gone, pending flag remains
-        localStorage.removeItem(PENDING_KEY);
-        doLogout('leave');
-        return;
-      } else {
-        localStorage.removeItem(PENDING_KEY);
-      }
-    } catch (e) { /* ignore */ }
-
-    ['click', 'keydown', 'mousemove', 'scroll', 'touchstart'].forEach(function (ev) {
+    try { localStorage.removeItem('nexora-pending-logout'); } catch (e) { /* ignore */ }
+    ['click', 'keydown', 'touchstart'].forEach(function (ev) {
       document.addEventListener(ev, bumpIdle, { passive: true });
     });
+    // Throttle heavy move/scroll — avoid PBKDF2 storm on every pixel
+    var moveTimer = null;
+    ['mousemove', 'scroll'].forEach(function (ev) {
+      document.addEventListener(ev, function () {
+        if (moveTimer) return;
+        moveTimer = setTimeout(function () {
+          moveTimer = null;
+          bumpIdle();
+        }, 2000);
+      }, { passive: true });
+    });
     document.addEventListener('visibilitychange', function () {
-      clearTimeout(hiddenTimer);
-      if (document.visibilityState === 'hidden') {
-        if (!loggedIn()) return;
-        hiddenTimer = setTimeout(function () {
-          if (document.visibilityState === 'hidden') doLogout('idle');
-        }, IDLE_MS);
-      } else {
-        bumpIdle();
-      }
+      if (document.visibilityState === 'visible') bumpIdle();
     });
     bumpIdle();
   });

@@ -73,20 +73,10 @@ app.get('/config.json', (_req, res) => {
 });
 
 app.get('/api/health', (_req, res) => {
-  // Always 200 so Render/host health checks pass even during cold seed.
-  let products = null;
-  let users = null;
-  try {
-    products = db.prepare('SELECT COUNT(*) AS n FROM products').get().n;
-    users = db.prepare('SELECT COUNT(*) AS n FROM users').get().n;
-  } catch (e) {
-    /* DB may still be initializing */
-  }
+  // Instant 200 — never touch SQLite here (seed/bcrypt must not block host checks).
   res.status(200).json({
     ok: true,
     service: 'nexora-api',
-    products,
-    users,
     time: new Date().toISOString(),
     env: cfg.isProd ? 'production' : 'development'
   });
@@ -166,8 +156,19 @@ app.use(express.static(ROOT, {
 }));
 
 app.use((err, _req, res, _next) => {
-  console.error(err);
-  res.status(500).json({ error: 'Server xətası' });
+  console.error(err && err.stack ? err.stack : err);
+  if (res.headersSent) return;
+  const status = Number(err && err.status) || 500;
+  res.status(status >= 400 && status < 600 ? status : 500).json({
+    error: (err && err.expose && err.message) || 'Server xətası'
+  });
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[unhandledRejection]', reason && reason.stack ? reason.stack : reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[uncaughtException]', err && err.stack ? err.stack : err);
 });
 
 function ensureSeeded() {
