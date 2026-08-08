@@ -66,6 +66,18 @@ function ensureCmsSeed() {
 
 ensureCmsSeed();
 
+function ensureCmsKey(key, fileName) {
+  try {
+    const row = db.prepare('SELECT key FROM cms_docs WHERE key = ?').get(key);
+    if (row) return;
+    db.prepare('INSERT INTO cms_docs (key, data_json, updated_at) VALUES (?, ?, ?)')
+      .run(key, JSON.stringify(readFileJson(fileName)), new Date().toISOString());
+  } catch (e) {
+    console.warn('CMS ensure', key, e.message);
+  }
+}
+ensureCmsKey('site', 'site.json');
+
 router.get('/:key', (req, res) => {
   const key = req.params.key;
   if (!ALLOWED.has(key)) return res.status(404).json({ error: 'Tapılmadı' });

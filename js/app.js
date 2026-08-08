@@ -175,8 +175,30 @@ const NexoraApp = (function () {
     return site;
   }
 
-  async function loadSiteSettings() {
-    if (_siteCache) return _siteCache;
+  async function loadSiteSettings(force) {
+    if (!force && _siteCache) return _siteCache;
+
+    // Prefer live CMS so admin "Sayt ayarları" applies for all visitors
+    if (typeof NexoraApi !== 'undefined' && NexoraApi.getCms) {
+      try {
+        var online = true;
+        if (NexoraApi.health) {
+          var h = await NexoraApi.health();
+          online = !!(h && h.ok);
+        }
+        if (online) {
+          var cms = await NexoraApi.getCms('site');
+          var cmsData = cms && (cms.data || cms);
+          if (cmsData && typeof cmsData === 'object') {
+            _siteCache = Object.assign(defaultSiteSettings(), cmsData);
+            ensureNavExtras(_siteCache);
+            try { storageSet(SITE_KEY, _siteCache); } catch (e0) { /* ignore */ }
+            return _siteCache;
+          }
+        }
+      } catch (e1) { /* fall through to local seed */ }
+    }
+
     let seed = null;
     try { seed = await fetchJSON('data/site.json'); } catch (e) { seed = null; }
     const override = storageGet(SITE_KEY, null);
@@ -191,6 +213,7 @@ const NexoraApp = (function () {
 
   function saveSiteSettings(data) {
     _siteCache = Object.assign(defaultSiteSettings(), data || {});
+    ensureNavExtras(_siteCache);
     storageSet(SITE_KEY, _siteCache);
     applySiteTheme(_siteCache);
     return _siteCache;

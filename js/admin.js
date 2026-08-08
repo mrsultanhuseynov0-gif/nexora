@@ -158,16 +158,23 @@
 
   async function requireAdmin() {
     state.apiLive = await detectApi();
-    if (state.apiLive && typeof NexoraApi !== 'undefined' && NexoraApi.getToken()) {
-      try {
-        var me = await NexoraApi.me();
-        if (me && me.user && me.user.role === 'admin') {
-          state.currentUser = me.user;
-          showGate(false);
-          updateMetaPills();
-          return true;
+    // When API is live, local-only admin session cannot save CMS — require JWT.
+    if (state.apiLive && typeof NexoraApi !== 'undefined') {
+      if (NexoraApi.getToken()) {
+        try {
+          var me = await NexoraApi.me();
+          if (me && me.user && me.user.role === 'admin') {
+            state.currentUser = me.user;
+            showGate(false);
+            updateMetaPills();
+            return true;
+          }
+        } catch (e) {
+          try { NexoraApi.clearToken(); } catch (e2) { /* ignore */ }
         }
-      } catch (e) { /* local fallback */ }
+      }
+      showGate(true);
+      return false;
     }
     try {
       var session = await NexoraAccount.getSession();
@@ -337,6 +344,11 @@
 
   async function saveCms(key, data) {
     if (state.apiLive) {
+      if (typeof NexoraApi === 'undefined' || !NexoraApi.getToken()) {
+        var authErr = new Error('API üçün yenidən daxil olun (admin sessiyası bitib)');
+        authErr.status = 401;
+        throw authErr;
+      }
       await NexoraApi.saveCms(key, data);
     }
     if (key === 'site') {
@@ -2410,8 +2422,22 @@
           heroCta: document.getElementById('sHeroCta').value.trim()
         }
       };
-      await saveCms('site', data);
-      NexoraToast.success('Sayt parametrləri saxlandı');
+      var btn = e.target.querySelector('[type="submit"]');
+      if (btn) btn.disabled = true;
+      try {
+        await saveCms('site', data);
+        if (typeof NexoraToast !== 'undefined') NexoraToast.success('Sayt parametrləri saxlandı');
+      } catch (err) {
+        var msg = (err && err.message) || 'Saxlama alınmadı';
+        if (err && (err.status === 401 || err.status === 403)) {
+          msg = 'Giriş bitib — admin kimi yenidən daxil olun';
+          showGate(true);
+        }
+        if (typeof NexoraToast !== 'undefined') NexoraToast.error(msg);
+        else window.alert(msg);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
     });
 
     document.getElementById('exportSite').addEventListener('click', async function () {
@@ -2534,10 +2560,13 @@
           return;
         }
       }
-      var session = await NexoraAccount.getSession();
-      if (session && session.role === 'admin') {
-        state.currentUser = session;
-        await bootAdmin();
+      // Offline-only: allow local admin session. With live API, force re-login for JWT.
+      if (!state.apiLive) {
+        var session = await NexoraAccount.getSession();
+        if (session && session.role === 'admin') {
+          state.currentUser = session;
+          await bootAdmin();
+        }
       }
     } catch (e) { /* stay on gate */ }
   });
